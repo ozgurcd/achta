@@ -90,7 +90,7 @@ func TestInstallToolsIncludesGograph(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(data), "go install github.com/ozgurcd/gograph@v1.6.10") {
+	if !strings.Contains(string(data), "go install github.com/ozgurcd/gograph/cmd/gograph@v1.6.10") {
 		t.Fatal("install-tools does not install the pinned Gograph required by exact Rulefloor reach")
 	}
 }

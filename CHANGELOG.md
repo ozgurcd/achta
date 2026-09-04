@@ -1,11 +1,18 @@
 # Changelog
 
+## v0.2.3 — 2026-09-04
+
+- Corrected the pinned Gograph installer to its `cmd/gograph` executable
+  package and carried the unpublished corrective changes forward.
+
 ## v0.2.2 — 2026-09-04
 
 - Installed pinned Gograph in release CI so exact Rulefloor reach can be
   evaluated before publication.
 - Carried the authenticated private-asset and delimiter-ordering fixes from the
   unpublished v0.2.1 attempt into the corrective release.
+- The release workflow stopped before publication because the Gograph module
+  root is not an installable command package.
 
 ## v0.2.1 — 2026-09-04
 

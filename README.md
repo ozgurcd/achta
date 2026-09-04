@@ -120,7 +120,7 @@ The v0.2.0 release adds decision insertion, native wiki status and
 derivation, explicit witness lifecycle recording, landed-slice checks, and a
 Homebrew cask. Unconditional amendment clearing remains deferred.
 
-The v0.2.2 patch routes authenticated Homebrew downloads through GitHub's
+The v0.2.3 patch routes authenticated Homebrew downloads through GitHub's
 private release-asset API.
 
 Authorized users can install a released build with:

@@ -2,7 +2,25 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.2.3 — 2026-09-04
+
+### Fixed
+
+- Release CI now installs Gograph from its executable package at
+  `github.com/ozgurcd/gograph/cmd/gograph@v1.6.10`.
+- The authenticated Homebrew asset-API rewrite and derived-marker ordering fix
+  are carried forward from the two tags whose fail-closed verification gates
+  stopped before publication.
+
+### Changed
+
+- Source version advanced to v0.2.3.
+
 ## v0.2.2 — 2026-09-04
+
+The v0.2.2 tag stopped during tool installation before any GitHub release or
+Homebrew update was published because the Gograph module root is not an
+installable command package.
 
 ### Fixed
 

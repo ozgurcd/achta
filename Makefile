@@ -40,4 +40,4 @@ install-tools:
 	go install honnef.co/go/tools/cmd/staticcheck@v0.8.0
 	go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
 	go install github.com/ozgurcd/rulefloor@v0.9.1
-	go install github.com/ozgurcd/gograph@v1.6.10
+	go install github.com/ozgurcd/gograph/cmd/gograph@v1.6.10

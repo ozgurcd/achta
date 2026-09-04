@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.2.0 released baseline; v0.2.2 current authenticated Homebrew patch
+Status: v0.2.0 released baseline; v0.2.3 current authenticated Homebrew patch
 
 Project name: Achta
 
