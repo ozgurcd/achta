@@ -22,6 +22,9 @@ Initial private MVP release.
 - Exact machine fixtures, fuzz seeds, integration tests, a repository-local
   verification gate, and private release archives for macOS and Linux on amd64
   and arm64.
+- Five armed Rulefloor invariants with measured mutation proofs covering
+  workspace ambiguity, timed JSON, wiki review attestation, amendment
+  reconciliation, and concurrent-write refusal.
 
 ### Security and compatibility
 

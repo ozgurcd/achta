@@ -77,6 +77,18 @@ The v0.1.0 release does not advertise Phase 3 `decision add`, broader wiki
 checks, amendment clearing, or Homebrew distribution. Those workflows remain
 explicitly deferred.
 
+## Rulefloor
+
+[`RULE-FLOOR.md`](RULE-FLOOR.md) is Achta's canonical repository-local ledger.
+Its initial floor contains five armed, mutation-proved invariants covering
+workspace discovery, timed JSON output, reviewed wiki pinning, amendment
+reconciliation, and concurrent-safe replacement. `make verify` checks the
+ledger on every slice; execute the bound tests with:
+
+```sh
+rulefloor check --repo . --run-profile unit --timings
+```
+
 ## Exit contract
 
 - `0`: operation or evaluation succeeded.

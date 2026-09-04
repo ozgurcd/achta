@@ -1,5 +1,10 @@
-FLOOR: 0
-RED-PROOFS: 0
+FLOOR: 5
+RED-PROOFS: 5
 
 | ID | one-sentence rule | enforced-by | check | red-proof | hash |
 |---|---|---|---|---|---|
+| WORKSPACE-AMBIGUITY-1 | Ambiguous ancestor workspace discovery fails instead of selecting a candidate. | go-test | internal/workspace/workspace_test.go @ unit | [proof-v1 kind=mutation_observation] 2026-09-04 changed the ambiguity guard to accept multiple candidates; TestResolveRefusesAmbiguousAncestors failed because Resolve accepted the nested candidate; restored byte-identical, green | 480da065bf19 |
+| TIMING-JSON-1 | With --timing, successful JSON remains one document and adds a non-negative elapsed_ms field. | go-test | internal/cli/run_test.go @ unit | [proof-v1 kind=mutation_observation] 2026-09-04 renamed elapsed_ms to duration_ms; TestTimingAddsElapsedToSingleJSONDocument failed with elapsed_ms nil; restored byte-identical, green | 0fef35397a08 |
+| WIKI-PIN-1 | Wiki pinning refuses missing review attestation without changing bytes and preserves the reviewed pin regions when attested. | go-test | internal/cli/integration_test.go @ unit | [proof-v1 kind=mutation_observation] 2026-09-04 bypassed the review-attestation guard; TestWikiPinWorkflowAndAttestationRefusal failed because the unattested command exited zero; restored byte-identical, green | a715644a107f |
+| AMENDMENT-RECONCILE-1 | Amendment reconciliation checks measured and declared ledger changes in both directions and validates sentence digests. | go-test | internal/amendments/reconcile_test.go @ unit | [proof-v1 kind=mutation_observation] 2026-09-04 bypassed sentence-digest mismatch detection; TestReconcileBothDirectionsAndDigest failed because the mismatch passed; restored byte-identical, green | 325bcb581699 |
+| SAFEFILE-CONCURRENCY-1 | Atomic replacement refuses a target that changed after its original snapshot. | go-test | internal/safefile/safefile_test.go @ unit | [proof-v1 kind=mutation_observation] 2026-09-04 bypassed both concurrent-change rechecks; TestReplaceRefusesConcurrentChange failed because replacement was accepted; restored byte-identical, green | c7ee5fcbb28a |

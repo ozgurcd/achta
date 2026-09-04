@@ -13,6 +13,7 @@ import (
 	"github.com/ozgurcd/achta/internal/gitstate"
 )
 
+// RULE: WIKI-PIN-1
 func TestWikiPinWorkflowAndAttestationRefusal(t *testing.T) {
 	root, repo, head := testWorkspaceRepo(t, "sample")
 	page := strings.ReplaceAll(pageFixtureCLI, "REPOSITORY", "sample")

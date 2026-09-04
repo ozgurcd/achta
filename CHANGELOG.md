@@ -8,4 +8,6 @@
 - Added deterministic amendment declaration and accepted-witness rebasing.
 - Added two-way reconciliation through Rulefloor's stable machine interface.
 - Added opt-in end-to-end elapsed timing for human and JSON command output.
+- Added a five-rule armed Rulefloor floor with measured mutation proofs for
+  release-critical invariants.
 - Added private GitHub release archives for macOS and Linux on amd64 and arm64.

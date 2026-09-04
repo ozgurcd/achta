@@ -24,14 +24,21 @@ func TestResolveAndConfine(t *testing.T) {
 	}
 }
 
+// RULE: WORKSPACE-AMBIGUITY-1
 func TestResolveRefusesAmbiguousAncestors(t *testing.T) {
 	root := fixtureWorkspace(t)
 	nested := filepath.Join(root, "nested")
-	if err := os.MkdirAll(nested, 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(nested, "wiki", "repos"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(nested, "wiki", "platform"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(nested, "wiki", "platform", "decisions.md"), []byte("# Decisions\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := Resolve("", nested); err == nil {
-		t.Fatal("Resolve accepted nested candidate when the containing Identuum workspace is also a candidate")
+		t.Fatal("Resolve accepted nested candidate when its outer workspace is also a candidate")
 	}
 }
 

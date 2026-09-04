@@ -84,6 +84,7 @@ func TestTimingAppendsHumanElapsedLine(t *testing.T) {
 	}
 }
 
+// RULE: TIMING-JSON-1
 func TestTimingAddsElapsedToSingleJSONDocument(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	if code := Run([]string{"--timing", "version", "--json"}, &stdout, &stderr, "v0.1.0"); code != 0 {

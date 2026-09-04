@@ -55,6 +55,7 @@ func TestReadRejectsSymlinkAndSecretLike(t *testing.T) {
 	}
 }
 
+// RULE: SAFEFILE-CONCURRENCY-1
 func TestReplaceRefusesConcurrentChange(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "page.md")

@@ -7,6 +7,7 @@ import (
 	"github.com/ozgurcd/achta/internal/rulefloorclient"
 )
 
+// RULE: AMENDMENT-RECONCILE-1
 func TestReconcileBothDirectionsAndDigest(t *testing.T) {
 	manifest := testManifest()
 	manifest.Changes = []Change{{RuleID: "A-1", ChangeClass: "sentence_changed", AfterSentenceSHA256: strings.Repeat("b", 64), Reason: "Changed wording."}}
