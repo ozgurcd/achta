@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const maxWalkDepth = 128
@@ -92,6 +93,23 @@ func (w Workspace) Confine(path string) (string, error) {
 	rel, err := filepath.Rel(w.Root, clean)
 	if err != nil || rel == ".." || filepath.IsAbs(rel) || startsWithParent(rel) {
 		return "", fmt.Errorf("path %q escapes workspace", path)
+	}
+	current := w.Root
+	for _, component := range strings.Split(rel, string(filepath.Separator)) {
+		if component == "." || component == "" {
+			continue
+		}
+		current = filepath.Join(current, component)
+		info, statErr := os.Lstat(current)
+		if errors.Is(statErr, os.ErrNotExist) {
+			break
+		}
+		if statErr != nil {
+			return "", fmt.Errorf("inspect confined path component %q: %w", component, statErr)
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return "", fmt.Errorf("linked path component rejected: %q", component)
+		}
 	}
 	return clean, nil
 }

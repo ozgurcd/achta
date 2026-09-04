@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ozgurcd/achta/internal/buildinfo"
+	achtawiki "github.com/ozgurcd/achta/internal/wiki"
 )
 
 const (
@@ -54,33 +55,42 @@ func mismatch(format string, args ...any) error {
 func Run(args []string, stdout, stderr io.Writer, releaseVersion string) int {
 	started := time.Now()
 	opts, command, rest, err := parseGlobal(args)
-	if !opts.timing {
+	jsonMode := jsonRequested(args)
+	if !opts.timing && (!opts.quiet || jsonMode) {
 		return dispatch(args, stdout, stderr, releaseVersion, opts, command, rest, err)
 	}
-	if jsonRequested(args) {
+	if jsonMode {
 		opts.json = true
 	}
 
 	var commandStdout, commandStderr bytes.Buffer
 	code := dispatch(args, &commandStdout, &commandStderr, releaseVersion, opts, command, rest, err)
-	elapsedMS := time.Since(started).Milliseconds()
-	if jsonRequested(args) {
-		document, appendErr := appendElapsedJSON(commandStdout.Bytes(), elapsedMS)
-		if appendErr != nil {
-			fmt.Fprintf(stderr, "achta: append timing to JSON: %v\n", appendErr)
-			return 2
+	if jsonMode {
+		document := commandStdout.Bytes()
+		if opts.timing {
+			var appendErr error
+			document, appendErr = appendElapsedJSON(document, time.Since(started).Milliseconds())
+			if appendErr != nil {
+				fmt.Fprintf(stderr, "achta: append timing to JSON: %v\n", appendErr)
+				return 2
+			}
 		}
 		_, _ = stdout.Write(document)
 		_, _ = stderr.Write(commandStderr.Bytes())
 		return code
 	}
 
-	_, _ = stdout.Write(commandStdout.Bytes())
+	if !opts.quiet || code != 0 {
+		_, _ = stdout.Write(commandStdout.Bytes())
+	}
 	_, _ = stderr.Write(commandStderr.Bytes())
-	if code == 0 {
-		fmt.Fprintf(stdout, "elapsed: %dms\n", elapsedMS)
-	} else {
-		fmt.Fprintf(stderr, "elapsed: %dms\n", elapsedMS)
+	if opts.timing {
+		elapsedMS := time.Since(started).Milliseconds()
+		if code == 0 {
+			fmt.Fprintf(stdout, "elapsed: %dms\n", elapsedMS)
+		} else {
+			fmt.Fprintf(stderr, "elapsed: %dms\n", elapsedMS)
+		}
 	}
 	return code
 }
@@ -88,6 +98,10 @@ func Run(args []string, stdout, stderr io.Writer, releaseVersion string) int {
 func dispatch(args []string, stdout, stderr io.Writer, releaseVersion string, opts globalOptions, command string, rest []string, err error) int {
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, "achta.error.v1", err)
+	}
+	if command != "" && command != "help" && commandHelpRequested(rest) {
+		fmt.Fprint(stdout, helpText)
+		return 0
 	}
 
 	switch command {
@@ -107,9 +121,23 @@ func dispatch(args []string, stdout, stderr io.Writer, releaseVersion string, op
 		return runWitness(rest, stdout, stderr, opts)
 	case "amendments":
 		return runAmendments(rest, stdout, stderr, opts)
+	case "decision":
+		return runDecision(rest, stdout, stderr, opts)
+	case "slice":
+		return runSlice(rest, stdout, stderr, opts)
 	default:
 		return renderError(stdout, stderr, opts.json, "achta.error.v1", invalid("unknown command %q", command))
 	}
+}
+
+func commandHelpRequested(args []string) bool {
+	if len(args) == 1 {
+		return args[0] == "--help" || args[0] == "-h"
+	}
+	if len(args) == 2 {
+		return args[1] == "--help" || args[1] == "-h"
+	}
+	return false
 }
 
 func parseGlobal(args []string) (globalOptions, string, []string, error) {
@@ -198,6 +226,10 @@ func currentVersion(releaseVersion string) versionDocument {
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
 		toolchainVersion = info.Main.Version
 	}
+	return versionDocumentFor(releaseVersion, toolchainVersion)
+}
+
+func versionDocumentFor(releaseVersion, toolchainVersion string) versionDocument {
 	releaseVersion = normalizeVersion(releaseVersion)
 	agreement := "cannot_evaluate"
 	if toolchainVersion != "unknown" {
@@ -252,15 +284,25 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "amendments rebase", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "amendments reconcile", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "capabilities"},
+		{Name: "decision add", Reads: true, Writes: true, RequiresWorkspace: true},
+		{Name: "slice check", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "version"},
 		{Name: "wiki pin", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "wiki freshness", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "wiki unpushed", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "wiki derive", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "wiki check", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "witness summarize", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "witness init", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "witness step", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "witness finalize", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "witness check", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 	}
 	sort.Slice(commands, func(i, j int) bool { return commands[i].Name < commands[j].Name })
 	doc := capabilitiesDocument{
 		SchemaVersion:     capabilitiesSchema,
 		Version:           normalizeVersion(releaseVersion),
-		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", "achta.witness-summary.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1"},
+		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1"},
 		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--workspace"},
 		Commands:          commands,
 		ArtifactSchemas:   []string{"gate-run.v1", "ledger-amendments.v1"},
@@ -269,7 +311,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		Limitations: []string{
 			"local filesystem only",
 			"no shell execution",
-			"no repository mutation",
+			"no Git mutation",
 		},
 	}
 	if opts.json {
@@ -351,8 +393,18 @@ Global options:
 Commands:
   version       report release and Go module versions
   capabilities report supported machine interfaces and operations
+  decision add  allocate and insert an explicit platform decision
+  slice check   audit a landed slice from Git and wiki evidence
   wiki pin      update a reviewed repository verification pin
+  wiki freshness compare repository-page pins with local HEADs
+  wiki derive   check, print, or update generated repository facts
+  wiki unpushed compare a repository with its local upstream ref
+  wiki check    report freshness and derived-block checks separately
   witness summarize summarize a gate-run.v1 record
+  witness init  create or restart a bounded witness record
+  witness step  append one explicitly observed target result
+  witness finalize close a witness and bind a green result to the tree
+  witness check validate a complete green witness against the current tree
   amendments declare add an explicit ledger change declaration
   amendments rebase move a manifest to an accepted witness commit
   amendments reconcile compare declarations with Rulefloor's logical diff

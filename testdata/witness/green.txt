@@ -1,0 +1,11 @@
+schema: gate-run.v1
+gate: fixture gate
+repo-head: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+started: 2026-09-04T10:00:00Z
+plan: build test
+elapsed: build 12ms
+target: build exit=0
+target: test exit=0
+finished: 2026-09-04T10:00:01Z
+tree: sha256=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+result: green

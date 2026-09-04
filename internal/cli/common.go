@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
+	"unicode"
 
 	"github.com/ozgurcd/achta/internal/workspace"
 )
@@ -34,6 +36,26 @@ func confinedPath(root workspace.Workspace, path string) (string, error) {
 		return "", invalid("%v", err)
 	}
 	return confined, nil
+}
+
+func rejectSecretLikeInput(path string) error {
+	name := strings.ToLower(filepath.Base(path))
+	if name == ".env" || strings.HasPrefix(name, ".env.") || strings.HasSuffix(name, ".env") {
+		return invalid("refusing secret-like input path")
+	}
+	switch filepath.Ext(name) {
+	case ".key", ".pem", ".p12", ".pfx":
+		return invalid("refusing secret-like input path")
+	}
+	for _, token := range strings.FieldsFunc(name, func(value rune) bool {
+		return !unicode.IsLetter(value) && !unicode.IsNumber(value)
+	}) {
+		switch token {
+		case "secret", "secrets", "token", "tokens", "credential", "credentials", "password", "passwords", "passwd", "cookie", "cookies", "totp", "license", "recovery":
+			return invalid("refusing secret-like input path")
+		}
+	}
+	return nil
 }
 
 func requireSubcommand(args []string, wanted string) ([]string, error) {

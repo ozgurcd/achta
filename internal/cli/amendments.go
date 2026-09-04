@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -55,6 +56,9 @@ func runAmendmentsDeclare(args []string, stdout, stderr io.Writer, opts globalOp
 	if *manifestValue == "" || *rule == "" || *class == "" || *reasonValue == "" {
 		return renderError(stdout, stderr, opts.json, "achta.amendments-operation.v1", invalid("--manifest, --rule, --class, and --reason-file are required"))
 	}
+	if err := rejectSecretLikeInput(*reasonValue); err != nil {
+		return renderError(stdout, stderr, opts.json, "achta.amendments-operation.v1", err)
+	}
 	ws, err := resolveWorkspace(opts)
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, "achta.amendments-operation.v1", err)
@@ -82,7 +86,10 @@ func runAmendmentsDeclare(args []string, stdout, stderr io.Writer, opts globalOp
 	}
 	manifest, err = amendments.Declare(manifest, amendments.Change{RuleID: *rule, ChangeClass: *class, AfterSentenceSHA256: *digest, Reason: reason})
 	if err != nil {
-		return renderError(stdout, stderr, opts.json, "achta.amendments-operation.v1", mismatch("declare amendment: %v", err))
+		if errors.Is(err, amendments.ErrDuplicateDeclaration) {
+			return renderError(stdout, stderr, opts.json, "achta.amendments-operation.v1", mismatch("declare amendment: %v", err))
+		}
+		return renderError(stdout, stderr, opts.json, "achta.amendments-operation.v1", invalid("declare amendment: %v", err))
 	}
 	data, err := amendments.Encode(manifest)
 	if err != nil {
@@ -205,15 +212,19 @@ func runAmendmentsReconcile(args []string, stdout, stderr io.Writer, opts global
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, "achta.amendments-reconciliation.v1", invalid("parse manifest: %v", err))
 	}
-	client := rulefloorclient.Client{Path: *rulefloorPath}
+	client, selectedRulefloor, err := (rulefloorclient.Client{Path: *rulefloorPath}).Resolve()
+	if err != nil {
+		return renderError(stdout, stderr, opts.json, "achta.amendments-reconciliation.v1", invalid("Rulefloor executable: %v", err))
+	}
 	if err := client.CheckCompatibility(); err != nil {
-		return renderError(stdout, stderr, opts.json, "achta.amendments-reconciliation.v1", invalid("Rulefloor capabilities: %v", err))
+		return renderError(stdout, stderr, opts.json, "achta.amendments-reconciliation.v1", invalid("Rulefloor capabilities using %s: %v", selectedRulefloor, err))
 	}
 	diff, rawDiff, err := client.LedgerDiff(manifest.BaseCommit, repo)
 	if err != nil {
-		return renderError(stdout, stderr, opts.json, "achta.amendments-reconciliation.v1", invalid("Rulefloor ledger diff: %v", err))
+		return renderError(stdout, stderr, opts.json, "achta.amendments-reconciliation.v1", invalid("Rulefloor ledger diff using %s: %v", selectedRulefloor, err))
 	}
 	result := amendments.Reconcile(manifest, diff, rawDiff)
+	result.RulefloorExecutable = selectedRulefloor
 	code := 0
 	if result.Status != "pass" {
 		code = 1
@@ -223,7 +234,7 @@ func runAmendmentsReconcile(args []string, stdout, stderr io.Writer, opts global
 			return 2
 		}
 	} else {
-		fmt.Fprintf(stdout, "amendments reconcile: %s; %d declared, %d measured, %d problem(s), %d header change(s)\n", result.Status, result.DeclaredChanges, result.ActualChanges, len(result.Problems), len(result.HeaderChanges))
+		fmt.Fprintf(stdout, "amendments reconcile: %s using %s; %d declared, %d measured, %d problem(s), %d header change(s)\n", result.Status, result.RulefloorExecutable, result.DeclaredChanges, result.ActualChanges, len(result.Problems), len(result.HeaderChanges))
 	}
 	return code
 }

@@ -2,6 +2,7 @@ package rulefloorclient
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -23,6 +24,10 @@ esac
 exit 2
 `)
 	client := Client{Path: script}
+	resolved, selected, err := client.Resolve()
+	if err != nil || !filepath.IsAbs(selected) || resolved.Path != selected {
+		t.Fatalf("resolved client = %+v, selected=%q, err=%v", resolved, selected, err)
+	}
 	if err := client.CheckCompatibility(); err != nil {
 		t.Fatal(err)
 	}
@@ -50,6 +55,18 @@ printf '%s\n' '{"schema_version":"rulefloor.capabilities.v1","machine_interfaces
 printf '%s\n' '{"schema_version":"rulefloor.ledger-diff.v1","status":"different","base_commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","headers_changed":false,"header_changes":[],"rules":[],"total_rule_changes":0,"truncated":false}'
 exit 0
 `, "diff"},
+		"cannot evaluate": {`#!/bin/sh
+printf '%s\n' '{"schema_version":"rulefloor.ledger-diff.v1","status":"cannot_evaluate","base_commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","headers_changed":false,"header_changes":[],"rules":[],"total_rule_changes":0,"truncated":false}'
+exit 2
+`, "diff"},
+		"truncated": {`#!/bin/sh
+printf '%s\n' '{"schema_version":"rulefloor.ledger-diff.v1","status":"different","base_commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","headers_changed":false,"header_changes":[],"rules":[],"total_rule_changes":0,"truncated":true}'
+exit 1
+`, "diff"},
+		"header fields disagree": {`#!/bin/sh
+printf '%s\n' '{"schema_version":"rulefloor.ledger-diff.v1","status":"different","base_commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","headers_changed":true,"header_changes":[],"rules":[],"total_rule_changes":0,"truncated":false}'
+exit 1
+`, "diff"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			client := Client{Path: fakeExecutable(t, tc.body)}
@@ -74,6 +91,30 @@ func TestClientRefusesTimeoutAndOversize(t *testing.T) {
 	oversize := Client{Path: fakeExecutable(t, "#!/bin/sh\nhead -c 8400000 /dev/zero\n")}
 	if err := oversize.CheckCompatibility(); err == nil || !strings.Contains(err.Error(), "exceeded") {
 		t.Fatalf("oversize err = %v", err)
+	}
+}
+
+func TestClientRefusesMissingAndNonzeroExecutable(t *testing.T) {
+	missing := Client{Path: filepath.Join(t.TempDir(), "missing-rulefloor")}
+	if _, _, err := missing.Resolve(); err == nil || !strings.Contains(err.Error(), "discover Rulefloor executable") {
+		t.Fatalf("missing Rulefloor discovery err = %v", err)
+	}
+	if err := missing.CheckCompatibility(); err == nil {
+		t.Fatal("missing Rulefloor executable was accepted")
+	}
+	nonzero := Client{Path: fakeExecutable(t, "#!/bin/sh\nprintf 'failure\\n' >&2\nexit 7\n")}
+	if err := nonzero.CheckCompatibility(); err == nil || !strings.Contains(err.Error(), "failure") {
+		t.Fatalf("nonzero err = %v", err)
+	}
+}
+
+func TestInstalledRulefloorCompatibility(t *testing.T) {
+	path, err := exec.LookPath("rulefloor")
+	if err != nil {
+		t.Skip("compatible Rulefloor is not installed")
+	}
+	if err := (Client{Path: path}).CheckCompatibility(); err != nil {
+		t.Fatal(err)
 	}
 }
 

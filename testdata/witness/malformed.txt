@@ -1,0 +1,5 @@
+schema: gate-run.v1
+repo-head: not-a-sha
+plan: build
+target: build exit=0
+target: build exit=0

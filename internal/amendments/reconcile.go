@@ -10,14 +10,15 @@ import (
 )
 
 type Reconciliation struct {
-	SchemaVersion   string   `json:"schema_version"`
-	Status          string   `json:"status"`
-	BaseCommit      string   `json:"base_commit"`
-	DiffSHA256      string   `json:"ledger_diff_sha256"`
-	HeaderChanges   []string `json:"header_changes"`
-	ActualChanges   int      `json:"actual_changes"`
-	DeclaredChanges int      `json:"declared_changes"`
-	Problems        []string `json:"problems"`
+	SchemaVersion       string   `json:"schema_version"`
+	Status              string   `json:"status"`
+	BaseCommit          string   `json:"base_commit"`
+	RulefloorExecutable string   `json:"rulefloor_executable"`
+	DiffSHA256          string   `json:"ledger_diff_sha256"`
+	HeaderChanges       []string `json:"header_changes"`
+	ActualChanges       int      `json:"actual_changes"`
+	DeclaredChanges     int      `json:"declared_changes"`
+	Problems            []string `json:"problems"`
 }
 
 func Reconcile(manifest Manifest, diff rulefloorclient.LedgerDiff, rawDiff []byte) Reconciliation {
@@ -26,6 +27,9 @@ func Reconcile(manifest Manifest, diff rulefloorclient.LedgerDiff, rawDiff []byt
 	result.DiffSHA256 = hex.EncodeToString(digest[:])
 	if diff.BaseCommit != manifest.BaseCommit {
 		result.Problems = append(result.Problems, fmt.Sprintf("manifest base %s differs from resolved diff base %s", manifest.BaseCommit, diff.BaseCommit))
+	}
+	for _, change := range diff.HeaderChanges {
+		result.Problems = append(result.Problems, "undeclared ledger header change: "+change)
 	}
 	actual := make(map[string]rulefloorclient.RuleChange)
 	for _, rule := range diff.Rules {

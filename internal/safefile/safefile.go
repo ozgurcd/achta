@@ -124,6 +124,59 @@ func (s Snapshot) Replace(replacement []byte, maxSize int64) error {
 	return nil
 }
 
+// Create writes a new canonical file through a same-directory temporary and an
+// exclusive hard-link publication step. It never overwrites an existing path.
+func Create(root, path string, data []byte, maxSize int64, mode os.FileMode) error {
+	if maxSize <= 0 || int64(len(data)) > maxSize {
+		return fmt.Errorf("new file exceeds %d-byte limit", maxSize)
+	}
+	root, path, err := validatePath(root, path)
+	if err != nil {
+		return err
+	}
+	if err := rejectSecretLike(path); err != nil {
+		return err
+	}
+	if err := rejectLinkedComponents(root, filepath.Dir(path)); err != nil {
+		return err
+	}
+	if _, err := os.Lstat(path); err == nil {
+		return fmt.Errorf("%q already exists", path)
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	dir := filepath.Dir(path)
+	tmp, err := os.CreateTemp(dir, ".achta-create-*")
+	if err != nil {
+		return err
+	}
+	tmpPath := tmp.Name()
+	defer os.Remove(tmpPath)
+	if err := tmp.Chmod(mode.Perm()); err != nil {
+		tmp.Close()
+		return err
+	}
+	if _, err := io.Copy(tmp, bytes.NewReader(data)); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if err := os.Link(tmpPath, path); err != nil {
+		return err
+	}
+	if d, err := os.Open(dir); err == nil {
+		defer d.Close()
+		_ = d.Sync()
+	}
+	return nil
+}
+
 func validatePath(root, path string) (string, string, error) {
 	rootAbs, err := filepath.Abs(filepath.Clean(root))
 	if err != nil {

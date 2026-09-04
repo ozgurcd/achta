@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.2.0 — 2026-09-04
+
+- Added deterministic decision insertion and native wiki status/derivation
+  checks.
+- Added explicit witness lifecycle recording and current-green validation.
+- Added read-only landed-slice auditing.
+- Added exact machine contracts for the v0.2.0 commands.
+- Completed required human, integration, failure-mode, and fuzz coverage for
+  the shipped command set.
+- Added a reproducible `make test-fuzz` gate for all required parser families.
+- Made command-local help workspace-independent, decision heading parsing
+  fail closed, and ledger-header reconciliation explicitly fail closed.
+- Reported the resolved Rulefloor executable and tightened Git discovery and
+  refusal-versus-invalid exit classification.
+- Made Rulefloor execute-mode enforcement part of `make verify`.
+- Made release publication select only the matching versioned release-note
+  section.
+- Added verified Homebrew cask publication for authorized private-release
+  users.
+
 ## v0.1.0 — 2026-09-04
 
 - Added workspace-independent version and capability discovery.

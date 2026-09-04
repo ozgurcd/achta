@@ -1,0 +1,1 @@
+{"schema_version":"achta.wiki-freshness.v1","status":"pass","fresh":1,"behind":0,"unpinned":0,"unreadable":0,"skipped":0,"pages":[{"repository":"sample","page":"wiki/repos/sample.md","status":"fresh","verified":"2026-09-04","declared_sha":"0123456789abcdef0123456789abcdef01234567","head_sha":"0123456789abcdef0123456789abcdef01234567"}]}

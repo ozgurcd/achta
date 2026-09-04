@@ -23,6 +23,8 @@ var (
 	ruleID     = regexp.MustCompile(`^[A-Z0-9][A-Z0-9._-]*$`)
 )
 
+var ErrDuplicateDeclaration = errors.New("duplicate amendment declaration")
+
 var validClasses = map[string]struct{}{
 	"rule_added": {}, "rule_removed": {}, "sentence_changed": {}, "binding_changed": {},
 	"proof_changed": {}, "covered_symbols_changed": {}, "test_fingerprint_changed": {},
@@ -81,7 +83,7 @@ func Declare(manifest Manifest, change Change) (Manifest, error) {
 	}
 	for _, existing := range manifest.Changes {
 		if existing.RuleID == change.RuleID && existing.ChangeClass == change.ChangeClass {
-			return Manifest{}, fmt.Errorf("amendment %s/%s already exists", change.RuleID, change.ChangeClass)
+			return Manifest{}, fmt.Errorf("%w: %s/%s already exists", ErrDuplicateDeclaration, change.RuleID, change.ChangeClass)
 		}
 	}
 	manifest.Changes = append(manifest.Changes, change)

@@ -9,10 +9,26 @@ import (
 )
 
 func runWitness(args []string, stdout, stderr io.Writer, opts globalOptions) int {
-	rest, err := requireSubcommand(args, "summarize")
-	if err != nil {
-		return renderError(stdout, stderr, opts.json, "achta.witness-summary.v1", err)
+	if len(args) == 0 {
+		return renderError(stdout, stderr, opts.json, "achta.witness-operation.v1", invalid("witness requires a subcommand"))
 	}
+	switch args[0] {
+	case "summarize":
+		return runWitnessSummarize(args[1:], stdout, stderr, opts)
+	case "init":
+		return runWitnessInit(args[1:], stdout, stderr, opts)
+	case "step":
+		return runWitnessStep(args[1:], stdout, stderr, opts)
+	case "finalize":
+		return runWitnessFinalize(args[1:], stdout, stderr, opts)
+	case "check":
+		return runWitnessCheck(args[1:], stdout, stderr, opts)
+	default:
+		return renderError(stdout, stderr, opts.json, "achta.witness-operation.v1", invalid("unknown witness subcommand %q", args[0]))
+	}
+}
+
+func runWitnessSummarize(rest []string, stdout, stderr io.Writer, opts globalOptions) int {
 	set := flagSet("witness summarize")
 	repoValue := set.String("repo", "", "repository path")
 	recordValue := set.String("record", "", "gate-run.v1 record path")
@@ -60,10 +76,14 @@ func runWitness(args []string, stdout, stderr io.Writer, opts globalOptions) int
 			return 2
 		}
 	} else {
-		fmt.Fprintf(stdout, "witness %s: %s, %s, %s; targets %d planned/%d passed/%d failed/%d missing\n", baseName(recordPath), summary.Status, summary.Completeness, summary.Freshness, summary.PlannedTargets, summary.PassedTargets, summary.FailedTargets, summary.MissingTargets)
-		for _, target := range summary.SlowTargets {
-			fmt.Fprintf(stdout, "  %s: %dms\n", target.Name, target.ElapsedMS)
-		}
+		renderWitnessSummaryHuman(stdout, baseName(recordPath), summary)
 	}
 	return code
+}
+
+func renderWitnessSummaryHuman(output io.Writer, recordName string, summary witness.Summary) {
+	fmt.Fprintf(output, "witness %s: %s, %s, %s; targets %d planned/%d passed/%d failed/%d missing\n", recordName, summary.Status, summary.Completeness, summary.Freshness, summary.PlannedTargets, summary.PassedTargets, summary.FailedTargets, summary.MissingTargets)
+	for _, target := range summary.SlowTargets {
+		fmt.Fprintf(output, "  %s: %dms\n", target.Name, target.ElapsedMS)
+	}
 }

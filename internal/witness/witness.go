@@ -22,13 +22,14 @@ const (
 var (
 	namePattern    = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]*$`)
 	targetPattern  = regexp.MustCompile(`^target: ([A-Za-z0-9][A-Za-z0-9._-]*) exit=(-?[0-9]+)$`)
-	elapsedPattern = regexp.MustCompile(`^elapsed: ([A-Za-z0-9][A-Za-z0-9._-]*) ([0-9]+)s$`)
+	elapsedPattern = regexp.MustCompile(`^elapsed: ([A-Za-z0-9][A-Za-z0-9._-]*) ([0-9]+)(ms|s)$`)
 	shaPattern     = regexp.MustCompile(`^[0-9a-f]{40}$`)
 	digestPattern  = regexp.MustCompile(`^[0-9a-f]{64}$`)
 )
 
 type Record struct {
 	RepoHead  string
+	RepoDirty bool
 	Started   *time.Time
 	Finished  *time.Time
 	Plan      []string
@@ -94,7 +95,9 @@ func Parse(data []byte) (Record, error) {
 			if err := singleton(seen, "repo-head"); err != nil {
 				return Record{}, err
 			}
-			record.RepoHead = strings.TrimSuffix(strings.TrimPrefix(line, "repo-head: "), " (dirty)")
+			value := strings.TrimPrefix(line, "repo-head: ")
+			record.RepoDirty = strings.HasSuffix(value, " (dirty)")
+			record.RepoHead = strings.TrimSuffix(value, " (dirty)")
 		case strings.HasPrefix(line, "started: "):
 			if err := singleton(seen, "started"); err != nil {
 				return Record{}, err
@@ -142,11 +145,17 @@ func Parse(data []byte) (Record, error) {
 			if _, exists := record.ElapsedMS[match[1]]; exists {
 				return Record{}, fmt.Errorf("duplicate elapsed target %q", match[1])
 			}
-			seconds, err := strconv.ParseInt(match[2], 10, 64)
-			if err != nil || seconds > (1<<63-1)/1000 {
+			value, err := strconv.ParseInt(match[2], 10, 64)
+			if err != nil {
 				return Record{}, errors.New("invalid elapsed duration")
 			}
-			record.ElapsedMS[match[1]] = seconds * 1000
+			if match[3] == "s" {
+				if value > (1<<63-1)/1000 {
+					return Record{}, errors.New("invalid elapsed duration")
+				}
+				value *= 1000
+			}
+			record.ElapsedMS[match[1]] = value
 		case strings.HasPrefix(line, "tree: sha256="):
 			if err := singleton(seen, "tree"); err != nil {
 				return Record{}, err
@@ -208,9 +217,11 @@ func Summarize(record Record, repo, recordPath, requireHead string, slowest int)
 		return Summary{}, errors.New("required HEAD does not match repository HEAD")
 	}
 	summary := Summary{SchemaVersion: "achta.witness-summary.v1", RecordSchemaVersion: Schema, RepositoryHead: head, SlowTargets: []SlowTarget{}, PlannedTargets: len(record.Plan), RecordedTargets: len(record.Targets)}
+	recordedHeadMatches := false
 	if record.RepoHead != "" {
 		if resolved, resolveErr := gitstate.ResolveCommit(repo, record.RepoHead); resolveErr == nil {
 			summary.RecordedHead = resolved
+			recordedHeadMatches = resolved == head
 		}
 	}
 	for _, name := range record.Plan {
@@ -226,7 +237,7 @@ func Summarize(record Record, repo, recordPath, requireHead string, slowest int)
 		}
 	}
 	summary.Completeness = "complete"
-	if summary.MissingTargets > 0 || record.Started == nil || record.Finished == nil || record.TreeKind == "" || record.Result == "" {
+	if summary.MissingTargets > 0 || record.RepoHead == "" || summary.RecordedHead == "" || record.Started == nil || record.Finished == nil || record.TreeKind == "" || record.Result == "" {
 		summary.Completeness = "incomplete"
 	}
 	summary.Status = "green"
@@ -271,7 +282,7 @@ func Summarize(record Record, repo, recordPath, requireHead string, slowest int)
 		if cleanErr != nil {
 			return Summary{}, cleanErr
 		}
-		if record.TreeValue == head && clean {
+		if record.TreeValue == head && clean && recordedHeadMatches {
 			summary.Freshness = "current"
 		} else {
 			summary.Freshness = "stale"
@@ -293,7 +304,7 @@ func Summarize(record Record, repo, recordPath, requireHead string, slowest int)
 		if digestErr != nil {
 			return Summary{}, digestErr
 		}
-		if digest == record.TreeValue {
+		if digest == record.TreeValue && recordedHeadMatches {
 			summary.Freshness = "current"
 		} else {
 			summary.Freshness = "stale"

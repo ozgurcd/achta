@@ -40,3 +40,27 @@ changelog:
 
 release:
   replace_existing_artifacts: false
+
+homebrew_casks:
+  - name: achta
+    # The release workflow publishes this generated cask only after the private
+    # GitHub release succeeds, then verifies the exact tap copy.
+    skip_upload: true
+    repository:
+      owner: ozgurcd
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/ozgurcd/achta"
+    description: "Fail-closed workspace bookkeeping for Identuum repositories"
+    binaries:
+      - achta
+    url:
+      headers:
+        - "Accept: application/octet-stream"
+        - "Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\")}"
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/achta"]
+          end

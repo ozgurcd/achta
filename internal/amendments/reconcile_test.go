@@ -21,6 +21,13 @@ func TestReconcileBothDirectionsAndDigest(t *testing.T) {
 	if result.Status != "fail" || len(result.Problems) != 1 {
 		t.Fatalf("result = %+v", result)
 	}
+	diff.HeadersChanged = true
+	diff.HeaderChanges = []string{"FLOOR changed"}
+	manifest.Changes[0].AfterSentenceSHA256 = strings.Repeat("b", 64)
+	result = Reconcile(manifest, diff, []byte("diff"))
+	if result.Status != "fail" || len(result.Problems) != 1 || result.HeaderChanges[0] != "FLOOR changed" {
+		t.Fatalf("header reconciliation = %+v", result)
+	}
 }
 
 func TestReconcileFindsMissingAndExtra(t *testing.T) {

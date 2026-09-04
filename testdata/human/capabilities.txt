@@ -1,0 +1,18 @@
+Achta v0.2.0 capabilities
+  amendments declare
+  amendments rebase
+  amendments reconcile
+  capabilities
+  decision add
+  slice check
+  version
+  wiki check
+  wiki derive
+  wiki freshness
+  wiki pin
+  wiki unpushed
+  witness check
+  witness finalize
+  witness init
+  witness step
+  witness summarize

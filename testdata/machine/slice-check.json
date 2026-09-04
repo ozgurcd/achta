@@ -1,0 +1,1 @@
+{"schema_version":"achta.slice-check.v1","status":"pass","repository":"sample","commits":1,"passed":1,"failed":0,"skipped":0,"checks":[{"name":"clean-tree","status":"pass","detail":"working tree is clean"}]}

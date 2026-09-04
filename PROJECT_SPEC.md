@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: implementation-ready draft
+Status: v0.1.0 released baseline; v0.2.0 active development
 
 Project name: Achta
 
@@ -18,12 +18,13 @@ Go module path: `github.com/ozgurcd/achta`
 
 Libraries: Go native libraries preferred over 3rd party.
 
-UUID: If used, all UUID's MUST me UUIDv7
+UUID: If used, all UUIDs must be UUIDv7.
 
-DB: If required, use a .sqlite (but not use CGO) db
+DB: If required, use SQLite without CGO.
 
 
-DEVELOPER TOOLS:  use gograph instead of unix text processing tools where available.
+Developer tools: use Gograph instead of Unix text-processing tools where
+available.
 
 ## 1. Executive summary
 
@@ -249,6 +250,13 @@ Global options:
 --help             Show help without requiring a workspace.
 ```
 
+`--help` and `-h` may appear before or after a command path. Both forms emit
+the same workspace-independent top-level help and exit successfully.
+
+`--quiet` suppresses successful human detail. It does not suppress evaluated
+mismatches or error diagnostics, does not alter JSON documents, and does not
+suppress the explicitly requested elapsed line when combined with `--timing`.
+
 `--timing` starts a monotonic measurement immediately before global argument
 parsing and stops after the command result has been constructed, just before
 the timing value itself is rendered. Human success output ends with
@@ -372,15 +380,21 @@ achta decision add \
 Behavior:
 
 1. Parse all decision headings using a closed structural grammar.
-2. Allocate the next available numeric ID for the selected prefix.
-3. Reject duplicates, malformed IDs, ambiguous insertion locations, or a gap
-   policy not supported by the current register.
-4. Read the body from one bounded regular file. Supporting `-` for stdin is
-   acceptable if input remains bounded.
-5. Insert one heading and body at the measured canonical location.
-6. Preserve unrelated bytes, line endings, and final-newline behavior.
-7. Validate the complete register and atomically replace it.
-8. Return the allocated decision ID.
+2. Allocate one more than the highest measured numeric ID for the selected
+   prefix; physical order and numeric gaps do not change that result.
+3. Require all measured headings for the prefix to belong to exactly one
+   second-level section, then insert at that section's boundary.
+4. Reject duplicates, malformed IDs, ambiguous sections, empty or multiline
+   titles, and unsupported prefixes.
+5. Read the body from one bounded, confined, non-secret regular file.
+6. Insert one heading and body at the measured canonical location. The caller
+   supplies the complete title, including any desired date; Achta does not add
+   one.
+7. Preserve unrelated bytes, LF or CRLF line endings, and final-newline
+   behavior.
+8. Validate the complete register and atomically replace it.
+9. Return the allocated decision ID. `--check` returns exit 1 with
+   `status=would_change` and leaves the register byte-identical.
 
 Achta does not generate decision prose or decide whether a decision is correct.
 
@@ -514,6 +528,10 @@ Instead it must:
    - header changes must be reported and handled by explicit policy rather than
      silently ignored.
 
+The reconciliation document reports the absolute selected Rulefloor executable
+as `rulefloor_executable`. Executable discovery is completed before either
+Rulefloor invocation; failures are `cannot_evaluate`.
+
 Exit 0 means the manifest and measured logical ledger diff agree. It does not
 mean the human reason is true or the ledger amendment is correct.
 
@@ -535,38 +553,86 @@ added, it must require evidence that:
 
 Until those checks exist, clearing remains an explicit reviewed edit.
 
-### 7.11 Later wiki commands
-
-After parity with the existing scripts is proven, Achta may add:
+### 7.11 Wiki status and derivation commands
 
 ```text
 achta wiki freshness [--strict] [--repo NAME] [--json]
 achta wiki derive [--check | --print REPOSITORY] [--json]
 achta wiki unpushed [--repo PATH] [--json]
 achta wiki check [--json]
-achta slice check --repo PATH --commits N [--entries N] [--ahead N]
 ```
 
-`wiki check` may compose wiki-specific structural validators, but it must expose
-each result separately. A single green aggregate must not hide skipped or
-cannot-evaluate checks.
+`wiki freshness` compares each repository page's anchored canonical pin with
+the corresponding local repository HEAD. It never fetches or writes. Without
+`--strict`, measured drift is reported but does not fail the command;
+`--strict` maps drift to exit 1. Unreadable or ambiguous evidence is
+`cannot_evaluate` and exit 2.
 
-### 7.12 Later witness commands
+`wiki derive --check` renders every marked derived block from local facts and
+returns exit 1 when any page would change. Without `--check`, each page is
+validated and replaced independently and atomically. `--print` renders exactly
+one repository block without editing a page and is mutually exclusive with
+`--check`.
 
-Only after the existing witness writer has complete parity tests should Achta
-consider:
+`wiki unpushed` compares HEAD with the configured local upstream tracking ref.
+It deliberately performs no fetch and records that limitation in JSON. Its
+closed statuses are `published`, `unpushed`, `behind`, and `diverged`.
+
+`wiki check` composes strict freshness and derived-block checks, exposes both
+results separately, and preserves `cannot_evaluate`; a green aggregate never
+hides a skipped or unevaluated component.
+
+The stable schemas are `achta.wiki-freshness.v1`, `achta.wiki-derive.v1`,
+`achta.wiki-unpushed.v1`, and `achta.wiki-check.v1`.
+
+### 7.12 Witness lifecycle commands
+
+Achta records explicitly supplied observations but does not execute gate
+commands:
 
 ```text
-achta witness run
-achta witness init
-achta witness step
-achta witness finalize
-achta witness check
+achta witness init --repo PATH --record PATH --label TEXT --targets A,B
+achta witness step --repo PATH --record PATH --target NAME --exit-code N \
+  [--elapsed-ms N] [--evidence-file PATH]
+achta witness finalize --repo PATH --record PATH [--commit-tie]
+achta witness check --repo PATH --record PATH
 ```
 
-The initial release should add `summarize` without rewriting the trusted writer.
-This keeps migration small and makes the new parser prove itself against
-existing records first.
+`init` requires a repository clean except for the selected witness path and
+records the exact HEAD and plan. When replacing an existing record, `init`
+first requires that record to be a valid supported witness. `step` appends one planned target's observed
+exit code, optional measured milliseconds, and bounded evidence lines; it never
+runs that target. `finalize` writes green only when every planned target was
+recorded with exit zero and binds the record to the current tree digest by
+default. `--commit-tie` is allowed only for a completely clean repository.
+`check` requires a complete, green, current record created from a clean
+repository.
+
+All lifecycle mutations refuse a stale recorded HEAD, repository changes
+outside the witness path, duplicate or unplanned targets, and concurrent
+record changes. The stable schemas are `achta.witness-operation.v1` and
+`achta.witness-check.v1`.
+
+There is intentionally no `witness run`. Make or CI owns command execution and
+passes measured outcomes to `witness step`. Adding an arbitrary executor would
+contradict Achta's no-shell, non-runner boundary and would make a locally
+writable witness appear stronger than it is.
+
+### 7.13 Slice check
+
+```text
+achta slice check --repo PATH [--commits N] [--entries N] [--ahead N] [--json]
+```
+
+The command audits local Git and wiki evidence for an already landed slice. It
+checks a clean tree, upstream availability and ancestry, total commits ahead,
+slice author and committer identity, absence of agent identities and
+secret-like paths, module-boundary changes, expected `log.md` heading appends,
+and a wiki pin equal to HEAD. `--commits` and `--entries` default to one;
+`--ahead` optionally requires an exact total. It performs no fetch and no Git
+mutation. Every component is returned separately using
+`achta.slice-check.v1`; inability to measure a required fact is exit 2 rather
+than a pass.
 
 ## 8. Exit codes
 
@@ -622,6 +688,11 @@ documented transaction or can prove that the files are independently safe.
 - Apply timeouts and bounded stdout/stderr buffers.
 - Validate executable discovery and report which binary was selected without
   printing environment variables.
+- Git discovery failures identify the requested Git executable, and bounded Git
+  execution failures identify the selected absolute executable. Amendment
+  reconciliation reports its selected absolute Rulefloor executable on success.
+- Every Git invocation uses `--no-optional-locks` so read-only measurements do
+  not refresh repository index metadata.
 - Do not accept arbitrary command strings from manifests, wiki prose, or
   witness records.
 - Git operations are read-only unless a future command separately documents a
@@ -660,6 +731,7 @@ logic:
 ```text
 achta/
   cmd/achta/
+  cmd/release-notes/
   internal/cli/
   internal/workspace/
   internal/safefile/
@@ -669,6 +741,8 @@ achta/
   internal/witness/
   internal/amendments/
   internal/rulefloorclient/
+  internal/releasenotes/
+  internal/slicecheck/
   testdata/
     machine/
     wiki/
@@ -682,6 +756,8 @@ and tests need the boundary.
 Responsibilities:
 
 - `cmd/achta`: process entry point and runtime version stamp only.
+- `cmd/release-notes`: exact extraction of one version section for release
+  automation.
 - `internal/cli`: argument parsing, help, exit mapping, and human/JSON rendering.
 - `internal/workspace`: discovery and canonical workspace/repository selection.
 - `internal/safefile`: confined regular-file reads and atomic replacement.
@@ -693,6 +769,8 @@ Responsibilities:
   reconciliation.
 - `internal/rulefloorclient`: bounded direct execution and strict parsing of
   Rulefloor's stable machine interfaces.
+- `internal/releasenotes`: bounded version-heading validation and extraction.
+- `internal/slicecheck`: read-only landed-slice checks over Git and wiki facts.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
@@ -738,12 +816,12 @@ not allow configuration to define arbitrary executable commands.
 
 | Existing utility family | Disposition |
 |---|---|
-| Wiki freshness, derivation, and unpushed checks | Migrate gradually into `achta wiki` after parity |
+| Wiki freshness, derivation, and unpushed checks | Implemented in `achta wiki`; keep old scripts during measured shadow parity |
 | New wiki pin editor | Implement directly in Achta |
 | New decision insertion helper | Implement directly in Achta |
-| Gate-witness parsing and summary | Add summary first; migrate writer later |
-| End-to-end witness freshness | Candidate for `achta witness check` after core parity |
-| Slice postcheck | Candidate for `achta slice check` after wiki and Git primitives stabilize |
+| Gate-witness parsing, summary, and writer | Implemented as summarize plus explicit init/step/finalize recording; external gates still execute commands |
+| End-to-end witness freshness | Implemented by `achta witness check` |
+| Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition, count-claim, ledger-claim, and model-mirror checks | Candidates for explicit `achta wiki check` components |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
@@ -788,15 +866,25 @@ Requirements:
   the optional non-negative integer field `elapsed_ms` without emitting a
   second document. Untimed documents remain byte-compatible.
 
-Initial schemas:
+Schemas shipped in v0.1.0:
 
 - `achta.version.v1`
 - `achta.capabilities.v1`
 - `achta.wiki-pin.v1`
-- `achta.decision-add.v1`
 - `achta.witness-summary.v1`
 - `achta.amendments-operation.v1`
 - `achta.amendments-reconciliation.v1`
+
+Schemas added for v0.2.0:
+
+- `achta.decision-add.v1`
+- `achta.wiki-freshness.v1`
+- `achta.wiki-derive.v1`
+- `achta.wiki-unpushed.v1`
+- `achta.wiki-check.v1`
+- `achta.witness-operation.v1`
+- `achta.witness-check.v1`
+- `achta.slice-check.v1`
 
 Do not publish a schema until the corresponding implementation and conformance
 tests are complete.
@@ -838,6 +926,7 @@ Add focused tests for:
   document, including failure output;
 - version disagreement and unavailable Go build information;
 - capabilities independence from the current directory and workspace files.
+- exact golden encoding for every advertised stable machine interface.
 
 ### 15.2 Integration tests
 
@@ -861,6 +950,9 @@ Cover complete workflows:
 Use fake executables for Git and Rulefloor argument-vector tests where
 appropriate, while retaining a small end-to-end suite against installed
 compatible binaries.
+
+Run the five required parser fuzz targets reproducibly with `make test-fuzz`;
+`FUZZTIME` may be overridden without changing which targets execute.
 
 ### 15.3 Fuzz tests
 
@@ -908,9 +1000,15 @@ go vet ./...
 staticcheck ./...
 govulncheck ./...
 go mod tidy -diff
+rulefloor check --repo . --run-profile unit --timings
 ```
 
-It must also fail on unformatted Go files. CI uses the Go version from `go.mod`
+It must also fail on unformatted Go files. `RULE-FLOOR.md` is the canonical
+repository-local invariant ledger. The default gate uses Rulefloor execute mode
+so ledger syntax, bindings, tests, fingerprints, and red-proof requirements are
+enforced together; a static-only check is diagnostic and is not a substitute
+for `make verify`. New release-critical behavior must add or deliberately amend
+an armed rule with a measured red proof. CI uses the Go version from `go.mod`
 and runs the complete repository-local verification gate.
 
 For every Go implementation slice:
@@ -942,12 +1040,44 @@ use by authorized workspace users:
 - use GoReleaser or an equivalently reproducible checked-in release workflow;
 - publish `checksums.txt`;
 - stamp the release version while also reporting Go build metadata;
-- do not add Homebrew packaging until at least the core read/write workflows
-  have passed migration parity.
+- publish an `achta` Homebrew cask to `ozgurcd/homebrew-tap` after the private
+  GitHub release succeeds; installation still requires authorized access to
+  the private release assets through `HOMEBREW_GITHUB_API_TOKEN`;
+- use GoReleaser's current `homebrew_casks` support rather than its deprecated
+  `brews` configuration, verify tap push access before creating the release,
+  refuse tap downgrades, and verify the published cask.
 
 The tool must remain buildable without third-party runtime services.
 
+### 18.1 Release documentation
+
+`RELEASE_NOTES.md` is the detailed, user-facing source for release bodies. It
+contains newest-first sections whose headings are exactly
+`## vMAJOR.MINOR.PATCH — YYYY-MM-DD`. Every change is recorded under the version
+that first ships it; historical version sections are not rewritten to describe
+later work.
+
+`CHANGELOG.md` is the concise newest-first historical summary. It may omit
+implementation detail but must not disagree with the release notes.
+
+The checked-in `cmd/release-notes` helper validates an exact semantic version,
+requires exactly one matching heading, and extracts only that section. The
+release workflow uses the tag as the requested version and passes the extracted
+temporary file to GoReleaser. A missing, duplicate, or malformed version
+section fails the release before publication.
+
 ## 19. Delivery phases
+
+Phase status is a measured project fact, not a roadmap implication. The
+current v0.2.0 development state is:
+
+| Phase | Status | Evidence |
+|---|---|---|
+| 0 | complete in v0.1.0 | foundations, safe-file checks, machine fixtures, and repository verification gate |
+| 1 | complete in v0.1.0 | attested wiki pin and witness summary integration workflows, including dry-run/no-op/stale transitions and exact human and JSON fixtures |
+| 2 | complete in v0.1.0 | amendment authoring/rebase, strict Rulefloor client, complete CLI reconciliation, bidirectional/header-change failures, and real-history witness selection tests |
+| 3 | verified for v0.2.0 | on 2026-09-04, repeated real-workspace old/native cycles agreed on 10 fresh pages and six unchanged derived blocks; the latest local-unpushed facts agreed at 13; decision check allocated P-058 without a write; malformed-heading and derived-delimiter fuzzing, failure fixtures, and exact machine contracts pass |
+| 4 | verified for v0.2.0 | two independent parser/writer lifecycle cycles and a landed-slice integration workflow pass; `witness run` is rejected by the product boundary |
 
 ### Phase 0: inventory and frozen fixtures
 
@@ -993,9 +1123,10 @@ failure fixtures.
 
 ### Phase 4: witness writer and slice checks
 
-- Decide whether the proven parser should replace witness run/init/step/
-  finalize/check operations.
-- Consider migrating slice-postcheck and end-to-end witness freshness.
+- Use the proven parser for init/step/finalize/check recording operations.
+- Keep command execution in Make or CI; do not add `witness run`.
+- Migrate slice-postcheck and end-to-end witness freshness to read-only Achta
+  checks.
 - Retire old scripts only in later explicit changes.
 
 Exit criterion: no duplicate parser remains without a documented reason, and
@@ -1039,7 +1170,6 @@ The following are not part of the initial implementation:
 - Gograph source analysis inside Achta.
 - Unconditional amendment clearing.
 - A public embedding API.
-- Homebrew distribution before workflow stability is demonstrated.
 
 ## 22. v0.1.0 decisions
 
@@ -1061,7 +1191,29 @@ The v0.1.0 release records these choices explicitly:
 6. Unconditional amendment clearing and post-witness finalization remain
    deferred; v0.1.0 cannot erase declaration intent.
 
-## 23. Success measure
+## 23. v0.2.0 decisions
+
+The v0.2.0 development line records these choices explicitly:
+
+1. `decision add` is enabled with measured max-plus-one allocation and
+   section-boundary insertion; its schema is first advertised in v0.2.0.
+2. Wiki freshness, derivation, unpushed, and composed checks are native but do
+   not authorize retiring compatibility scripts without repeated shadow
+   agreement.
+3. Witness init/step/finalize/check record caller-supplied observations. A
+   `witness run` executor is rejected because Achta is not a generic task
+   runner.
+4. `slice check` is a read-only postcondition audit and performs no fetch or Git
+   mutation.
+5. `RULE-FLOOR.md` is enforced in execute mode by `make verify`.
+6. Release bodies come only from the exactly matching version section in
+   `RELEASE_NOTES.md`; `CHANGELOG.md` remains the concise history.
+7. Homebrew uses the shared `ozgurcd/homebrew-tap` cask path. GoReleaser
+   generates the cask after the private GitHub release; the workflow verifies
+   tap access before release creation, refuses a version downgrade, and
+   authorized installers must retain access to the private release assets.
+
+## 24. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

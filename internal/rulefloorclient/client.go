@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -17,6 +18,23 @@ const MaxOutput = 8 << 20
 type Client struct {
 	Path    string
 	Timeout time.Duration
+}
+
+func (c Client) Resolve() (Client, string, error) {
+	requested := c.Path
+	if requested == "" {
+		requested = "rulefloor"
+	}
+	selected, err := exec.LookPath(requested)
+	if err != nil {
+		return Client{}, "", fmt.Errorf("discover Rulefloor executable %q: %w", requested, err)
+	}
+	selected, err = filepath.Abs(selected)
+	if err != nil {
+		return Client{}, "", fmt.Errorf("canonicalize Rulefloor executable %q: %w", selected, err)
+	}
+	c.Path = filepath.Clean(selected)
+	return c, c.Path, nil
 }
 
 type Capabilities struct {
@@ -88,6 +106,9 @@ func (c Client) LedgerDiff(base, repo string) (LedgerDiff, []byte, error) {
 	if diff.Truncated {
 		return LedgerDiff{}, nil, errors.New("rulefloor ledger diff is truncated")
 	}
+	if diff.HeadersChanged != (len(diff.HeaderChanges) > 0) {
+		return LedgerDiff{}, nil, errors.New("rulefloor header-change fields disagree")
+	}
 	if len(diff.Rules) != diff.TotalRuleChanges {
 		return LedgerDiff{}, nil, errors.New("rulefloor rule count disagreement")
 	}
@@ -116,11 +137,11 @@ func (c Client) invoke(target any, expectedExit int, args ...string) error {
 }
 
 func (c Client) run(args ...string) ([]byte, int, error) {
-	path := c.Path
-	if path == "" {
-		path = "rulefloor"
+	resolved, path, err := c.Resolve()
+	if err != nil {
+		return nil, 2, err
 	}
-	timeout := c.Timeout
+	timeout := resolved.Timeout
 	if timeout <= 0 {
 		timeout = 30 * time.Second
 	}
@@ -129,7 +150,7 @@ func (c Client) run(args ...string) ([]byte, int, error) {
 	cmd := exec.CommandContext(ctx, path, args...)
 	var stdout, stderr limitedBuffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
-	err := cmd.Run()
+	err = cmd.Run()
 	if ctx.Err() != nil {
 		return nil, 2, errors.New("rulefloor command timed out")
 	}

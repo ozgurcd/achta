@@ -20,10 +20,26 @@ type wikiPinDocument struct {
 }
 
 func runWiki(args []string, stdout, stderr io.Writer, opts globalOptions) int {
-	rest, err := requireSubcommand(args, "pin")
-	if err != nil {
-		return renderError(stdout, stderr, opts.json, "achta.wiki-pin.v1", err)
+	if len(args) == 0 {
+		return renderError(stdout, stderr, opts.json, "achta.wiki-operation.v1", invalid("wiki requires a subcommand"))
 	}
+	switch args[0] {
+	case "pin":
+		return runWikiPin(args[1:], stdout, stderr, opts)
+	case "freshness":
+		return runWikiFreshness(args[1:], stdout, stderr, opts)
+	case "derive":
+		return runWikiDerive(args[1:], stdout, stderr, opts)
+	case "unpushed":
+		return runWikiUnpushed(args[1:], stdout, stderr, opts)
+	case "check":
+		return runWikiCheck(args[1:], stdout, stderr, opts)
+	default:
+		return renderError(stdout, stderr, opts.json, "achta.wiki-operation.v1", invalid("unknown wiki subcommand %q", args[0]))
+	}
+}
+
+func runWikiPin(rest []string, stdout, stderr io.Writer, opts globalOptions) int {
 	if len(rest) == 0 {
 		return renderError(stdout, stderr, opts.json, "achta.wiki-pin.v1", invalid("wiki pin requires a repository name"))
 	}
@@ -89,7 +105,15 @@ func runWiki(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 			return 2
 		}
 	} else {
-		fmt.Fprintf(stdout, "wiki pin %s: %s at %s (%s)\n", status, repository, (*sha)[:7], *verified)
+		renderWikiPinHuman(stdout, doc)
 	}
 	return code
+}
+
+func renderWikiPinHuman(output io.Writer, doc wikiPinDocument) {
+	shortSHA := doc.SHA
+	if len(shortSHA) > 7 {
+		shortSHA = shortSHA[:7]
+	}
+	fmt.Fprintf(output, "wiki pin %s: %s at %s (%s)\n", doc.Status, doc.Repository, shortSHA, doc.Verified)
 }

@@ -22,6 +22,16 @@ func TestResolveAndConfine(t *testing.T) {
 	if _, err := got.Confine("../escape"); err == nil {
 		t.Fatal("Confine accepted traversal")
 	}
+	if _, err := got.Confine(filepath.Join(t.TempDir(), "escape")); err == nil {
+		t.Fatal("Confine accepted an absolute path outside the workspace")
+	}
+	external := t.TempDir()
+	if err := os.Symlink(external, filepath.Join(root, "linked-repo")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := got.Confine(filepath.Join("linked-repo", "artifact.md")); err == nil {
+		t.Fatal("Confine accepted a linked path component")
+	}
 }
 
 // RULE: WORKSPACE-AMBIGUITY-1

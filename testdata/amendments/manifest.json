@@ -1,0 +1,11 @@
+{
+  "schema_version": "ledger-amendments.v1",
+  "base_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "changes": [
+    {
+      "rule_id": "EXAMPLE-1",
+      "change_class": "rule_added",
+      "reason": "Fixture declaration for deterministic parser coverage."
+    }
+  ]
+}
