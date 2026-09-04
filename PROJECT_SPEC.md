@@ -143,14 +143,27 @@ storage.
 
 ### 6.1 Wiki repository pages
 
-Repository pages live under `wiki/repos/` and include frontmatter fields such
-as:
+Repository pages live under `wiki/repos/`. A page owned by a separate workspace
+wiki includes an anchored repository SHA:
 
 ```text
 updated: YYYY-MM-DD
 verified: YYYY-MM-DD
 verified_against: repository-name @ COMMIT (...optional existing prose...)
 ```
+
+A page committed in the repository it describes instead uses:
+
+```text
+updated: YYYY-MM-DD
+verified: YYYY-MM-DD
+co_versioned: true
+```
+
+It must omit `verified_against:`. A Git commit cannot contain its own final SHA;
+the code and page already share one atomic commit boundary. `verified:` remains
+the explicit claim-review date. A co-versioned marker outside the repository's
+own wiki is malformed and must fail closed.
 
 Some pages contain a generated block delimited by exact markers:
 
@@ -270,6 +283,9 @@ line or JSON field to the caller's output stream.
 Workspace discovery may walk from the current directory toward the filesystem
 root looking for the expected `wiki/` layout. Ambiguous discovery must fail and
 request `--workspace`; it must never select a sibling or ancestor by guesswork.
+A repository-owned wiki uses the same layout at the repository root. When both
+the repository and a parent are candidates, callers select the repository with
+`--workspace .`.
 
 The following commands must not require a workspace:
 
@@ -353,6 +369,10 @@ Behavior:
 8. Replace it atomically only if every check succeeds.
 9. `--check` performs every validation and prints the proposed summary without
    writing.
+
+`wiki pin` applies to externally pinned repository pages. A co-versioned page
+does not carry a SHA field to rewrite; it is reviewed and committed with the
+source it describes.
 
 The command must refuse:
 
@@ -563,9 +583,12 @@ achta wiki unpushed [--repo PATH] [--json]
 achta wiki check [--json]
 ```
 
-`wiki freshness` compares each repository page's anchored canonical pin with
-the corresponding local repository HEAD. It never fetches or writes. Without
-`--strict`, measured drift is reported but does not fail the command;
+`wiki freshness` compares each externally owned repository page's anchored
+canonical pin with the corresponding local repository HEAD. A self-owned page
+is fresh only when it carries `co_versioned: true`, omits `verified_against:`,
+has a review date, and its selected workspace root is the exact Git repository
+root. It never fetches or writes. Without `--strict`, measured drift is reported
+but does not fail the command;
 `--strict` maps drift to exit 1. Unreadable or ambiguous evidence is
 `cannot_evaluate` and exit 2.
 
@@ -653,8 +676,10 @@ achta slice check --repo PATH [--commits N] [--entries N] [--ahead N] [--json]
 The command audits local Git and wiki evidence for an already landed slice. It
 checks a clean tree, upstream availability and ancestry, total commits ahead,
 slice author and committer identity, absence of agent identities and
-secret-like paths, module-boundary changes, expected `log.md` heading appends,
-and a wiki pin equal to HEAD. `--commits` and `--entries` default to one;
+secret-like paths, module-boundary changes, expected log heading appends, and
+wiki freshness. A repository-owned `wiki/log.md` takes precedence over a root
+`log.md`; a co-versioned wiki page is tied by the containing commit rather than
+an impossible self-SHA. `--commits` and `--entries` default to one;
 `--ahead` optionally requires an exact total. It performs no fetch and no Git
 mutation. Every component is returned separately using
 `achta.slice-check.v1`; inability to measure a required fact is exit 2 rather
@@ -860,6 +885,19 @@ WORKSPACE/
   REPOSITORY-B/
 ```
 
+Repository-owned wiki layout:
+
+```text
+REPOSITORY/
+  wiki/
+    repos/REPOSITORY.md  # co_versioned: true; no verified_against
+    platform/decisions.md
+    log.md
+```
+
+Repository-specific facts must have exactly one wiki owner. A local page and a
+central page for the same repository are a configuration error, not mirrors.
+
 If configuration later becomes necessary, use a bounded, versioned JSON file.
 The repo-local `achta.toolchain-manifest.v1` is the first such format. Do not
 introduce YAML solely for configuration, and do not allow configuration to
@@ -869,7 +907,9 @@ define arbitrary executable commands.
 
 ### 13.1 Compatibility principles
 
-- Existing wiki Markdown stays canonical.
+- Existing wiki Markdown stays canonical until ownership is explicitly moved.
+- A repository ownership move transfers its page, decisions, and history; it
+  does not leave a central mirror.
 - Existing `ledger-amendments.v1` stays canonical.
 - Existing `gate-run.v1` records remain readable.
 - Existing Make targets and scripts continue working during migration.
@@ -1236,6 +1276,8 @@ The first usable Achta release is accepted only when:
 - Missing Git or Rulefloor produces `cannot_evaluate`, never a crash or silent
   pass.
 - The full Go verification gate and security-focused filesystem tests pass.
+- A repository-owned wiki can pass freshness and slice-log checks without a
+  self-referential commit SHA.
 - Public documentation states precisely what Achta can and cannot establish.
 
 ## 21. Explicit deferred work
@@ -1300,7 +1342,7 @@ The v0.2.0 development line records these choices explicitly:
 
 ## 24. v0.3.0 decisions
 
-The v0.3.0 development line records these choices explicitly:
+The v0.3.0 release records these choices explicitly:
 
 1. Achta owns one parsed `xrepo:` grammar and rejects duplicate sibling names;
    the three byte-pinned shell implementations remain compatibility callers
@@ -1318,7 +1360,16 @@ The v0.3.0 development line records these choices explicitly:
 6. Published-fix vulnerability policy remains outside Achta because advisory,
    ecosystem, and fix-availability semantics belong to a dedicated analyzer.
 
-## 25. Success measure
+## 25. Unreleased decisions
+
+1. Repository-owned wikis use `co_versioned: true` and omit
+   `verified_against:`. The containing commit is the version boundary.
+2. `wiki/log.md` takes precedence over a repository-root `log.md` during slice
+   checks so locally owned history is mechanically enforced.
+3. Repository-specific facts have exactly one wiki owner; migration removes the
+   former central page, decision, and log records instead of retaining mirrors.
+
+## 26. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

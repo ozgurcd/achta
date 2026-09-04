@@ -104,6 +104,41 @@ func Freshness(root, filter string) (FreshnessResult, error) {
 			continue
 		}
 		page.Verified = fields["verified"]
+		coVersioned := fields["co_versioned"]
+		if coVersioned != "" && coVersioned != "true" {
+			page.Status, page.Problem = "malformed", "co_versioned must be exactly true when present"
+			result.Unreadable++
+			result.Pages = append(result.Pages, page)
+			continue
+		}
+		if coVersioned == "true" {
+			gitMarker, markerErr := os.Lstat(filepath.Join(filepath.Clean(root), ".git"))
+			if markerErr != nil || gitMarker.Mode()&os.ModeSymlink != 0 || (!gitMarker.IsDir() && !gitMarker.Mode().IsRegular()) {
+				page.Status, page.Problem = "malformed", "co_versioned requires the workspace root to be the exact Git repository root"
+				result.Unreadable++
+				result.Pages = append(result.Pages, page)
+				continue
+			}
+			if page.Verified == "" || fields["verified_against"] != "" {
+				page.Status = "unpinned"
+				page.Problem = "co-versioned repository pages require verified and must omit verified_against"
+				result.Unpinned++
+				result.Pages = append(result.Pages, page)
+				continue
+			}
+			head, headErr := gitstate.Head(filepath.Clean(root))
+			if headErr != nil {
+				page.Status, page.Problem = "no_repo", boundedProblem(headErr)
+				result.Unreadable++
+				result.Pages = append(result.Pages, page)
+				continue
+			}
+			page.HeadSHA = head
+			page.Status = "fresh"
+			result.Fresh++
+			result.Pages = append(result.Pages, page)
+			continue
+		}
 		declared := fields["verified_against"]
 		match := verifiedAgainstPattern.FindStringSubmatch(declared)
 		if page.Verified == "" || match == nil {

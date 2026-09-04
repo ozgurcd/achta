@@ -2,6 +2,23 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Added
+
+- A repository-owned wiki under `wiki/`, including current facts, durable
+  decisions, release history, and local maintenance rules.
+- `co_versioned: true` freshness semantics for a wiki committed in the
+  repository it describes, avoiding an impossible self-referential Git SHA.
+- Two mutation-proved Rulefloor invariants for co-versioned freshness and
+  repository-owned log precedence, raising the floor from 20 to 22.
+
+### Changed
+
+- Slice checks prefer a repository-owned `wiki/log.md` over a root `log.md`.
+- Achta-specific wiki information is no longer owned or duplicated by the
+  parent workspace wiki.
+
 ## v0.3.0 — 2026-09-04
 
 ### Added

@@ -176,12 +176,12 @@ func Run(options Options) Result {
 		}
 	}
 
-	logPath := filepath.Join(options.Repository, "log.md")
-	if _, err := os.Lstat(logPath); errors.Is(err, os.ErrNotExist) {
+	logRelative, logErr := repositoryLog(options.Repository)
+	if errors.Is(logErr, os.ErrNotExist) {
 		add("log-append", "skip", "repository has no log.md")
-	} else if err != nil {
-		add("log-append", "cannot_evaluate", err.Error())
-	} else if status, detail := logAppend(options.Repository, base, options.ExpectedEntries); status != "pass" {
+	} else if logErr != nil {
+		add("log-append", "cannot_evaluate", logErr.Error())
+	} else if status, detail := logAppend(options.Repository, base, logRelative, options.ExpectedEntries); status != "pass" {
 		add("log-append", status, detail)
 	} else {
 		add("log-append", "pass", detail)
@@ -233,12 +233,30 @@ func moduleBoundary(repo string, paths []string) (string, error) {
 	return "", nil
 }
 
-func logAppend(repo, base string, expected int) (string, string) {
-	current, err := safefile.Read(repo, filepath.Join(repo, "log.md"), 8<<20)
+func repositoryLog(repo string) (string, error) {
+	for _, relative := range []string{filepath.Join("wiki", "log.md"), "log.md"} {
+		path := filepath.Join(repo, relative)
+		info, err := os.Lstat(path)
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return "", err
+		}
+		if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+			return "", fmt.Errorf("repository log must be a regular non-linked file: %s", relative)
+		}
+		return relative, nil
+	}
+	return "", os.ErrNotExist
+}
+
+func logAppend(repo, base, relative string, expected int) (string, string) {
+	current, err := safefile.Read(repo, filepath.Join(repo, relative), 8<<20)
 	if err != nil {
 		return "cannot_evaluate", err.Error()
 	}
-	previous, err := gitstate.FileAt(repo, base, "log.md", 8<<20)
+	previous, err := gitstate.FileAt(repo, base, relative, 8<<20)
 	if err != nil {
 		return "cannot_evaluate", err.Error()
 	}

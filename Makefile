@@ -1,11 +1,11 @@
 SHELL := /bin/sh
 
-.PHONY: help build test test-fuzz fmt-check verify rulefloor-static install-tools
+.PHONY: help build test test-fuzz fmt-check wiki-check verify rulefloor-static install-tools
 
 FUZZTIME ?= 5s
 
 help:
-	@printf '%s\n' 'Targets:' '  build             build ./cmd/achta' '  test              run unit tests' '  test-fuzz         fuzz every narrow parser for FUZZTIME each' '  fmt-check         fail on unformatted Go files' '  verify            run the complete local verification gate' '  rulefloor-static  validate the ledger without executing bindings' '  install-tools     install pinned verification tools'
+	@printf '%s\n' 'Targets:' '  build             build ./cmd/achta' '  test              run unit tests' '  test-fuzz         fuzz every narrow parser for FUZZTIME each' '  fmt-check         fail on unformatted Go files' '  wiki-check        validate the co-versioned repository wiki' '  verify            run the complete local verification gate' '  rulefloor-static  validate the ledger without executing bindings' '  install-tools     install pinned verification tools'
 
 build:
 	go build ./...
@@ -23,6 +23,9 @@ test-fuzz:
 fmt-check:
 	@test -z "$$(gofmt -l cmd internal)" || { gofmt -l cmd internal; exit 1; }
 
+wiki-check:
+	go run ./cmd/achta --workspace . wiki check --json
+
 verify: fmt-check
 	go version
 	go build ./...
@@ -32,6 +35,7 @@ verify: fmt-check
 	govulncheck ./...
 	go mod tidy -diff
 	gograph build . --precise
+	$(MAKE) wiki-check
 	rulefloor check --repo . --run-profile unit --timings
 
 rulefloor-static:

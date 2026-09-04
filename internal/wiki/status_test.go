@@ -61,6 +61,45 @@ func TestFreshnessDoesNotTakeSHAFromSuffix(t *testing.T) {
 	}
 }
 
+// RULE: WIKI-CO-VERSIONED-1
+func TestFreshnessCoVersionedOwnership(t *testing.T) {
+	self := t.TempDir()
+	runGitStatusTest(t, self, "init", "-b", "main")
+	runGitStatusTest(t, self, "config", "user.name", "Achta Test")
+	runGitStatusTest(t, self, "config", "user.email", "achta@example.invalid")
+	mustWrite(t, filepath.Join(self, "x"), "one\n")
+	runGitStatusTest(t, self, "add", "x")
+	runGitStatusTest(t, self, "commit", "-m", "one")
+	mustMkdir(t, filepath.Join(self, "wiki", "repos"))
+	name := "achta"
+	mustWrite(t, filepath.Join(self, "wiki", "repos", name+".md"), "---\ntitle: self\ncategory: repo\nco_versioned: true\nverified: 2026-09-04\n---\n")
+
+	result, err := Freshness(self, name)
+	if err != nil || result.Status != "pass" || result.Fresh != 1 || result.Pages[0].HeadSHA == "" || result.Pages[0].DeclaredSHA != "" {
+		t.Fatalf("self-owned result = %+v, err=%v", result, err)
+	}
+
+	central := t.TempDir()
+	repo := filepath.Join(central, "sample")
+	mustMkdir(t, filepath.Join(central, "wiki", "repos"))
+	mustMkdir(t, repo)
+	runGitStatusTest(t, repo, "init", "-b", "main")
+	runGitStatusTest(t, repo, "config", "user.name", "Achta Test")
+	runGitStatusTest(t, repo, "config", "user.email", "achta@example.invalid")
+	mustWrite(t, filepath.Join(repo, "x"), "one\n")
+	runGitStatusTest(t, repo, "add", "x")
+	runGitStatusTest(t, repo, "commit", "-m", "one")
+	mustWrite(t, filepath.Join(central, "wiki", "repos", "sample.md"), "---\ntitle: sample\ncategory: repo\nco_versioned: true\nverified: 2026-09-04\n---\n")
+
+	result, err = Freshness(central, "sample")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "cannot_evaluate" || result.Unreadable != 1 || result.Pages[0].Status != "malformed" {
+		t.Fatalf("central co-versioned result = %+v", result)
+	}
+}
+
 func TestWikiOperationsRejectLinkedRepository(t *testing.T) {
 	root := t.TempDir()
 	mustMkdir(t, filepath.Join(root, "wiki", "repos"))

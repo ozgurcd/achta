@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Moved Achta-specific wiki ownership into the Achta repository.
+- Added co-versioned repository-page freshness and owned-wiki log selection.
+- Raised the executable Rulefloor from 20 to 22 with mutation proofs for both
+  ownership behaviors.
+
 ## v0.3.0 — 2026-09-04
 
 - Added parsed sibling witness pins, reachability-aware staleness, CI

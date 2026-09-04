@@ -39,7 +39,9 @@ Human output ends with `elapsed: Nms`. JSON output remains one document and
 adds the optional `elapsed_ms` integer field. Untimed output is unchanged.
 
 Workspace-bound commands accept an explicit root or discover exactly one
-ancestor with `wiki/repos/` and `wiki/platform/decisions.md`:
+ancestor with `wiki/repos/` and `wiki/platform/decisions.md`. A repository may
+own that layout directly; when a parent workspace also has a wiki, pass
+`--workspace .` explicitly so the intended authority is unambiguous:
 
 ```sh
 achta --workspace /path/to/workspace wiki pin REPOSITORY \
@@ -92,12 +94,16 @@ achta --workspace /path/to/workspace amendments rebase \
 
 achta --workspace /path/to/workspace amendments reconcile \
   --manifest REPOSITORY/ledger-amendments.json --repo REPOSITORY --json
+
+go run ./cmd/achta --workspace . wiki check --json
 ```
 
 `wiki pin` writes only after the caller explicitly attests that review
 occurred. It checks the supplied full SHA against repository HEAD, preserves
 the existing `verified_against` suffix, updates the derived `Repo HEAD` row,
 validates the complete rendered page, and atomically replaces only that page.
+Repository-owned pages instead use `co_versioned: true`: they omit the
+impossible self-referential SHA pin and are committed atomically with source.
 
 `decision add` allocates one more than the highest measured ID for a prefix and
 inserts caller-written prose at the measured section boundary. The caller owns
@@ -127,8 +133,9 @@ as its audit record; it does not write a self-invalidating marker.
 `toolchain check` compares bounded JSON version and script-digest declarations
 with top-level CI workflow pins and never accepts an executable command.
 
-`slice check` audits an already landed slice using local Git and wiki facts. It
-does not fetch, stage, commit, or otherwise mutate Git.
+`slice check` audits an already landed slice using local Git and wiki facts. A
+repository-owned `wiki/log.md` takes precedence over a root `log.md`. The
+command does not fetch, stage, commit, or otherwise mutate Git.
 
 `amendments declare` records human intent; it never infers a declaration.
 `amendments rebase` selects the newest reachable commit with the accepted
@@ -142,7 +149,7 @@ The v0.2.0 release adds decision insertion, native wiki status and
 derivation, explicit witness lifecycle recording, landed-slice checks, and a
 Homebrew cask. Unconditional amendment clearing remains deferred.
 
-The v0.3.0 development line adds cross-repository witness pins, no-reach-aware
+The v0.3.0 release adds cross-repository witness pins, no-reach-aware
 staleness, CI provenance, earned-cycle refusal, and declarative toolchain parity.
 Published-fix vulnerability policy remains in dedicated analyzers.
 
@@ -170,6 +177,13 @@ rulefloor check --repo . --run-profile unit --timings
 
 `make rulefloor-static` is available for diagnosis, but it is not the complete
 verification gate.
+
+## Repository wiki
+
+[`wiki/index.md`](wiki/index.md) is the entry point for Achta-specific current
+facts, decisions, and history. This wiki is co-versioned with the source and is
+the only home for that information; the parent workspace wiki must not
+duplicate it. `make verify` runs the repository-owned wiki check.
 
 ## Exit contract
 
