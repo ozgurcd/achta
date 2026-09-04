@@ -1,0 +1,11 @@
+/.gograph/
+/.cache/
+/bin/
+/dist/
+/coverage.out
+*.test
+*.sqlite
+*.sqlite3
+.DS_Store
+
+.gograph/
