@@ -41,7 +41,7 @@ jobs:
         with:
           distribution: goreleaser
           version: ${{ env.GORELEASER_VERSION }}
-          args: release --snapshot --clean --skip=publish
+          args: release --snapshot --clean --skip=publish --release-notes=RELEASE_NOTES.md
 
   release:
     needs: verify
@@ -61,6 +61,6 @@ jobs:
         with:
           distribution: goreleaser
           version: ${{ env.GORELEASER_VERSION }}
-          args: release --clean
+          args: release --clean --release-notes=RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

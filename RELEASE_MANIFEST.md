@@ -16,8 +16,8 @@ publication. Only explicit, surgical staging is permitted.
 - `go.mod` — declares the module identity and required Go toolchain version.
 - `cmd/achta/` and `internal/` — contain the CLI entry point and product code.
 - `testdata/machine/` — contains exact stable machine-interface fixtures.
-- `README.md`, `CHANGELOG.md`, and `PROJECT_SPEC.md` — document the supported release,
-  its scope, and its contract.
+- `README.md`, `CHANGELOG.md`, `RELEASE_NOTES.md`, and `PROJECT_SPEC.md` — document
+  the supported release, its versioned changes, scope, and contract.
 - `RULE-FLOOR.md` — is the canonical repository-local Rulefloor ledger.
 - `RELEASE_MANIFEST.md` — records this first-publication classification.
 
