@@ -63,9 +63,21 @@ achta --workspace /path/to/workspace witness step \
   --repo REPOSITORY --record REPOSITORY/GATE-RUN.txt \
   --target build --exit-code 0 --elapsed-ms 125
 achta --workspace /path/to/workspace witness finalize \
-  --repo REPOSITORY --record REPOSITORY/GATE-RUN.txt
+  --repo REPOSITORY --record REPOSITORY/GATE-RUN.txt \
+  --sibling SIBLING=SIBLING
 achta --workspace /path/to/workspace witness check \
-  --repo REPOSITORY --record REPOSITORY/GATE-RUN.txt
+  --repo REPOSITORY --record REPOSITORY/GATE-RUN.txt \
+  --sibling SIBLING=SIBLING
+achta --workspace /path/to/workspace witness earned \
+  --repo REPOSITORY --record REPOSITORY/GATE-RUN.txt --json
+
+achta --workspace /path/to/workspace reachability classify \
+  --repo REPOSITORY --base FULL_SHA \
+  --no-reach 'docs/**=documentation only' --json
+
+achta --workspace /path/to/workspace toolchain check \
+  --repo REPOSITORY --manifest REPOSITORY/toolchain-pins.json \
+  --workflow REPOSITORY/.github/workflows/verify.yml --json
 
 achta --workspace /path/to/workspace slice check \
   --repo REPOSITORY --commits 1 --entries 1 --json
@@ -101,9 +113,19 @@ different measurements. Missing timing remains absent. Green, red,
 incomplete, malformed, unsupported, and stale records remain distinguishable.
 
 `witness init`, `step`, `finalize`, and `check` maintain the same canonical
-record format. `step` records an explicitly supplied result; it does not run a
-command. Make or CI remains the gate runner. Achta intentionally has no
-`witness run` command.
+record format. Optional sibling pins are parsed and singleton-guarded. A changed
+repository may pass only as `proven_no_reach` when every exact changed path is
+covered by an explicit non-catch-all declaration. Optional CI provenance is
+accepted only for a green, complete, clean commit tie on local HEAD ancestry;
+the check performs no fetch or network request. `witness earned` refuses cycles
+containing only witness machinery paths. `step` records an explicitly supplied
+result; it does not run a command. Make or CI remains the gate runner. Achta
+intentionally has no `witness run` command.
+
+`reachability classify` emits the complete path inventory and exclusion reasons
+as its audit record; it does not write a self-invalidating marker.
+`toolchain check` compares bounded JSON version and script-digest declarations
+with top-level CI workflow pins and never accepts an executable command.
 
 `slice check` audits an already landed slice using local Git and wiki facts. It
 does not fetch, stage, commit, or otherwise mutate Git.
@@ -120,9 +142,9 @@ The v0.2.0 release adds decision insertion, native wiki status and
 derivation, explicit witness lifecycle recording, landed-slice checks, and a
 Homebrew cask. Unconditional amendment clearing remains deferred.
 
-The v0.2.5 patch keeps Cask evaluation safe during a token-less `brew update`
-while routing authenticated downloads through GitHub's private release-asset
-API.
+The v0.3.0 development line adds cross-repository witness pins, no-reach-aware
+staleness, CI provenance, earned-cycle refusal, and declarative toolchain parity.
+Published-fix vulnerability policy remains in dedicated analyzers.
 
 Authorized users can install a released build with:
 

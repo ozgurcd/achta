@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.0 — 2026-09-04
+
+- Added parsed sibling witness pins, reachability-aware staleness, CI
+  provenance, and record-only earned-cycle refusal.
+- Added declarative workspace/CI version and script-digest parity.
+- Kept witness command execution and vulnerability-fix policy outside Achta's
+  product boundary.
+
 ## v0.2.5 — 2026-09-04
 
 - Made token-less Homebrew Cask evaluation safe during `brew update` while

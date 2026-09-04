@@ -1,0 +1,1 @@
+{"schema_version":"achta.reachability.v1","decision":"SKIPPABLE","changed":["docs/guide.md"],"excluded":[{"path":"docs/guide.md","pattern":"docs/**","why":"documentation only"}],"reaching":[],"unknown":[]}

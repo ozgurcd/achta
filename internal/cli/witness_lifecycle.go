@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ozgurcd/achta/internal/gitstate"
+	"github.com/ozgurcd/achta/internal/reachability"
 	"github.com/ozgurcd/achta/internal/safefile"
 	"github.com/ozgurcd/achta/internal/witness"
 	"github.com/ozgurcd/achta/internal/workspace"
@@ -31,9 +32,12 @@ type witnessOperationDocument struct {
 }
 
 type witnessCheckDocument struct {
-	SchemaVersion string          `json:"schema_version"`
-	Status        string          `json:"status"`
-	Summary       witness.Summary `json:"summary"`
+	SchemaVersion       string                `json:"schema_version"`
+	Status              string                `json:"status"`
+	Summary             witness.Summary       `json:"summary"`
+	PrimaryReachability *reachability.Result  `json:"primary_reachability,omitempty"`
+	CIProvenance        *ciProvenanceCheck    `json:"ci_provenance,omitempty"`
+	Siblings            []siblingWitnessCheck `json:"siblings,omitempty"`
 }
 
 func runWitnessInit(args []string, stdout, stderr io.Writer, opts globalOptions) int {
@@ -150,6 +154,11 @@ func runWitnessFinalize(args []string, stdout, stderr io.Writer, opts globalOpti
 	repoValue := set.String("repo", "", "repository path")
 	recordValue := set.String("record", "", "gate-run.v1 record path")
 	commitTie := set.Bool("commit-tie", false, "tie a clean CI record to HEAD instead of a tree digest")
+	var siblingValues repeatedValue
+	set.Var(&siblingValues, "sibling", "repeatable NAME=REPOSITORY sibling pin")
+	ciRun := set.String("ci-run", "", "CI run URL")
+	ciAttempt := set.Int("ci-attempt", 0, "CI run attempt")
+	ciSHA := set.String("ci-sha", "", "CI commit SHA")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
 	if err := parseFlags(set, args); err != nil {
 		opts.json = *jsonMode
@@ -183,7 +192,18 @@ func runWitnessFinalize(args []string, stdout, stderr io.Writer, opts globalOpti
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, witnessOperationSchema, invalid("calculate witness tie: %v", err))
 	}
-	data, err := witness.Finalize(snapshot.Data, treeKind, treeValue, time.Now())
+	pins, err := collectSiblingPins(ws, repo, siblingValues)
+	if err != nil {
+		return renderError(stdout, stderr, opts.json, witnessOperationSchema, err)
+	}
+	var provenance *witness.CIProvenance
+	if *ciRun != "" || *ciAttempt != 0 || *ciSHA != "" {
+		if *ciRun == "" || *ciAttempt <= 0 || *ciSHA == "" || !*commitTie {
+			return renderError(stdout, stderr, opts.json, witnessOperationSchema, invalid("--ci-run, --ci-attempt, --ci-sha, and --commit-tie are required together"))
+		}
+		provenance = &witness.CIProvenance{RunURL: *ciRun, Attempt: *ciAttempt, SHA: *ciSHA}
+	}
+	data, err := witness.FinalizeWithMetadata(snapshot.Data, treeKind, treeValue, time.Now(), witness.FinalizeOptions{Siblings: pins, CI: provenance})
 	if err != nil {
 		if errors.Is(err, witness.ErrOperationRefused) {
 			return renderError(stdout, stderr, opts.json, witnessOperationSchema, mismatch("finalize witness: %v", err))
@@ -208,13 +228,19 @@ func runWitnessCheck(args []string, stdout, stderr io.Writer, opts globalOptions
 	set := flagSet("witness check")
 	repoValue := set.String("repo", "", "repository path")
 	recordValue := set.String("record", "", "gate-run.v1 record path")
+	var siblingValues repeatedValue
+	var noReachValues repeatedValue
+	var siblingNoReachValues repeatedValue
+	set.Var(&siblingValues, "sibling", "repeatable NAME=REPOSITORY sibling mapping")
+	set.Var(&noReachValues, "no-reach", "repeatable PATTERN=WHY declaration for the primary repository")
+	set.Var(&siblingNoReachValues, "sibling-no-reach", "repeatable NAME:PATTERN=WHY declaration")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
 	if err := parseFlags(set, args); err != nil {
 		opts.json = *jsonMode
 		return renderError(stdout, stderr, opts.json, witnessCheckSchema, err)
 	}
 	opts.json = *jsonMode
-	ws, repo, recordPath, _, err := resolveWitnessPaths(opts, *repoValue, *recordValue)
+	ws, repo, recordPath, relative, err := resolveWitnessPaths(opts, *repoValue, *recordValue)
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, witnessCheckSchema, err)
 	}
@@ -230,18 +256,21 @@ func runWitnessCheck(args []string, stdout, stderr io.Writer, opts globalOptions
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, witnessCheckSchema, invalid("check witness: %v", err))
 	}
-	status, code := "pass", 0
-	if record.RepoDirty || summary.Status != "green" || summary.Completeness != "complete" || summary.Freshness != "current" {
-		status, code = "fail", 1
+	document, err := evaluateWitnessCheck(ws, repo, relative, record, summary, siblingValues, noReachValues, siblingNoReachValues)
+	if err != nil {
+		return renderError(stdout, stderr, opts.json, witnessCheckSchema, err)
 	}
-	document := witnessCheckDocument{SchemaVersion: witnessCheckSchema, Status: status, Summary: summary}
+	code := 0
+	if document.Status != "pass" {
+		code = 1
+	}
 	if opts.json {
 		if writeJSON(stdout, stderr, document) != 0 {
 			return 2
 		}
 		return code
 	}
-	fmt.Fprintf(stdout, "witness check %s: %s; %s, %s, %s\n", baseName(recordPath), status, summary.Status, summary.Completeness, summary.Freshness)
+	fmt.Fprintf(stdout, "witness check %s: %s; %s, %s, %s\n", baseName(recordPath), document.Status, document.Summary.Status, document.Summary.Completeness, document.Summary.Freshness)
 	return code
 }
 

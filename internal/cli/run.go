@@ -119,6 +119,10 @@ func dispatch(args []string, stdout, stderr io.Writer, releaseVersion string, op
 		return runWiki(rest, stdout, stderr, opts)
 	case "witness":
 		return runWitness(rest, stdout, stderr, opts)
+	case "reachability":
+		return runReachability(rest, stdout, stderr, opts)
+	case "toolchain":
+		return runToolchain(rest, stdout, stderr, opts)
 	case "amendments":
 		return runAmendments(rest, stdout, stderr, opts)
 	case "decision":
@@ -285,7 +289,9 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "amendments reconcile", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "capabilities"},
 		{Name: "decision add", Reads: true, Writes: true, RequiresWorkspace: true},
+		{Name: "reachability classify", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "slice check", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "toolchain check", Reads: true, RequiresWorkspace: true},
 		{Name: "version"},
 		{Name: "wiki pin", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "wiki freshness", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
@@ -297,15 +303,16 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "witness step", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "witness finalize", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "witness check", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "witness earned", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 	}
 	sort.Slice(commands, func(i, j int) bool { return commands[i].Name < commands[j].Name })
 	doc := capabilitiesDocument{
 		SchemaVersion:     capabilitiesSchema,
 		Version:           normalizeVersion(releaseVersion),
-		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1"},
+		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1"},
 		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--workspace"},
 		Commands:          commands,
-		ArtifactSchemas:   []string{"gate-run.v1", "ledger-amendments.v1"},
+		ArtifactSchemas:   []string{"achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
 		RulefloorSchemas:  []string{"rulefloor.capabilities.v1", "rulefloor.ledger-diff.v1"},
 		SupportedOS:       []string{"darwin", "linux"},
 		Limitations: []string{
@@ -394,7 +401,9 @@ Commands:
   version       report release and Go module versions
   capabilities report supported machine interfaces and operations
   decision add  allocate and insert an explicit platform decision
+  reachability classify decide REQUIRED or SKIPPABLE from changed paths and declared no-reach patterns
   slice check   audit a landed slice from Git and wiki evidence
+  toolchain check compare declared workspace versions and script digests with CI pins
   wiki pin      update a reviewed repository verification pin
   wiki freshness compare repository-page pins with local HEADs
   wiki derive   check, print, or update generated repository facts
@@ -405,6 +414,7 @@ Commands:
   witness step  append one explicitly observed target result
   witness finalize close a witness and bind a green result to the tree
   witness check validate a complete green witness against the current tree
+  witness earned refuse a new witness cycle when only witness machinery changed
   amendments declare add an explicit ledger change declaration
   amendments rebase move a manifest to an accepted witness commit
   amendments reconcile compare declarations with Rulefloor's logical diff

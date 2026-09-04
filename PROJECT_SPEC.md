@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.2.0 released baseline; v0.2.5 current authenticated Homebrew patch
+Status: v0.2.5 released baseline; v0.3.0 current witness-integrity development
 
 Project name: Achta
 
@@ -216,8 +216,9 @@ entries. The reconciliation result must report them explicitly.
 
 Gate-witness records are line-oriented, human-readable records with a versioned
 schema marker, repository identity, start and finish times, a declared plan,
-per-target exit codes, optional elapsed measurements, a tree or commit tie, and
-an overall result.
+per-target exit codes, optional elapsed measurements, a tree or commit tie,
+optional parsed sibling-repository pins, optional CI provenance, and an overall
+result.
 
 Achta must parse records strictly enough to distinguish:
 
@@ -594,8 +595,13 @@ commands:
 achta witness init --repo PATH --record PATH --label TEXT --targets A,B
 achta witness step --repo PATH --record PATH --target NAME --exit-code N \
   [--elapsed-ms N] [--evidence-file PATH]
-achta witness finalize --repo PATH --record PATH [--commit-tie]
-achta witness check --repo PATH --record PATH
+achta witness finalize --repo PATH --record PATH [--commit-tie] \
+  [--sibling NAME=REPOSITORY]... \
+  [--ci-run URL --ci-attempt N --ci-sha FULL_SHA]
+achta witness check --repo PATH --record PATH \
+  [--sibling NAME=REPOSITORY]... [--no-reach PATTERN=WHY]... \
+  [--sibling-no-reach NAME:PATTERN=WHY]...
+achta witness earned --repo PATH --record PATH
 ```
 
 `init` requires a repository clean except for the selected witness path and
@@ -605,13 +611,33 @@ exit code, optional measured milliseconds, and bounded evidence lines; it never
 runs that target. `finalize` writes green only when every planned target was
 recorded with exit zero and binds the record to the current tree digest by
 default. `--commit-tie` is allowed only for a completely clean repository.
-`check` requires a complete, green, current record created from a clean
-repository.
+Repeated `--sibling` flags add parsed, name-singleton, clean sibling pins with
+full HEAD and complete tree SHA-256 values. CI provenance requires all four of
+`--commit-tie`, `--ci-run`, `--ci-attempt`, and `--ci-sha`; its SHA must equal
+the commit tie.
+
+`check` requires a complete green record created from a clean repository. A
+record is `current` when its original tie still matches. If a pinned repository
+has advanced along the recorded commit's ancestry, exact changed paths may be
+classified against explicit no-reach declarations. A completely excluded diff
+is `proven_no_reach`, neither stale nor current, and may pass; any unmatched or
+unknown path is `REQUIRED` and the witness remains stale. Catch-all declarations
+such as `*`, `**`, and `**/*` are invalid. The JSON result records every changed
+path and the exact declaration and reason used for each exclusion.
+
+A CI-provenance record passes only when it is green, complete, commit-tied,
+clean at initialization and finalization, tied to the recorded CI SHA, and that
+commit remains on local HEAD ancestry. CI validation performs no fetch or
+network request and states that limitation. `witness earned` compares HEAD with
+the newest accepted witness commit and returns `REFUSE` when the intervening
+committed diff consists only of `GATE-RUN*.txt`, `ledger-amendments.json`, and
+`MINT-STATE.json` record paths.
 
 All lifecycle mutations refuse a stale recorded HEAD, repository changes
 outside the witness path, duplicate or unplanned targets, and concurrent
 record changes. The stable schemas are `achta.witness-operation.v1` and
-`achta.witness-check.v1`.
+`achta.witness-check.v1`. Earned-cycle output uses
+`achta.witness-earned.v1`.
 
 There is intentionally no `witness run`. Make or CI owns command execution and
 passes measured outcomes to `witness step`. Adding an arbitrary executor would
@@ -633,6 +659,36 @@ and a wiki pin equal to HEAD. `--commits` and `--entries` default to one;
 mutation. Every component is returned separately using
 `achta.slice-check.v1`; inability to measure a required fact is exit 2 rather
 than a pass.
+
+### 7.14 Reachability classification
+
+```text
+achta reachability classify --repo PATH --base COMMIT \
+  [--no-reach PATTERN=WHY]... [--json]
+```
+
+The command resolves the base locally, requires it on HEAD ancestry, inventories
+the exact committed path diff, and returns `REQUIRED` when any path lacks a
+declared no-reach match. `SKIPPABLE` is returned only when every changed path is
+excluded. The result is the audit record; the command writes no marker file, so
+committing its output cannot make an internal state marker self-invalidating.
+Exit 0 means `SKIPPABLE`, exit 1 means `REQUIRED`, and exit 2 means the decision
+could not be safely evaluated.
+
+### 7.15 Toolchain parity
+
+```text
+achta toolchain check --repo PATH --manifest PATH --workflow PATH [--json]
+```
+
+The bounded `achta.toolchain-manifest.v1` JSON document declares version pins
+and SHA-256 script pins using explicit CI environment keys. The check compares
+each declaration with the workflow's top-level `env` value and recomputes every
+declared script digest from a confined, non-secret regular file. Empty manifests,
+missing CI pins, duplicate names or environment keys, digest mismatches, and
+paths outside the repository fail closed. The manifest cannot define commands;
+the check executes no external process. Output uses
+`achta.toolchain-parity.v1`.
 
 ## 8. Exit codes
 
@@ -739,6 +795,9 @@ achta/
   internal/wiki/
   internal/decision/
   internal/witness/
+  internal/earned/
+  internal/reachability/
+  internal/toolchain/
   internal/amendments/
   internal/rulefloorclient/
   internal/releasenotes/
@@ -765,6 +824,11 @@ Responsibilities:
 - `internal/wiki`: frontmatter, derived-block, freshness, and page validation.
 - `internal/decision`: decision ID allocation and structural insertion.
 - `internal/witness`: strict record model, parser, validation, and summary.
+- `internal/earned`: pure record-only versus substantive witness-cycle
+  classification.
+- `internal/reachability`: pure fail-closed path/no-reach classification.
+- `internal/toolchain`: bounded manifest, workflow-pin, and script-digest
+  parity checks.
 - `internal/amendments`: manifest model, deterministic writes, and two-way
   reconciliation.
 - `internal/rulefloorclient`: bounded direct execution and strict parsing of
@@ -796,9 +860,10 @@ WORKSPACE/
   REPOSITORY-B/
 ```
 
-If configuration later becomes necessary, use one bounded, versioned JSON file
-at the workspace root. Do not introduce YAML solely for configuration, and do
-not allow configuration to define arbitrary executable commands.
+If configuration later becomes necessary, use a bounded, versioned JSON file.
+The repo-local `achta.toolchain-manifest.v1` is the first such format. Do not
+introduce YAML solely for configuration, and do not allow configuration to
+define arbitrary executable commands.
 
 ## 13. Compatibility and migration
 
@@ -819,14 +884,16 @@ not allow configuration to define arbitrary executable commands.
 | Wiki freshness, derivation, and unpushed checks | Implemented in `achta wiki`; keep old scripts during measured shadow parity |
 | New wiki pin editor | Implement directly in Achta |
 | New decision insertion helper | Implement directly in Achta |
-| Gate-witness parsing, summary, and writer | Implemented as summarize plus explicit init/step/finalize recording; external gates still execute commands |
-| End-to-end witness freshness | Implemented by `achta witness check` |
+| Gate-witness parsing, summary, and writer | Implemented as summarize plus explicit init/step/finalize recording, parsed sibling pins, and CI provenance; external gates still execute commands |
+| End-to-end witness freshness | Implemented by `achta witness check`, including explicit no-reach classification |
+| Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition, count-claim, ledger-claim, and model-mirror checks | Candidates for explicit `achta wiki check` components |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
 | Ledger census versus source graph | Keep as a composition gate; Rulefloor and Gograph retain ownership |
 | Rulefloor installation-route gate | Keep outside; it audits workflow/distribution policy |
+| Vulnerability fix-availability policy | Keep in a dedicated vulnerability analyzer; Achta does not own advisory or fix semantics |
 | Route, link, inert-parameter, clock, and wire analyzers | Keep dedicated |
 | Prompt inclusion, prompt locks, commit hook, and source-navigation hook | Keep in the agent harness initially |
 
@@ -886,6 +953,12 @@ Schemas added for v0.2.0:
 - `achta.witness-check.v1`
 - `achta.slice-check.v1`
 
+Schemas added for v0.3.0:
+
+- `achta.reachability.v1`
+- `achta.toolchain-parity.v1`
+- `achta.witness-earned.v1`
+
 Do not publish a schema until the corresponding implementation and conformance
 tests are complete.
 
@@ -925,8 +998,12 @@ Add focused tests for:
 - opt-in timing as the final human line and as `elapsed_ms` in the same JSON
   document, including failure output;
 - version disagreement and unavailable Go build information;
-- capabilities independence from the current directory and workspace files.
-- exact golden encoding for every advertised stable machine interface.
+- capabilities independence from the current directory and workspace files;
+- exact golden encoding for every advertised stable machine interface;
+- sibling-pin singleton parsing, dirty/current/stale/no-reach transitions, and
+  CI provenance ancestry checks;
+- fail-closed reachability, catch-all rejection, exact skip evidence, record-only
+  witness-cycle refusal, and toolchain pin/digest parity.
 
 ### 15.2 Integration tests
 
@@ -1172,6 +1249,7 @@ The following are not part of the initial implementation:
 - Automatic commits, tags, pushes, releases, or pull requests.
 - Generic execution of repository test commands.
 - Replacement of product-specific analyzers.
+- Vulnerability advisory and published-fix evaluation.
 - Rulefloor ledger parsing inside Achta.
 - Gograph source analysis inside Achta.
 - Unconditional amendment clearing.
@@ -1220,7 +1298,27 @@ The v0.2.0 development line records these choices explicitly:
    tap access before release creation, refuses a version downgrade, and
    authorized installers must retain access to the private release assets.
 
-## 24. Success measure
+## 24. v0.3.0 decisions
+
+The v0.3.0 development line records these choices explicitly:
+
+1. Achta owns one parsed `xrepo:` grammar and rejects duplicate sibling names;
+   the three byte-pinned shell implementations remain compatibility callers
+   until a later measured shadow-parity slice explicitly retires them.
+2. Witness staleness has three outcomes: `current`, `proven_no_reach`, and
+   stale. No-reach is an explicit path declaration, rejects catch-all patterns,
+   records exact excluded paths, and fails closed on every unmatched path.
+3. CI provenance is locally validated evidence, not a remote CI query. Checks
+   require green, complete, clean, commit-tied records on local HEAD ancestry
+   and never fetch.
+4. Earned-cycle checking is a separate read-only gate. Achta still has no
+   `witness run` and never executes the recorded targets.
+5. Toolchain parity uses a bounded declarative JSON manifest and fixed version
+   and digest comparisons; manifests cannot contain executable commands.
+6. Published-fix vulnerability policy remains outside Achta because advisory,
+   ecosystem, and fix-availability semantics belong to a dedicated analyzer.
+
+## 25. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

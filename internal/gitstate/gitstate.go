@@ -309,12 +309,23 @@ func NewestWitness(repo, witnessPath string) (string, error) {
 }
 
 func TreeDigest(repo, exclude string) (string, error) {
-	cleanExclude := filepath.Clean(exclude)
-	if filepath.IsAbs(cleanExclude) || cleanExclude == ".." || strings.HasPrefix(cleanExclude, ".."+string(filepath.Separator)) {
-		return "", errors.New("excluded record must be repository-relative")
+	return treeDigest(repo, []string{exclude})
+}
+
+func TreeDigestAll(repo string) (string, error) {
+	return treeDigest(repo, nil)
+}
+
+func treeDigest(repo string, excludes []string) (string, error) {
+	args := []string{"ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."}
+	for _, exclude := range excludes {
+		cleanExclude := filepath.Clean(exclude)
+		if cleanExclude == "." || filepath.IsAbs(cleanExclude) || cleanExclude == ".." || strings.HasPrefix(cleanExclude, ".."+string(filepath.Separator)) {
+			return "", errors.New("excluded record must be repository-relative")
+		}
+		args = append(args, ":(exclude)"+filepath.ToSlash(cleanExclude))
 	}
-	pathspec := ":(exclude)" + filepath.ToSlash(cleanExclude)
-	out, err := run(repo, nil, "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", ".", pathspec)
+	out, err := run(repo, nil, args...)
 	if err != nil {
 		return "", err
 	}

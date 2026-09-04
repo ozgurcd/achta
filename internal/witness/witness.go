@@ -3,6 +3,7 @@ package witness
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -25,7 +26,22 @@ var (
 	elapsedPattern = regexp.MustCompile(`^elapsed: ([A-Za-z0-9][A-Za-z0-9._-]*) ([0-9]+)(ms|s)$`)
 	shaPattern     = regexp.MustCompile(`^[0-9a-f]{40}$`)
 	digestPattern  = regexp.MustCompile(`^[0-9a-f]{64}$`)
+	xrepoPattern   = regexp.MustCompile(`^xrepo: ([A-Za-z0-9][A-Za-z0-9._-]*) head=([0-9a-f]{7,40})( \(dirty\))? tree=sha256:([0-9a-f]{64})$`)
+	ciRunPattern   = regexp.MustCompile(`^ci-run: (\S+) attempt=([1-9][0-9]*) sha=([0-9a-f]{40})$`)
 )
+
+type SiblingPin struct {
+	Name      string `json:"name"`
+	Head      string `json:"head"`
+	Dirty     bool   `json:"dirty"`
+	TreeValue string `json:"tree_sha256"`
+}
+
+type CIProvenance struct {
+	RunURL  string `json:"run_url"`
+	Attempt int    `json:"attempt"`
+	SHA     string `json:"sha"`
+}
 
 type Record struct {
 	RepoHead  string
@@ -37,6 +53,9 @@ type Record struct {
 	ElapsedMS map[string]int64
 	TreeKind  string
 	TreeValue string
+	TreeDirty bool
+	Siblings  []SiblingPin
+	CI        *CIProvenance
 	Result    string
 }
 
@@ -69,9 +88,10 @@ func Parse(data []byte) (Record, error) {
 	if len(data) == 0 {
 		return Record{}, errors.New("empty witness record")
 	}
-	record := Record{Targets: make(map[string]int), ElapsedMS: make(map[string]int64)}
+	record := Record{Targets: make(map[string]int), ElapsedMS: make(map[string]int64), Siblings: []SiblingPin{}}
 	seen := make(map[string]bool)
 	planSet := make(map[string]bool)
+	siblingSet := make(map[string]bool)
 	lines := strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
 	for lineNumber, line := range lines {
 		if line == "" && lineNumber == len(lines)-1 {
@@ -168,10 +188,33 @@ func Parse(data []byte) (Record, error) {
 			if err := singleton(seen, "tree"); err != nil {
 				return Record{}, err
 			}
-			record.TreeKind, record.TreeValue = "commit", strings.TrimSuffix(strings.TrimPrefix(line, "tree: commit="), " (dirty-at-finalize)")
+			value := strings.TrimPrefix(line, "tree: commit=")
+			record.TreeDirty = strings.HasSuffix(value, " (dirty-at-finalize)")
+			record.TreeKind, record.TreeValue = "commit", strings.TrimSuffix(value, " (dirty-at-finalize)")
 			if !shaPattern.MatchString(record.TreeValue) {
 				return Record{}, errors.New("invalid tree commit")
 			}
+		case xrepoPattern.MatchString(line):
+			match := xrepoPattern.FindStringSubmatch(line)
+			if siblingSet[match[1]] {
+				return Record{}, fmt.Errorf("duplicate sibling pin %q", match[1])
+			}
+			siblingSet[match[1]] = true
+			record.Siblings = append(record.Siblings, SiblingPin{Name: match[1], Head: match[2], Dirty: match[3] != "", TreeValue: match[4]})
+		case ciRunPattern.MatchString(line):
+			if err := singleton(seen, "ci-run"); err != nil {
+				return Record{}, err
+			}
+			match := ciRunPattern.FindStringSubmatch(line)
+			runURL, err := url.ParseRequestURI(match[1])
+			if err != nil || (runURL.Scheme != "https" && runURL.Scheme != "http") || runURL.Host == "" || runURL.User != nil || runURL.Fragment != "" {
+				return Record{}, errors.New("invalid CI run URL")
+			}
+			attempt, err := strconv.Atoi(match[2])
+			if err != nil {
+				return Record{}, errors.New("invalid CI run attempt")
+			}
+			record.CI = &CIProvenance{RunURL: match[1], Attempt: attempt, SHA: match[3]}
 		case strings.HasPrefix(line, "result: "):
 			if err := singleton(seen, "result"); err != nil {
 				return Record{}, err
@@ -322,7 +365,7 @@ func singleton(seen map[string]bool, name string) error {
 }
 
 func allowedInformational(line string) bool {
-	for _, prefix := range []string{"gate: ", "note: ", "cites: ", "evidence: ", "tool: ", "tie-note: ", "xrepo: "} {
+	for _, prefix := range []string{"gate: ", "note: ", "cites: ", "evidence: ", "tool: ", "tie-note: "} {
 		if strings.HasPrefix(line, prefix) {
 			return true
 		}

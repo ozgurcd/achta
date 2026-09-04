@@ -5,7 +5,10 @@ import (
 	"testing"
 
 	"github.com/ozgurcd/achta/internal/amendments"
+	"github.com/ozgurcd/achta/internal/earned"
+	"github.com/ozgurcd/achta/internal/reachability"
 	"github.com/ozgurcd/achta/internal/slicecheck"
+	"github.com/ozgurcd/achta/internal/toolchain"
 	achtawiki "github.com/ozgurcd/achta/internal/wiki"
 	"github.com/ozgurcd/achta/internal/witness"
 )
@@ -165,6 +168,35 @@ func assertStableMachineContracts(t *testing.T) {
 					RecordedTargetElapsedMS: &targetMS,
 					SlowTargets:             []witness.SlowTarget{{Name: "test", ElapsedMS: 12}},
 				},
+			},
+		},
+		{
+			name: "reachability.json",
+			value: reachability.Result{
+				SchemaVersion: reachability.Schema,
+				Decision:      "SKIPPABLE",
+				Changed:       []string{"docs/guide.md"},
+				Excluded:      []reachability.ExcludedPath{{Path: "docs/guide.md", Pattern: "docs/**", Why: "documentation only"}},
+				Reaching:      []string{},
+				Unknown:       []string{},
+			},
+		},
+		{
+			name: "witness-earned.json",
+			value: earned.Result{
+				SchemaVersion: earned.Schema,
+				Decision:      "REFUSE",
+				Changed:       []string{"GATE-RUN.txt"},
+				RecordOnly:    []string{"GATE-RUN.txt"},
+				Substantive:   []string{},
+			},
+		},
+		{
+			name: "toolchain-parity.json",
+			value: toolchain.Result{
+				SchemaVersion: toolchain.ResultSchema,
+				Status:        "pass",
+				Pins:          []toolchain.PinCheck{{Name: "rulefloor", Kind: "version", Env: "RULEFLOOR_VERSION", Workspace: "v0.9.0", CI: "v0.9.0", Status: "pass"}},
 			},
 		},
 		{

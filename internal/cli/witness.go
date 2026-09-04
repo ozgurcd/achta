@@ -23,6 +23,8 @@ func runWitness(args []string, stdout, stderr io.Writer, opts globalOptions) int
 		return runWitnessFinalize(args[1:], stdout, stderr, opts)
 	case "check":
 		return runWitnessCheck(args[1:], stdout, stderr, opts)
+	case "earned":
+		return runWitnessEarned(args[1:], stdout, stderr, opts)
 	default:
 		return renderError(stdout, stderr, opts.json, "achta.witness-operation.v1", invalid("unknown witness subcommand %q", args[0]))
 	}

@@ -2,6 +2,40 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.3.0 — 2026-09-04
+
+### Added
+
+- Parsed, name-singleton sibling repository pins in `gate-run.v1`, with clean
+  HEAD and tree-digest capture during finalization and explicit repository
+  mappings during checks.
+- Reachability-aware witness staleness and `reachability classify`. A fully
+  declared no-reach diff is reported as `proven_no_reach`; unmatched paths fail
+  closed as `REQUIRED`, catch-all declarations are rejected, and machine output
+  records every changed and excluded path.
+- CI provenance fields for run URL, attempt, and SHA. Witness checks require a
+  green, complete, clean commit tie on local HEAD ancestry and perform no fetch
+  or network request.
+- `witness earned`, which refuses a new witness cycle when the committed delta
+  since the newest accepted witness contains only witness machinery paths.
+- Declarative toolchain parity for workspace version pins, CI environment pins,
+  and confined script SHA-256 values. Manifests cannot define commands.
+- Exact machine fixtures and unit/integration coverage for all new interfaces.
+
+### Changed
+
+- Source version advanced to v0.3.0.
+- Capability output now authoritatively lists `witness summarize`, the new
+  reachability, earned-cycle, and toolchain commands, and their schemas.
+- Existing shell witness implementations remain in compatibility shadow mode;
+  retirement requires a later explicit parity-backed slice.
+
+### Deferred
+
+- Published-fix vulnerability policy remains in dedicated vulnerability
+  analyzers because it is product- and ecosystem-specific rather than workspace
+  bookkeeping.
+
 ## v0.2.5 — 2026-09-04
 
 ### Fixed

@@ -1,0 +1,1 @@
+{"schema_version":"achta.toolchain-parity.v1","status":"pass","pins":[{"name":"rulefloor","kind":"version","env":"RULEFLOOR_VERSION","workspace":"v0.9.0","ci":"v0.9.0","status":"pass"}]}
