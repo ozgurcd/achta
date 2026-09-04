@@ -1,10 +1,19 @@
 # Changelog
 
+## v0.2.2 — 2026-09-04
+
+- Installed pinned Gograph in release CI so exact Rulefloor reach can be
+  evaluated before publication.
+- Carried the authenticated private-asset and delimiter-ordering fixes from the
+  unpublished v0.2.1 attempt into the corrective release.
+
 ## v0.2.1 — 2026-09-04
 
 - Fixed authenticated Homebrew downloads from Achta's private GitHub release
   by publishing release-asset API URLs and validating their exact mapping.
 - Rejected out-of-order and orphan derived-block end markers found by fuzzing.
+- The release workflow stopped before publication because its tool bootstrap
+  did not yet install Gograph.
 
 ## v0.2.0 — 2026-09-04
 

@@ -9,9 +9,11 @@ import (
 	"testing"
 )
 
+const testVersion = "v0.2.2"
+
 func TestVersionJSONIsSingleDocument(t *testing.T) {
 	var stdout, stderr bytes.Buffer
-	if code := Run([]string{"version", "--json"}, &stdout, &stderr, "v0.2.1"); code != 0 {
+	if code := Run([]string{"version", "--json"}, &stdout, &stderr, testVersion); code != 0 {
 		t.Fatalf("code = %d, stderr = %q", code, stderr.String())
 	}
 	output := stdout.String()
@@ -23,7 +25,7 @@ func TestVersionJSONIsSingleDocument(t *testing.T) {
 	if decoder.More() {
 		t.Fatal("more than one JSON document")
 	}
-	if doc.SchemaVersion != versionSchema || doc.Version != "v0.2.1" {
+	if doc.SchemaVersion != versionSchema || doc.Version != testVersion {
 		t.Fatalf("unexpected document: %+v", doc)
 	}
 	if stderr.Len() != 0 {
@@ -48,7 +50,7 @@ func TestCapabilitiesNeedNoWorkspace(t *testing.T) {
 	t.Cleanup(func() { _ = os.Chdir(original) })
 
 	var stdout, stderr bytes.Buffer
-	if code := Run([]string{"--workspace", "/does/not/exist", "capabilities", "--json"}, &stdout, &stderr, "v0.2.1"); code != 0 {
+	if code := Run([]string{"--workspace", "/does/not/exist", "capabilities", "--json"}, &stdout, &stderr, testVersion); code != 0 {
 		t.Fatalf("code = %d, stderr = %q", code, stderr.String())
 	}
 	if !strings.Contains(stdout.String(), capabilitiesSchema) {
@@ -122,10 +124,10 @@ func TestUnknownCommandJSONUsesExitTwo(t *testing.T) {
 
 func TestTimingAppendsHumanElapsedLine(t *testing.T) {
 	var stdout, stderr bytes.Buffer
-	if code := Run([]string{"--timing", "version"}, &stdout, &stderr, "v0.2.1"); code != 0 {
+	if code := Run([]string{"--timing", "version"}, &stdout, &stderr, testVersion); code != 0 {
 		t.Fatalf("code = %d, stderr = %q", code, stderr.String())
 	}
-	if !strings.Contains(stdout.String(), "achta v0.2.1") || !strings.HasSuffix(stdout.String(), "ms\n") {
+	if !strings.Contains(stdout.String(), "achta "+testVersion) || !strings.HasSuffix(stdout.String(), "ms\n") {
 		t.Fatalf("stdout = %q", stdout.String())
 	}
 	lines := strings.Split(strings.TrimSuffix(stdout.String(), "\n"), "\n")
@@ -140,7 +142,7 @@ func TestTimingAppendsHumanElapsedLine(t *testing.T) {
 // RULE: TIMING-JSON-1
 func TestTimingAddsElapsedToSingleJSONDocument(t *testing.T) {
 	var stdout, stderr bytes.Buffer
-	if code := Run([]string{"--quiet", "--timing", "version", "--json"}, &stdout, &stderr, "v0.2.1"); code != 0 {
+	if code := Run([]string{"--quiet", "--timing", "version", "--json"}, &stdout, &stderr, testVersion); code != 0 {
 		t.Fatalf("code = %d, stderr = %q", code, stderr.String())
 	}
 	decoder := json.NewDecoder(&stdout)
@@ -162,7 +164,7 @@ func TestTimingAddsElapsedToSingleJSONDocument(t *testing.T) {
 
 func TestQuietSuppressesOnlySuccessfulHumanDetail(t *testing.T) {
 	var stdout, stderr bytes.Buffer
-	if code := Run([]string{"--quiet", "version"}, &stdout, &stderr, "v0.2.1"); code != 0 {
+	if code := Run([]string{"--quiet", "version"}, &stdout, &stderr, testVersion); code != 0 {
 		t.Fatalf("quiet success code=%d stderr=%q", code, stderr.String())
 	}
 	if stdout.Len() != 0 || stderr.Len() != 0 {
@@ -171,7 +173,7 @@ func TestQuietSuppressesOnlySuccessfulHumanDetail(t *testing.T) {
 
 	stdout.Reset()
 	stderr.Reset()
-	if code := Run([]string{"--quiet", "--timing", "version"}, &stdout, &stderr, "v0.2.1"); code != 0 {
+	if code := Run([]string{"--quiet", "--timing", "version"}, &stdout, &stderr, testVersion); code != 0 {
 		t.Fatalf("quiet timed success code=%d stderr=%q", code, stderr.String())
 	}
 	if !strings.HasPrefix(stdout.String(), "elapsed: ") || !strings.HasSuffix(stdout.String(), "ms\n") || stderr.Len() != 0 {
@@ -180,7 +182,7 @@ func TestQuietSuppressesOnlySuccessfulHumanDetail(t *testing.T) {
 
 	stdout.Reset()
 	stderr.Reset()
-	if code := Run([]string{"--quiet", "unknown"}, &stdout, &stderr, "v0.2.1"); code != 2 {
+	if code := Run([]string{"--quiet", "unknown"}, &stdout, &stderr, testVersion); code != 2 {
 		t.Fatalf("quiet failure code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
 	if stderr.Len() == 0 {

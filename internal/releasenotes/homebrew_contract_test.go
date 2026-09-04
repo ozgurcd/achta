@@ -80,3 +80,17 @@ func TestReleaseUsesCurrentHomebrewCaskPublishing(t *testing.T) {
 		t.Fatal("tap credential verification, private GitHub release, and Homebrew publication are out of order")
 	}
 }
+
+func TestInstallToolsIncludesGograph(t *testing.T) {
+	repositoryRoot, err := filepath.Abs("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join(repositoryRoot, "Makefile"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "go install github.com/ozgurcd/gograph@v1.6.10") {
+		t.Fatal("install-tools does not install the pinned Gograph required by exact Rulefloor reach")
+	}
+}

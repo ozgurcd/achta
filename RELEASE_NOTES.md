@@ -2,7 +2,25 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.2.2 — 2026-09-04
+
+### Fixed
+
+- The release runner now installs pinned Gograph v1.6.10 before Rulefloor
+  evaluates exact structural reach, allowing the authenticated private-asset
+  invariant to run in CI.
+- The authenticated Homebrew asset-API rewrite and derived-marker ordering fix
+  first tagged in v0.2.1 are carried into the publishable patch release.
+
+### Changed
+
+- Source version advanced to v0.2.2.
+
 ## v0.2.1 — 2026-09-04
+
+The v0.2.1 tag stopped at its verification gate before any GitHub release or
+Homebrew update was published because Gograph was absent from the CI tool
+bootstrap.
 
 ### Fixed
 
