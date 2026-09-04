@@ -1,9 +1,18 @@
 # Changelog
 
+## v0.2.4 — 2026-09-04
+
+- Built a current precise Gograph index inside the canonical verification gate
+  before Rulefloor exact-reach evaluation.
+- Carried the unpublished authenticated private-asset and delimiter-ordering
+  fixes forward.
+
 ## v0.2.3 — 2026-09-04
 
 - Corrected the pinned Gograph installer to its `cmd/gograph` executable
   package and carried the unpublished corrective changes forward.
+- The release workflow stopped before publication because its clean checkout
+  had no precise graph for Rulefloor exact-reach evaluation.
 
 ## v0.2.2 — 2026-09-04
 

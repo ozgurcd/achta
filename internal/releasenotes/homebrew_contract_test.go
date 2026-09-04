@@ -81,7 +81,7 @@ func TestReleaseUsesCurrentHomebrewCaskPublishing(t *testing.T) {
 	}
 }
 
-func TestInstallToolsIncludesGograph(t *testing.T) {
+func TestVerificationInstallsAndBuildsGograph(t *testing.T) {
 	repositoryRoot, err := filepath.Abs("../..")
 	if err != nil {
 		t.Fatal(err)
@@ -90,7 +90,13 @@ func TestInstallToolsIncludesGograph(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(data), "go install github.com/ozgurcd/gograph/cmd/gograph@v1.6.10") {
+	contents := string(data)
+	if !strings.Contains(contents, "go install github.com/ozgurcd/gograph/cmd/gograph@v1.6.10") {
 		t.Fatal("install-tools does not install the pinned Gograph required by exact Rulefloor reach")
+	}
+	buildGraph := strings.Index(contents, "gograph build . --precise")
+	checkFloor := strings.Index(contents, "rulefloor check --repo . --run-profile unit --timings")
+	if buildGraph < 0 || checkFloor < 0 || buildGraph >= checkFloor {
+		t.Fatal("verify does not build a precise graph before Rulefloor exact-reach evaluation")
 	}
 }

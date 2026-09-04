@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.2.0 released baseline; v0.2.3 current authenticated Homebrew patch
+Status: v0.2.0 released baseline; v0.2.4 current authenticated Homebrew patch
 
 Project name: Achta
 
@@ -1000,6 +1000,7 @@ go vet ./...
 staticcheck ./...
 govulncheck ./...
 go mod tidy -diff
+gograph build . --precise
 rulefloor check --repo . --run-profile unit --timings
 ```
 

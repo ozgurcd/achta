@@ -2,7 +2,24 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.2.4 — 2026-09-04
+
+### Fixed
+
+- The canonical verification gate now builds a current precise Gograph index
+  before Rulefloor evaluates exact structural reach in a clean checkout.
+- The authenticated Homebrew asset-API rewrite and derived-marker ordering fix
+  are carried forward from the fail-closed, unpublished patch tags.
+
+### Changed
+
+- Source version advanced to v0.2.4.
+
 ## v0.2.3 — 2026-09-04
+
+The v0.2.3 tag installed Gograph successfully but stopped at verification
+before any GitHub release or Homebrew update was published because the clean
+checkout had no precise graph yet.
 
 ### Fixed
 

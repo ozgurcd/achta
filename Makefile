@@ -31,6 +31,7 @@ verify: fmt-check
 	STATICCHECK_CACHE=$(CURDIR)/.cache/staticcheck staticcheck ./...
 	govulncheck ./...
 	go mod tidy -diff
+	gograph build . --precise
 	rulefloor check --repo . --run-profile unit --timings
 
 rulefloor-static:
