@@ -55,17 +55,19 @@ func TestSpliceDerivedPreservesCRLFAndOutsideBytes(t *testing.T) {
 
 func TestDerivedRepositoryRefusesAmbiguousMarkers(t *testing.T) {
 	for name, source := range map[string]string{
-		"duplicate start":  "<!-- BEGIN DERIVED: sample -->\n<!-- BEGIN DERIVED: sample -->\n<!-- END DERIVED -->\n",
-		"duplicate end":    "<!-- BEGIN DERIVED: sample -->\n<!-- END DERIVED -->\n<!-- END DERIVED -->\n",
-		"missing end":      "<!-- BEGIN DERIVED: sample -->\n",
-		"end before start": "<!-- END DERIVED -->\n<!-- BEGIN DERIVED: sample -->\n",
+		"duplicate start":   "<!-- BEGIN DERIVED: sample -->\n<!-- BEGIN DERIVED: sample -->\n<!-- END DERIVED -->\n",
+		"duplicate end":     "<!-- BEGIN DERIVED: sample -->\n<!-- END DERIVED -->\n<!-- END DERIVED -->\n",
+		"missing end":       "<!-- BEGIN DERIVED: sample -->\n",
+		"end before start":  "<!-- END DERIVED -->\n<!-- BEGIN DERIVED: sample -->\n",
+		"end without start": "<!-- END DERIVED -->\n",
 	} {
 		t.Run(name, func(t *testing.T) {
 			repository, marked, err := derivedRepository([]byte(source))
-			if err == nil && marked {
-				if _, spliceErr := spliceDerived([]byte(source), repository, []byte("generated\n")); spliceErr == nil {
-					t.Fatal("ambiguous derived markers were accepted")
-				}
+			if err == nil {
+				t.Fatal("ambiguous derived markers were accepted")
+			}
+			if repository != "" || marked {
+				t.Fatalf("rejected markers returned repository=%q marked=%t", repository, marked)
 			}
 		})
 	}

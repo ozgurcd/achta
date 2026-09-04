@@ -43,8 +43,8 @@ release:
 
 homebrew_casks:
   - name: achta
-    # The release workflow publishes this generated cask only after the private
-    # GitHub release succeeds, then verifies the exact tap copy.
+    # The release workflow rewrites these generated browser URLs to the private
+    # release asset API, then publishes and verifies the exact tap copy.
     skip_upload: true
     repository:
       owner: ozgurcd

@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.1.0 released baseline; v0.2.0 active development
+Status: v0.2.0 released baseline; v0.2.1 current authenticated Homebrew patch
 
 Project name: Achta
 
@@ -1043,6 +1043,9 @@ use by authorized workspace users:
 - publish an `achta` Homebrew cask to `ozgurcd/homebrew-tap` after the private
   GitHub release succeeds; installation still requires authorized access to
   the private release assets through `HOMEBREW_GITHUB_API_TOKEN`;
+- rewrite every generated browser download URL to the unique numeric GitHub
+  release-asset API URL assigned after publication, retain the binary Accept
+  and bearer-token headers, and refuse missing, duplicate, or foreign URLs;
 - use GoReleaser's current `homebrew_casks` support rather than its deprecated
   `brews` configuration, verify tap push access before creating the release,
   refuse tap downgrades, and verify the published cask.
@@ -1209,7 +1212,8 @@ The v0.2.0 development line records these choices explicitly:
 6. Release bodies come only from the exactly matching version section in
    `RELEASE_NOTES.md`; `CHANGELOG.md` remains the concise history.
 7. Homebrew uses the shared `ozgurcd/homebrew-tap` cask path. GoReleaser
-   generates the cask after the private GitHub release; the workflow verifies
+   generates the cask after the private GitHub release; the workflow replaces
+   browser download URLs with authenticated release-asset API URLs, verifies
    tap access before release creation, refuses a version downgrade, and
    authorized installers must retain access to the private release assets.
 

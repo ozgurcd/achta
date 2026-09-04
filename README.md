@@ -116,14 +116,17 @@ requires its advertised stable interfaces, and checks measured and declared
 changes in both directions. Header changes are reported separately, and output
 identifies the absolute Rulefloor executable selected before invocation.
 
-The v0.2.0 development line adds decision insertion, native wiki status and
+The v0.2.0 release adds decision insertion, native wiki status and
 derivation, explicit witness lifecycle recording, landed-slice checks, and a
 Homebrew cask. Unconditional amendment clearing remains deferred.
+
+The v0.2.1 patch routes authenticated Homebrew downloads through GitHub's
+private release-asset API.
 
 Authorized users can install a released build with:
 
 ```sh
-brew install --cask ozgurcd/tap/achta
+HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install --cask ozgurcd/tap/achta
 ```
 
 Achta releases remain private. Set `HOMEBREW_GITHUB_API_TOKEN` to a GitHub token

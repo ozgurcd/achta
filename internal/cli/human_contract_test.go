@@ -18,7 +18,7 @@ func TestHumanContracts(t *testing.T) {
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			var stdout, stderr bytes.Buffer
-			if code := Run(fixture.args, &stdout, &stderr, "v0.2.0"); code != 0 {
+			if code := Run(fixture.args, &stdout, &stderr, "v0.2.1"); code != 0 {
 				t.Fatalf("code=%d stderr=%q", code, stderr.String())
 			}
 			want, err := os.ReadFile("../../testdata/human/" + fixture.name)

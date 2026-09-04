@@ -2,6 +2,23 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.2.1 — 2026-09-04
+
+### Fixed
+
+- Homebrew downloads for the private Achta repository now use GitHub's
+  authenticated release-asset API URLs instead of browser download URLs that
+  return `404` for private assets.
+- Release publication now fails closed unless all four generated archive URLs
+  map exactly once to numeric GitHub asset API endpoints, retain the required
+  authentication headers, and match the published checksums.
+- Derived-block validation now rejects end-before-start and orphan end markers,
+  closing a reproducible delimiter fuzz failure before publication.
+
+### Changed
+
+- Source version advanced to v0.2.1.
+
 ## v0.2.0 — 2026-09-04
 
 ### Added

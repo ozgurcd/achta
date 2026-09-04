@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1 — 2026-09-04
+
+- Fixed authenticated Homebrew downloads from Achta's private GitHub release
+  by publishing release-asset API URLs and validating their exact mapping.
+- Rejected out-of-order and orphan derived-block end markers found by fuzzing.
+
 ## v0.2.0 — 2026-09-04
 
 - Added deterministic decision insertion and native wiki status/derivation

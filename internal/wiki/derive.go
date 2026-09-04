@@ -182,22 +182,33 @@ func derivedRepository(data []byte) (string, bool, error) {
 	normalized := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
 	found := ""
 	endCount := 0
-	for _, line := range strings.Split(string(normalized), "\n") {
+	startIndex, endIndex := -1, -1
+	for index, line := range strings.Split(string(normalized), "\n") {
 		if match := beginDerivedPattern.FindStringSubmatch(line); match != nil {
 			if found != "" {
 				return "", false, errors.New("multiple derived block starts")
 			}
 			found = match[1]
+			startIndex = index
 		}
 		if line == "<!-- END DERIVED -->" {
 			endCount++
+			if endIndex < 0 {
+				endIndex = index
+			}
 		}
 	}
 	if found == "" {
+		if endCount != 0 {
+			return "", false, errors.New("derived block end has no start")
+		}
 		return "", false, nil
 	}
 	if endCount != 1 {
 		return "", false, errors.New("derived block must have exactly one end marker")
+	}
+	if endIndex <= startIndex {
+		return "", false, errors.New("derived block end must follow its start")
 	}
 	return found, true, nil
 }
