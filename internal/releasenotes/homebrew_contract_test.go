@@ -81,6 +81,22 @@ func TestReleaseUsesCurrentHomebrewCaskPublishing(t *testing.T) {
 	}
 }
 
+// RULE: HOMEBREW-NO-TOKEN-EVAL-1
+func TestHomebrewCaskTokenLookupIsNonThrowing(t *testing.T) {
+	repositoryRoot, err := filepath.Abs("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join(repositoryRoot, ".goreleaser.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const required = `Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\", \"\")}`
+	if !strings.Contains(string(data), required) {
+		t.Fatalf(".goreleaser.yaml must use a non-throwing installer-token lookup %q", required)
+	}
+}
+
 func TestVerificationInstallsAndBuildsGograph(t *testing.T) {
 	repositoryRoot, err := filepath.Abs("../..")
 	if err != nil {

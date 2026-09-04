@@ -27,7 +27,7 @@ const (
 func Rewrite(cask, releaseJSON []byte) ([]byte, error) {
 	for _, header := range []string{
 		"Accept: application/octet-stream",
-		"Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\")}",
+		"Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\", \"\")}",
 	} {
 		if count := bytes.Count(cask, []byte(header)); count != len(archiveNames) {
 			return nil, fmt.Errorf("generated cask contains required header %q %d times, want %d", header, count, len(archiveNames))

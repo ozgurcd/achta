@@ -2,6 +2,18 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.2.5 — 2026-09-04
+
+### Fixed
+
+- Homebrew can evaluate the Achta Cask during `brew update` when
+  `HOMEBREW_GITHUB_API_TOKEN` is absent. Private release downloads remain
+  authenticated when the token is supplied to the install or upgrade command.
+
+### Changed
+
+- Source version advanced to v0.2.5.
+
 ## v0.2.4 — 2026-09-04
 
 ### Fixed

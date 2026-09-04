@@ -52,7 +52,7 @@ func testCask() string {
 	var builder strings.Builder
 	for _, name := range archiveNames {
 		builder.WriteString("Accept: application/octet-stream\n")
-		builder.WriteString("Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\")}\n")
+		builder.WriteString("Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\", \"\")}\n")
 		fmt.Fprintf(&builder, "url %q\n", browserURLPrefix+name)
 	}
 	return builder.String()

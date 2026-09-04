@@ -57,7 +57,7 @@ homebrew_casks:
     url:
       headers:
         - "Accept: application/octet-stream"
-        - "Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\")}"
+        - "Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\", \"\")}"
     hooks:
       post:
         install: |

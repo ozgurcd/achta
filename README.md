@@ -120,8 +120,9 @@ The v0.2.0 release adds decision insertion, native wiki status and
 derivation, explicit witness lifecycle recording, landed-slice checks, and a
 Homebrew cask. Unconditional amendment clearing remains deferred.
 
-The v0.2.4 patch routes authenticated Homebrew downloads through GitHub's
-private release-asset API.
+The v0.2.5 patch keeps Cask evaluation safe during a token-less `brew update`
+while routing authenticated downloads through GitHub's private release-asset
+API.
 
 Authorized users can install a released build with:
 

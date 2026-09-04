@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.5 — 2026-09-04
+
+- Made token-less Homebrew Cask evaluation safe during `brew update` while
+  retaining bearer authentication for private release downloads.
+- Added a release contract that prevents strict installer-token lookup from
+  returning.
+
 ## v0.2.4 — 2026-09-04
 
 - Built a current precise Gograph index inside the canonical verification gate

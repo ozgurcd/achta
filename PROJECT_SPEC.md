@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.2.0 released baseline; v0.2.4 current authenticated Homebrew patch
+Status: v0.2.0 released baseline; v0.2.5 current authenticated Homebrew patch
 
 Project name: Achta
 
@@ -1044,6 +1044,8 @@ use by authorized workspace users:
 - publish an `achta` Homebrew cask to `ozgurcd/homebrew-tap` after the private
   GitHub release succeeds; installation still requires authorized access to
   the private release assets through `HOMEBREW_GITHUB_API_TOKEN`;
+- allow Homebrew to evaluate the cask during update and discovery when the
+  installer token is absent, without weakening authenticated asset downloads;
 - rewrite every generated browser download URL to the unique numeric GitHub
   release-asset API URL assigned after publication, retain the binary Accept
   and bearer-token headers, and refuse missing, duplicate, or foreign URLs;
