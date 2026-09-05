@@ -224,3 +224,17 @@ Measured live against identuum's census with the real rulefloor: 1285 rows
 covers 252 rules with 157 mapped, 45 absences all allowlisted, zero
 violations — the same numbers the shell gate prints. FLOOR-CENSUS-1 is armed
 with a mutation proof; the executable Rulefloor rises from 28 to 29.
+
+
+## [2026-09-05] release | achta-v0.4.3
+
+The source version, exact machine contracts, human goldens, current release
+facts, changelog, and release notes advance together to v0.4.3. The `floor
+census` entries move unchanged in substance from Unreleased to the exact
+v0.4.3 heading; the executable Rulefloor remains 29.
+
+Owner standing rule P-064 now makes the release boundary explicit: a release
+is not complete at a local commit or green build. Source push, tag and private
+release publication, Homebrew tap commit and push, and installation through
+Homebrew are all required, with the installed binary's exact version and new
+capability as the final proof.

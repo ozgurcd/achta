@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.4.3 — 2026-09-05
 
 - Added `floor census`: a fenced completeness census is recounted against
   itself (citations, repeated tokens, bucket-led prose leaks, stated counts)

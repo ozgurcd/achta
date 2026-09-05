@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.4.2.
+- Current release line: v0.4.3.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -24,6 +24,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - Private GitHub releases publish checksummed macOS and Linux archives for
   amd64 and arm64. The public Homebrew tap contains metadata only; downloading
   private assets requires authorized GitHub access.
+- A release is complete only after source push, tag and release publication,
+  Homebrew cask commit and push, and installation through Homebrew prove the
+  installed version and newly shipped capability.
 - Achta-specific wiki material is co-versioned under `wiki/` in this
   repository and is not duplicated in the parent workspace wiki.
 - `wiki check --only NAME[,NAME...]` evaluates and reports exactly the selected
@@ -49,7 +52,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
 - `RULE-FLOOR.md` carries 29 armed, mutation-proved invariants on the current
-  v0.4.2 line.
+  v0.4.3 line.
 
 ## Known limitations
 
@@ -82,3 +85,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Add `recipe check` (byte-exact recipe expectations, neutralizer refusal) and `ledger census` (a ledger table recounted against its totals and disk), both mutation-proved, raising the executable floor from 26 to 28. |
 | 2026-09-05 | `co-versioned` | Advance source, exact version fixtures, release notes, current wiki facts, and Homebrew publication metadata together for v0.4.2 without changing the 28-rule floor. |
 | 2026-09-05 | `co-versioned` | Add `floor census` (a fenced completeness census recounted against itself and rulefloor covers, vocabulary by flags, armed state refused), mutation-proved, raising the executable floor from 28 to 29. |
+| 2026-09-05 | `co-versioned` | Prepare v0.4.3 and record that every release completes only after source, tag, release, and tap publication culminate in an installed Homebrew binary proving its version and new capability. |

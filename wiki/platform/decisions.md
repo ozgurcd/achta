@@ -171,3 +171,15 @@ covers document is `rulefloor covers --json`, executed as an argument vector,
 consumed like ledger-diff.v1. And what it refuses: whether a cited rule is
 ARMED, because that lives in RULE-FLOOR.md's columns — Rulefloor's format —
 and Achta consumes Rulefloor's machine output, never its ledger's text.
+
+### P-064 — A release ends at the installed Homebrew binary
+
+Owner ruling, 2026-09-05: every Achta release is committed and pushed, tagged
+and published, made available by committing and pushing its matching Homebrew
+cask, and then installed through Homebrew. A local release commit, tag, release
+asset, tap update, or green build is an intermediate state, not a completed
+release.
+
+Completion evidence is the installed `/opt/homebrew/bin/achta` reporting the
+exact release version with version agreement `pass` and advertising the newly
+shipped capability. This sequence applies to every future release.

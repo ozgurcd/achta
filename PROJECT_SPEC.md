@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.4.2 release specification
+Status: v0.4.3 release specification
 
 Project name: Achta
 
@@ -1281,6 +1281,12 @@ use by authorized workspace users:
 - use GoReleaser's current `homebrew_casks` support rather than its deprecated
   `brews` configuration, verify tap push access before creating the release,
   refuse tap downgrades, and verify the published cask.
+
+A release is complete only after its source commit is pushed, its tag and
+private release are published, the matching Homebrew cask is committed and
+pushed to the tap, and that cask is installed through Homebrew. Completion is
+proved by the installed binary reporting the release version and advertising
+the newly shipped capability; a local commit or green build is not a release.
 
 The tool must remain buildable without third-party runtime services.
 
