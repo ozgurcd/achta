@@ -259,3 +259,14 @@ convention and could silently widen another workspace's evidence. The new
 SLICE-LOG-DIRECTORY-1 invariant is mutation-proved: disabling the filename-order
 guard made a lexically earlier file pass, so the bound test failed; restoring
 the guard returned it green. The executable Rulefloor rises from 29 to 30.
+
+
+## [2026-09-05] release | achta-v0.4.4
+
+The source version, exact machine contracts, human goldens, current release
+facts, changelog, and release notes advance together to v0.4.4. The `slice check
+--log-dir` entries move unchanged in substance from Unreleased to the exact
+v0.4.4 heading; the executable Rulefloor remains 30. A lexically later tracked
+directory fixture joins this release commit, allowing the installed Homebrew
+binary to prove that it counts the release's frozen-file heading plus the
+directory heading and fails when an additional expected heading is nowhere.

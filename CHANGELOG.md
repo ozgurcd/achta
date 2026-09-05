@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.4.4 — 2026-09-05
 
 - Added opt-in `slice check --log-dir RELATIVE_PATH`. The frozen log file is
   followed by recursively discovered regular directory files in deterministic

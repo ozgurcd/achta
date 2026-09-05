@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.4.3 release specification plus unreleased slice-log directory selection
+Status: v0.4.4 release specification
 
 Project name: Achta
 
