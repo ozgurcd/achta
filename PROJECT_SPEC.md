@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.4.5 release specification
+Status: v0.5.0 release specification
 
 Project name: Achta
 
@@ -1249,13 +1249,13 @@ Schemas added after v0.4.4:
 
 - `achta.mirror-check.v1`
 
-Schemas added after v0.4.5:
+Schemas added for v0.5.0:
 
 - `achta.parts-operation.v1`
 - `achta.parts-verify.v1`
 - `achta.ledger-rows.v1`
 
-Canonical artifact schemas added after v0.4.5:
+Canonical artifact schemas added for v0.5.0:
 
 - `achta.parts-lock.v1`
 
@@ -1663,7 +1663,7 @@ The v0.3.0 release records these choices explicitly:
 3. Mirror equality is SHA-256 over exact file bytes. Achta refuses newline,
    whitespace, encoding, or semantic normalization.
 
-## 27. Unreleased decisions
+## 27. v0.5.0 decisions
 
 1. Achta owns `achta.parts-lock.v1` because `parts lock` creates the artifact;
    the format is not shapeable through flags. This differs from P-063 census
@@ -1673,8 +1673,9 @@ The v0.3.0 release records these choices explicitly:
    Achta. The caller owns the canonical document, heading vocabulary, and
    reference semantics; Achta establishes exact bytes and closed-set membership
    only.
-3. The conversion remains Unreleased on the v0.4.5 source line. No source
-   version or release fixture moves until the later combined release.
+3. The conversion batch ships together on the v0.5.0 source line. A minor
+   version marks the caller-facing command expansion and gives migrations one
+   released baseline rather than another patch-level slice.
 4. Ledger-row status and prose vocabulary remains caller-owned: cell indexes,
    open/closed ID prefixes, identity terminator, completion, exemption,
    condition, and quote markers are explicit flags with no defaults.

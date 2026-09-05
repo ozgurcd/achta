@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.4.5.
+- Current release line: v0.5.0.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -67,7 +67,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
 - `RULE-FLOOR.md` carries 33 armed, mutation-proved invariants on the current
-  v0.4.5 line.
+  v0.5.0 line.
 
 ## Known limitations
 
@@ -107,3 +107,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Advance source, exact machine and human fixtures, current wiki facts, changelog, and release notes together for v0.4.5, retaining the 31-rule floor and adding installed exact-byte proof fixtures. |
 | 2026-09-05 | `co-versioned` | Add Achta-owned `parts lock` and exact closed-set `parts verify`, keep section-reference semantics caller-owned, and raise the mutation-proved floor from 31 to 32 without releasing. |
 | 2026-09-05 | `co-versioned` | Add caller-shaped `ledger rows`, enforce exact completion and closure-quote structure while refusing prose meaning, and raise the mutation-proved floor from 32 to 33 without releasing. |
+| 2026-09-05 | `co-versioned` | Release the complete conversion batch as v0.5.0, advancing source and exact fixtures while retaining the 33-rule floor for caller migration. |

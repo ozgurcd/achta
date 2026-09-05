@@ -2,10 +2,13 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.5.0 — 2026-09-05
 
 ### Added
 
+- v0.5.0 is the conversion-batch baseline intended for caller migrations. Its
+  released capability surface includes `recipe check`, `ledger census`, `floor
+  census`, `mirror check`, `parts lock`, `parts verify`, and `ledger rows`.
 - `parts lock --dir DIR --lock FILE [--bump]` writes the canonical
   `achta.parts-lock.v1` artifact from direct `.txt` files, preserving its
   `VERSION` unless `--bump` explicitly increments it. `parts verify --dir DIR

@@ -337,3 +337,12 @@ real-ledger-shaped completion fixture pass at exit 0; the CLI and domain tests
 both went red, and restoration returned them green. The executable floor rises
 from 32 to 33. Version remains v0.4.5, entries stay under Unreleased, and no
 remote or release action belongs to this slice.
+
+## [2026-09-05] release | achta-v0.5.0
+
+The source version, exact machine and human fixtures, current wiki facts,
+changelog, and release notes advance together to v0.5.0. The two unreleased
+conversion entries move unchanged in substance under the exact v0.5.0 heading,
+and the complete caller-migration baseline names `recipe check`, `ledger
+census`, `floor census`, `mirror check`, `parts lock`, `parts verify`, and
+`ledger rows`. The executable Rulefloor remains 33.

@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.5.0 — 2026-09-05
+
+- Established the complete conversion-batch baseline with `recipe check`,
+  `ledger census`, `floor census`, `mirror check`, `parts lock`, `parts verify`,
+  and `ledger rows` available together for caller migrations.
 
 - Added `parts lock --dir DIR --lock FILE [--bump]` and `parts verify --dir
   DIR --lock FILE`: Achta owns a strict `achta.parts-lock.v1` artifact, hashes
