@@ -2,6 +2,29 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Added
+
+- `floor census --file CENSUS --repo REPO --bucket A,B,… --covered NAME
+  --fence-heading TEXT [--marker C] [--count-sum RE] [--count-frozen RE]
+  [--count-plain RE] [--allow-prefix TEXT] [--covers FILE] [--rulefloor PATH]`
+  recounts a fenced completeness census. Against itself: an out-of-scope row
+  naming a rule, a covered row without a citation, a covered row citing a rule
+  the covers document does not know, a citation repeated in one row, a
+  bucket-led line outside the fence, and a stated count the table
+  contradicts. Against `rulefloor covers --json --repo REPO`, executed as an
+  argument vector with no shell: a mutation-proven `file:Symbol` whose census
+  rows never cite the rule, an unqualified covers entry, and a covers absence
+  not on the frozen allowlist. Rulefloor absent or non-JSON is
+  `cannot_evaluate`, exit 2, naming the resolved executable. The census
+  vocabulary is the caller's: no bucket names, headings, markers or count
+  phrases are built in. REFUSED, and reported in the document: whether a cited
+  rule is ARMED — that needs RULE-FLOOR.md column parsing, Rulefloor's format.
+- `rulefloor.covers.v1` joins the consumed Rulefloor input schemas.
+- A mutation-proved Rulefloor invariant, raising the executable floor from 28
+  to 29.
+
 ## v0.4.2 — 2026-09-05
 
 ### Added

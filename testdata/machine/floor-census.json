@@ -1,0 +1,1 @@
+{"schema_version":"achta.floor-census.v1","status":"pass","rows":2,"buckets":{"COVERED":1,"OOS":1},"frozen":0,"plain":1,"covers":{"rules":1,"mapped":1,"absences":0,"allowlisted":0,"new":0},"violations":[],"refused":["whether a cited rule is ARMED: that needs RULE-FLOOR.md column parsing, Rulefloor's format, outside this boundary"]}

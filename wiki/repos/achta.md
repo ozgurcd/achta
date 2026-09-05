@@ -36,6 +36,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
   recounts a markdown ledger table against its totals and against files
   (`--dir`) or directories (`--tree --ext`) on disk. Both read only, both
   workspace-confined, both `cannot_evaluate` on unreadable input.
+- `floor census` recounts a fenced completeness census against itself and
+  against `rulefloor covers --json` (executed as an argument vector); the
+  census vocabulary is the caller's, every piece a flag, nothing built in. It
+  refuses to judge whether a cited rule is armed and says so in its document.
 
 ## Verification surface
 
@@ -44,7 +48,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
   repository-owned wiki check.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
-- `RULE-FLOOR.md` carries 28 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 29 armed, mutation-proved invariants on the current
   v0.4.2 line.
 
 ## Known limitations
@@ -77,3 +81,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Publish only structured Homebrew postflight steps while preserving authenticated private-asset rewriting and macOS quarantine handling. |
 | 2026-09-05 | `co-versioned` | Add `recipe check` (byte-exact recipe expectations, neutralizer refusal) and `ledger census` (a ledger table recounted against its totals and disk), both mutation-proved, raising the executable floor from 26 to 28. |
 | 2026-09-05 | `co-versioned` | Advance source, exact version fixtures, release notes, current wiki facts, and Homebrew publication metadata together for v0.4.2 without changing the 28-rule floor. |
+| 2026-09-05 | `co-versioned` | Add `floor census` (a fenced completeness census recounted against itself and rulefloor covers, vocabulary by flags, armed state refused), mutation-proved, raising the executable floor from 28 to 29. |

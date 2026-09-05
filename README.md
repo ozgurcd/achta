@@ -104,6 +104,10 @@ achta --workspace /path/to/workspace recipe check \
 achta --workspace /path/to/workspace ledger census \
   --file wiki/contracts/retirement-ledger.md --dir wiki/tools \
   --tree GO=identuum-idp-oss/tools --ext .go --json
+achta --workspace /path/to/workspace floor census \
+  --file wiki/contracts/floor-completeness-census.md --repo identuum-idp-oss \
+  --bucket COVERED,OOS-L,OOS-O,OOS-P,OOS-T --covered COVERED --fence-heading '## Full list' \
+  --marker '~' --count-sum '^## Totals \(sum = (\d+)' --allow-prefix '- ALLOW-COVERS-ABSENCE:' --json
 
 go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 ```
@@ -138,6 +142,15 @@ totals rows and against the files (`--dir`) or directories (`--tree --ext`) on
 disk: a present row must exist at exactly its stated size, a RETIRED row must
 be gone, and every entry on disk must have a row. Both are read-only,
 workspace-confined, and exit 2 when they cannot evaluate.
+
+`floor census` recounts a fenced completeness census against itself and
+against `rulefloor covers --json`, executed as an argument vector: uncited
+covered rows, citations of unknown rules, repeated citations, bucket-led prose
+outside the fence, stated counts the table contradicts, mutation-proven pairs
+no row cites, and absences not on the frozen allowlist. Every piece of the
+census's vocabulary is a flag; nothing is built in. It refuses to say whether a
+cited rule is armed — that is RULE-FLOOR.md's column, Rulefloor's format — and
+says so in its document.
 
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,

@@ -778,6 +778,45 @@ workspace had. Exit 1 on any violation; no sources, an unreadable source, or
 no rows at all is `cannot_evaluate` and exit 2. Nothing is written. Output
 uses `achta.ledger-census.v1`.
 
+### 7.18 Floor census
+
+```text
+achta floor census --file PATH --repo PATH --bucket A,B,... --covered NAME --fence-heading TEXT
+                   [--marker C] [--count-sum RE] [--count-frozen RE] [--count-plain RE]
+                   [--allow-prefix TEXT] [--covers PATH] [--rulefloor PATH] [--json]
+```
+
+`floor census` recounts a fenced completeness census against itself and
+against Rulefloor's covers map. The census vocabulary is the CALLER'S: the
+bucket tokens that lead a row, the bucket whose rows must cite a rule, the
+heading under which the fenced table sits, an optional single-character
+marker that a citation may carry to mark the frozen arm, optional stated-count
+patterns (each a regexp with exactly one `(\d+)` capture) and an optional
+allowlist line prefix. None of these has a default; a required one missing is
+invalid input, exit 2. Achta owns only the mechanics: a row is
+`BUCKET N Symbol file:line reason…` inside the fence; a citation is a token in
+Rulefloor's rule-ID grammar, optionally suffixed by the marker; a covers
+document is `rulefloor covers --json --repo PATH` (rulefloor.covers.v1),
+executed as an argument vector with no shell, exactly as `amendments reconcile`
+executes Rulefloor, or read from `--covers PATH` for fixtures and replay.
+
+Violations, by class: (1) a row in a non-covered bucket whose reason names a
+rule the covers document knows; (2) a covered row citing a rule the covers
+document does not know; (3) a covered row with no citation; (4) a citation
+repeated within one row; (5) a line outside the fence that begins with a bucket
+token; (6) a stated count the table contradicts — `- BUCKET: N` per bucket,
+and the sum, frozen and plain counts where a pattern was given; (7) a
+qualified covers entry whose census rows at that `(file, symbol)` identity
+never cite the rule, or an unqualified covers entry; (8) a covers absence — no
+census row at that identity — not on the allowlist. Rulefloor absent, exiting
+non-zero, or answering non-JSON is `cannot_evaluate`, exit 2, and the resolved
+executable is named. REFUSED, and reported in the `refused` field: whether a
+cited rule is ARMED — that needs RULE-FLOOR.md column parsing, which is
+Rulefloor's format; Achta consumes Rulefloor's machine output only. Output
+uses `achta.floor-census.v1`: bucket counts, frozen/plain split, covers stats
+(rules, mapped, absences, allowlisted, new), the executable, violations
+`[{line, class, text}]`, and the refused list.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -1066,6 +1105,10 @@ Schemas added after v0.4.1:
 
 - `achta.recipe-check.v1`
 - `achta.ledger-census.v1`
+
+Schemas added after v0.4.2:
+
+- `achta.floor-census.v1`
 
 Do not publish a schema until the corresponding implementation and conformance
 tests are complete.

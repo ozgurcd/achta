@@ -144,3 +144,30 @@ script that implements `--selftest` must have a `check` entry) — it inspects
 other scripts' contents for a workspace convention — and gate-witness entry
 semantics (`name=command`), which are the identuum wiki's Makefile convention,
 not a make concept; `--expect-file` covers them byte-exactly instead.
+
+### P-063 — Census vocabulary is the caller's: flags, never a canonical Achta format
+The census vocabulary belongs to the workspace that wrote the census, not to
+Achta. `floor census` therefore takes every piece of it as a flag — the bucket
+tokens (`--bucket`), the covered bucket (`--covered`), the heading that
+introduces the fenced table (`--fence-heading`), the frozen marker
+(`--marker`), the stated-count patterns (`--count-sum`, `--count-frozen`,
+`--count-plain`) and the allowlist line prefix (`--allow-prefix`) — and refuses
+to run with the required ones absent. Nothing is defaulted to identuum's
+names.
+
+Considered and rejected: a canonical census format owned by Achta. It would
+force the workspace to rewrite a 1285-row page into Achta's vocabulary, make
+Achta the owner of a classification scheme whose meaning it does not judge,
+and turn every future bucket into an Achta release. Also rejected: hardcoding
+identuum's tokens, which is the same ownership mistake with worse manners.
+Flags keep the contract visible at the call site, the way `--sibling` and
+`--only` do, and let a second workspace with a different taxonomy use the same
+verb unchanged.
+
+What Achta does own here is the mechanics: a fenced row is `BUCKET N Symbol
+file:line reason…`; a citation is a token in Rulefloor's rule-ID grammar,
+optionally carrying the marker; a stated count is one capture group; the
+covers document is `rulefloor covers --json`, executed as an argument vector,
+consumed like ledger-diff.v1. And what it refuses: whether a cited rule is
+ARMED, because that lives in RULE-FLOOR.md's columns — Rulefloor's format —
+and Achta consumes Rulefloor's machine output, never its ledger's text.

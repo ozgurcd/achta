@@ -4,6 +4,7 @@ Achta v0.4.2 capabilities
   amendments reconcile
   capabilities
   decision add
+  floor census
   ledger census
   reachability classify
   recipe check

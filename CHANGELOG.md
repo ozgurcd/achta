@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- Added `floor census`: a fenced completeness census is recounted against
+  itself (citations, repeated tokens, bucket-led prose leaks, stated counts)
+  and against `rulefloor covers --json` (uncited mutation-proven pairs, new
+  absences vs a frozen allowlist). The census vocabulary is the caller's —
+  `--bucket`, `--covered`, `--fence-heading`, `--marker`, `--count-*`,
+  `--allow-prefix` — never a built-in default. Whether a cited rule is ARMED
+  is refused and reported as refused.
+- Added `rulefloor.covers.v1` to the consumed Rulefloor input schemas.
+- Raised the executable Rulefloor from 28 to 29 with a mutation proof for
+  stated-count recounting.
+
 ## v0.4.2 — 2026-09-05
 
 - Added `recipe check`: a Makefile target's recipe is read as text and

@@ -7,6 +7,7 @@ import (
 	"github.com/ozgurcd/achta/internal/amendments"
 	"github.com/ozgurcd/achta/internal/census"
 	"github.com/ozgurcd/achta/internal/earned"
+	"github.com/ozgurcd/achta/internal/floorcensus"
 	"github.com/ozgurcd/achta/internal/reachability"
 	"github.com/ozgurcd/achta/internal/recipe"
 	"github.com/ozgurcd/achta/internal/slicecheck"
@@ -226,6 +227,19 @@ func assertStableMachineContracts(t *testing.T) {
 				Lines:           3,
 				Violations:      []recipe.Violation{},
 				MissingExpected: []string{},
+			},
+		},
+		{
+			name: "floor-census.json",
+			value: floorcensus.Result{
+				SchemaVersion: floorcensus.Schema,
+				Status:        "pass",
+				Rows:          2,
+				Buckets:       map[string]int{"COVERED": 1, "OOS": 1},
+				Plain:         1,
+				Covers:        floorcensus.CoversStats{Rules: 1, Mapped: 1},
+				Violations:    []floorcensus.Violation{},
+				Refused:       []string{floorcensus.RefusedArmed},
 			},
 		},
 		{

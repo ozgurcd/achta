@@ -196,3 +196,31 @@ check` and `ledger census` entries move unchanged in substance from Unreleased
 to the exact v0.4.2 heading. The release workflow will publish the matching
 Homebrew cask after the tag passes its independent verification job. The
 executable Rulefloor remains 28.
+
+
+## [2026-09-05] feature | floor-census
+
+`floor census` gives the identuum wiki's last non-witness shell gate a verb.
+It recounts a fenced completeness census against itself — an out-of-scope row
+naming a rule, a covered row with no citation or citing a rule the covers
+document does not know, a citation repeated in one row, a bucket-led line
+outside the fence, a stated count the table contradicts — and against
+`rulefloor covers --json`, executed as an argument vector the way `amendments
+reconcile` executes Rulefloor: a mutation-proven pair no census row cites, an
+unqualified covers entry, an absence not on the frozen allowlist. Rulefloor
+absent is `cannot_evaluate`, exit 2, naming the resolved executable;
+`rulefloor.covers.v1` joins the consumed input schemas.
+
+The vocabulary decision (P-063): every piece of the census's vocabulary is a
+flag — buckets, covered bucket, fence heading, marker, count patterns,
+allowlist prefix — with no defaults; a canonical Achta-owned format was
+rejected because it would make Achta the owner of a taxonomy it does not judge
+and force a 1285-row rewrite; hardcoding identuum's tokens was rejected as the
+same ownership mistake. Refused, and reported in the document: whether a cited
+rule is ARMED, which lives in RULE-FLOOR.md's columns — Rulefloor's format.
+
+Measured live against identuum's census with the real rulefloor: 1285 rows
+(COVERED 227, OOS-L 9, OOS-O 6, OOS-P 953, OOS-T 90), frozen 26, plain 201,
+covers 252 rules with 157 mapped, 45 absences all allowlisted, zero
+violations — the same numbers the shell gate prints. FLOOR-CENSUS-1 is armed
+with a mutation proof; the executable Rulefloor rises from 28 to 29.
