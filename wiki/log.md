@@ -122,3 +122,10 @@ Achta v0.4.0 adds the explicit `--wiki-dir PATH` selector for repository-owned
 wiki authority, rejects conflicts with `--workspace`, and raises the executable
 Rulefloor from 22 to 23 with a measured parser mutation proof. The release
 workflow publishes the matching private archives and Homebrew Cask metadata.
+
+
+## [2026-09-05] release-fix | v0.4.0-source-version
+
+The first v0.4.0 tag run stopped before publication because the source version
+and exact machine fixtures still reported v0.3.0. They now advance together to
+v0.4.0 so the tag, release binary, and toolchain version agree.

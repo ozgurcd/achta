@@ -61,3 +61,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-04 | `2a545cd` | Add v0.3.0 cross-repository witness pins, reachability-aware staleness, CI provenance, earned-cycle refusal, and toolchain parity. |
 | 2026-09-05 | `co-versioned` | Move all Achta-specific wiki information into this repository and enforce local wiki freshness and history selection with two new armed invariants. |
 | 2026-09-05 | `co-versioned` | Add explicit, fail-closed repository wiki selection and prepare the v0.4.0 release and Homebrew update. |
+| 2026-09-05 | `co-versioned` | Advance the source and exact machine version contracts to v0.4.0 after the release gate rejected the stale v0.3.0 pin. |
