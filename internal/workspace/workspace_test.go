@@ -34,6 +34,27 @@ func TestResolveAndConfine(t *testing.T) {
 	}
 }
 
+func TestResolveWikiDir(t *testing.T) {
+	root := fixtureWorkspace(t)
+	got, err := ResolveWikiDir(filepath.Join(root, "wiki"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Root != root {
+		t.Fatalf("root = %q, want %q", got.Root, root)
+	}
+	if _, err := ResolveWikiDir(root); err == nil {
+		t.Fatal("ResolveWikiDir accepted a workspace root")
+	}
+	other := filepath.Join(root, "other")
+	if err := os.Mkdir(other, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ResolveWikiDir(other); err == nil {
+		t.Fatal("ResolveWikiDir accepted a directory without the wiki layout")
+	}
+}
+
 // RULE: WORKSPACE-AMBIGUITY-1
 func TestResolveRefusesAmbiguousAncestors(t *testing.T) {
 	root := fixtureWorkspace(t)

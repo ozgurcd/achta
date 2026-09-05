@@ -2,7 +2,7 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.4.0 — 2026-09-05
 
 ### Added
 
@@ -12,12 +12,19 @@ Release changes are recorded under their exact version, newest first.
   repository it describes, avoiding an impossible self-referential Git SHA.
 - Two mutation-proved Rulefloor invariants for co-versioned freshness and
   repository-owned log precedence, raising the floor from 20 to 22.
+- A global `--wiki-dir PATH` selector for directly choosing a repository-owned
+  wiki. It accepts only the canonical direct `wiki` child with the required
+  layout and is mutually exclusive with `--workspace`.
+- A mutation-proved Rulefloor invariant for direct wiki selection, raising the
+  executable floor from 22 to 23.
 
 ### Changed
 
 - Slice checks prefer a repository-owned `wiki/log.md` over a root `log.md`.
 - Achta-specific wiki information is no longer owned or duplicated by the
   parent workspace wiki.
+- Capability and help output advertise `--wiki-dir` as a stable global option.
+- Source version advanced to v0.4.0.
 
 ## v0.3.0 — 2026-09-04
 

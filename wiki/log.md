@@ -114,3 +114,11 @@ from the parent workspace wiki into this co-versioned repository wiki. The
 parent governance now routes repositories with owned wikis locally and forbids
 duplicate central records. Two mutation-proved rules raise the Rulefloor from
 20 to 22 for co-versioned freshness and repository-owned log precedence.
+
+
+## [2026-09-05] release | achta-v0.4.0
+
+Achta v0.4.0 adds the explicit `--wiki-dir PATH` selector for repository-owned
+wiki authority, rejects conflicts with `--workspace`, and raises the executable
+Rulefloor from 22 to 23 with a measured parser mutation proof. The release
+workflow publishes the matching private archives and Homebrew Cask metadata.

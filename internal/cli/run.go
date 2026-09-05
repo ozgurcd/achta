@@ -22,6 +22,7 @@ const (
 
 type globalOptions struct {
 	workspace string
+	wikiDir   string
 	json      bool
 	quiet     bool
 	timing    bool
@@ -152,7 +153,19 @@ func parseGlobal(args []string) (globalOptions, string, []string, error) {
 			if i+1 >= len(args) || strings.TrimSpace(args[i+1]) == "" {
 				return opts, "", nil, invalid("--workspace requires a path")
 			}
+			if opts.wikiDir != "" {
+				return opts, "", nil, invalid("--workspace and --wiki-dir are mutually exclusive")
+			}
 			opts.workspace = args[i+1]
+			i++
+		case "--wiki-dir":
+			if i+1 >= len(args) || strings.TrimSpace(args[i+1]) == "" {
+				return opts, "", nil, invalid("--wiki-dir requires a path")
+			}
+			if opts.workspace != "" {
+				return opts, "", nil, invalid("--workspace and --wiki-dir are mutually exclusive")
+			}
+			opts.wikiDir = args[i+1]
 			i++
 		case "--json":
 			opts.json = true
@@ -310,7 +323,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		SchemaVersion:     capabilitiesSchema,
 		Version:           normalizeVersion(releaseVersion),
 		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1"},
-		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--workspace"},
+		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--wiki-dir", "--workspace"},
 		Commands:          commands,
 		ArtifactSchemas:   []string{"achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
 		RulefloorSchemas:  []string{"rulefloor.capabilities.v1", "rulefloor.ledger-diff.v1"},
@@ -388,10 +401,11 @@ func sanitize(value string) string {
 const helpText = `Achta is a deterministic workspace governance and evidence tool.
 
 Usage:
-  achta [--workspace PATH] [--json] [--quiet] [--timing] COMMAND [options]
+  achta [--workspace PATH | --wiki-dir PATH] [--json] [--quiet] [--timing] COMMAND [options]
 
 Global options:
   --workspace PATH select the workspace root explicitly
+  --wiki-dir PATH  select the workspace's wiki directory explicitly
   --json           emit one versioned JSON document
   --quiet          suppress non-problem human detail where supported
   --timing         append total elapsed milliseconds to the final output

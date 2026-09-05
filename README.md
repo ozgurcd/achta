@@ -38,14 +38,17 @@ achta --timing capabilities --json
 Human output ends with `elapsed: Nms`. JSON output remains one document and
 adds the optional `elapsed_ms` integer field. Untimed output is unchanged.
 
-Workspace-bound commands accept an explicit root or discover exactly one
-ancestor with `wiki/repos/` and `wiki/platform/decisions.md`. A repository may
-own that layout directly; when a parent workspace also has a wiki, pass
-`--workspace .` explicitly so the intended authority is unambiguous:
+Workspace-bound commands accept either an explicit root, its exact `wiki/`
+directory, or discover exactly one ancestor with `wiki/repos/` and
+`wiki/platform/decisions.md`. `--workspace` and `--wiki-dir` are mutually
+exclusive. A repository may own that layout directly; when a parent workspace
+also has a wiki, pass `--wiki-dir ./wiki` so the intended authority is explicit:
 
 ```sh
 achta --workspace /path/to/workspace wiki pin REPOSITORY \
   --sha FULL_HEAD_SHA --verified YYYY-MM-DD --attest-reviewed --check
+
+achta --wiki-dir /path/to/repository/wiki wiki check --json
 
 achta --workspace /path/to/workspace decision add \
   --title 'complete decision title' --body-file decision-body.md --check
@@ -95,7 +98,7 @@ achta --workspace /path/to/workspace amendments rebase \
 achta --workspace /path/to/workspace amendments reconcile \
   --manifest REPOSITORY/ledger-amendments.json --repo REPOSITORY --json
 
-go run ./cmd/achta --workspace . wiki check --json
+go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 ```
 
 `wiki pin` writes only after the caller explicitly attests that review
@@ -152,6 +155,9 @@ Homebrew cask. Unconditional amendment clearing remains deferred.
 The v0.3.0 release adds cross-repository witness pins, no-reach-aware
 staleness, CI provenance, earned-cycle refusal, and declarative toolchain parity.
 Published-fix vulnerability policy remains in dedicated analyzers.
+
+The v0.4.0 release makes repository-owned wiki authority directly selectable
+with the fail-closed global `--wiki-dir` option.
 
 Authorized users can install a released build with:
 

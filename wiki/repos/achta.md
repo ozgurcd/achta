@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.3.0.
+- Current release line: v0.4.0.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -34,8 +34,8 @@ infer prose, execute generic gates, fetch, or mutate Git.
   repository-owned wiki check.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
-- `RULE-FLOOR.md` carries 22 armed, mutation-proved invariants on the current
-  post-v0.3.0 line.
+- `RULE-FLOOR.md` carries 23 armed, mutation-proved invariants on the current
+  v0.4.0 line.
 
 ## Known limitations
 
@@ -60,3 +60,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-04 | `a23e0c9` | Make token-less Homebrew Cask evaluation safe while retaining authenticated private asset downloads. |
 | 2026-09-04 | `2a545cd` | Add v0.3.0 cross-repository witness pins, reachability-aware staleness, CI provenance, earned-cycle refusal, and toolchain parity. |
 | 2026-09-05 | `co-versioned` | Move all Achta-specific wiki information into this repository and enforce local wiki freshness and history selection with two new armed invariants. |
+| 2026-09-05 | `co-versioned` | Add explicit, fail-closed repository wiki selection and prepare the v0.4.0 release and Homebrew update. |

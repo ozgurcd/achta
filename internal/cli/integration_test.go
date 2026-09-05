@@ -75,6 +75,37 @@ func TestWikiPinWorkflowAndAttestationRefusal(t *testing.T) {
 	}
 }
 
+// RULE: WIKI-DIR-1
+func TestWikiDirSelectsWikiAndRejectsWorkspaceConflict(t *testing.T) {
+	root, _, _ := testWorkspaceRepo(t, "sample")
+	var stdout, stderr bytes.Buffer
+	if code := Run([]string{"--wiki-dir", filepath.Join(root, "wiki"), "wiki", "freshness", "--json"}, &stdout, &stderr, "v0.1.0"); code != 0 {
+		t.Fatalf("wiki-dir code = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "achta.wiki-freshness.v1") {
+		t.Fatalf("wiki-dir did not run freshness: %s", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	conflictArgs := []string{"--json", "--workspace", root, "--wiki-dir", filepath.Join(root, "wiki"), "wiki", "freshness"}
+	if code := Run(conflictArgs, &stdout, &stderr, "v0.1.0"); code != 2 {
+		t.Fatalf("conflicting selectors code = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "mutually exclusive") {
+		t.Fatalf("conflicting selectors did not explain the error: %s", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	if code := Run([]string{"--json", "--wiki-dir", root, "wiki", "freshness"}, &stdout, &stderr, "v0.1.0"); code != 2 {
+		t.Fatalf("workspace-as-wiki code = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "direct wiki child") {
+		t.Fatalf("workspace-as-wiki did not explain the layout requirement: %s", stdout.String())
+	}
+}
+
 func TestDecisionAddCheckThenWrite(t *testing.T) {
 	root, _, _ := testWorkspaceRepo(t, "sample")
 	registerPath := filepath.Join(root, "wiki", "platform", "decisions.md")

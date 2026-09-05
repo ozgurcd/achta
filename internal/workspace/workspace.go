@@ -53,6 +53,27 @@ func Resolve(explicit, start string) (Workspace, error) {
 	return Workspace{Root: candidates[0]}, nil
 }
 
+// ResolveWikiDir resolves an explicitly selected workspace wiki directory.
+// The wiki must remain the direct "wiki" child of its workspace root because
+// wiki operations also resolve repositories beside it.
+func ResolveWikiDir(explicit string) (Workspace, error) {
+	wikiRoot, err := canonicalDirectory(explicit)
+	if err != nil {
+		return Workspace{}, fmt.Errorf("wiki directory: %w", err)
+	}
+	root, err := canonicalDirectory(filepath.Dir(wikiRoot))
+	if err != nil {
+		return Workspace{}, fmt.Errorf("workspace for wiki directory: %w", err)
+	}
+	if wikiRoot != filepath.Join(root, "wiki") {
+		return Workspace{}, fmt.Errorf("wiki directory %q must be the direct wiki child of its workspace root", wikiRoot)
+	}
+	if !hasWikiLayout(wikiRoot) {
+		return Workspace{}, fmt.Errorf("wiki directory %q lacks repos and platform/decisions.md", wikiRoot)
+	}
+	return Workspace{Root: root}, nil
+}
+
 func canonicalDirectory(path string) (string, error) {
 	abs, err := filepath.Abs(filepath.Clean(path))
 	if err != nil {
@@ -73,11 +94,15 @@ func canonicalDirectory(path string) (string, error) {
 }
 
 func hasLayout(root string) bool {
-	repos, err := os.Stat(filepath.Join(root, "wiki", "repos"))
+	return hasWikiLayout(filepath.Join(root, "wiki"))
+}
+
+func hasWikiLayout(wikiRoot string) bool {
+	repos, err := os.Stat(filepath.Join(wikiRoot, "repos"))
 	if err != nil || !repos.IsDir() {
 		return false
 	}
-	decisions, err := os.Stat(filepath.Join(root, "wiki", "platform", "decisions.md"))
+	decisions, err := os.Stat(filepath.Join(wikiRoot, "platform", "decisions.md"))
 	return err == nil && decisions.Mode().IsRegular()
 }
 

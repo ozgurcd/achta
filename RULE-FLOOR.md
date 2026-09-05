@@ -1,5 +1,5 @@
-FLOOR: 22
-RED-PROOFS: 22
+FLOOR: 23
+RED-PROOFS: 23
 
 | ID | one-sentence rule | enforced-by | check | red-proof | hash |
 |---|---|---|---|---|---|
@@ -25,3 +25,4 @@ RED-PROOFS: 22
 | TOOLCHAIN-PARITY-1 | Toolchain parity fails empty manifests, missing CI pins, version mismatches, and script digest mismatches without executing manifest-defined commands. | go-test | internal/toolchain/toolchain_test.go @ unit | [proof-v1 kind=mutation_observation] 2026-09-04 inverted aggregate parity status; TestCheckVersionAndDigestParity and TestCheckFailsOnMissingOrMismatchedCIPin failed because matching pins failed while missing and mismatched pins passed; restored, green <!-- rulefloor-binding-v1:eyJleGVjdXRpb25fcG9saWN5IjoiZXhlY3V0ZSJ9 --> | 9e58da9a9b04 |
 | WIKI-CO-VERSIONED-1 | A repository-owned wiki page is fresh only when it is co-versioned at the exact Git repository root, has a review date, and omits an external SHA pin. | go-test | internal/wiki/status_test.go @ unit | [proof-v1 kind=mutation_observation] 2026-09-04 changed co-versioned recognition to reject the true marker; TestFreshnessCoVersionedOwnership failed because the local page became unpinned; restored byte-identical, green <!-- rulefloor-binding-v1:eyJleGVjdXRpb25fcG9saWN5IjoiZXhlY3V0ZSJ9 --> | d5771be17943 |
 | SLICE-OWNED-WIKI-LOG-1 | Landed-slice checks prefer a regular repository-owned wiki log over a repository-root log and reject a linked owned log. | go-test | internal/slicecheck/check_test.go @ unit | [proof-v1 kind=mutation_observation] 2026-09-04 reversed log precedence to select the repository-root log first; TestRepositoryLogPrefersOwnedWiki failed with log.md instead of wiki/log.md; restored byte-identical, green <!-- rulefloor-binding-v1:eyJleGVjdXRpb25fcG9saWN5IjoiZXhlY3V0ZSJ9 --> | a5a8b8915508 |
+| WIKI-DIR-1 | The --wiki-dir global selector resolves only the canonical direct wiki child, drives wiki operations, and is mutually exclusive with --workspace. | go-test | internal/cli/integration_test.go @ unit | [proof-v1 kind=mutation_observation] supersedes-sha256:83ad0b547a9ee61b1689335086aefe5ee5b2f6dfb2878d95c14bba90d74ac61b 2026-09-05 renamed the --wiki-dir parser case to --wiki-directory; TestWikiDirSelectsWikiAndRejectsWorkspaceConflict failed because the requested selector became an unknown command; restored, green <!-- rulefloor-binding-v1:eyJleGVjdXRpb25fcG9saWN5IjoiZXhlY3V0ZSJ9 --> | 67da52116538 |

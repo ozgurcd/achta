@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.2.5 released baseline; v0.3.0 current witness-integrity development
+Status: v0.4.0 release specification
 
 Project name: Achta
 
@@ -258,6 +258,7 @@ Global options:
 
 ```text
 --workspace PATH   Explicit workspace root.
+--wiki-dir PATH    Explicit workspace wiki directory.
 --json             Emit the command's versioned JSON document where supported.
 --quiet            Suppress non-problem human detail where supported.
 --timing           Measure total command elapsed time and report it at the end.
@@ -282,10 +283,14 @@ line or JSON field to the caller's output stream.
 
 Workspace discovery may walk from the current directory toward the filesystem
 root looking for the expected `wiki/` layout. Ambiguous discovery must fail and
-request `--workspace`; it must never select a sibling or ancestor by guesswork.
-A repository-owned wiki uses the same layout at the repository root. When both
-the repository and a parent are candidates, callers select the repository with
-`--workspace .`.
+request an explicit selector; it must never select a sibling or ancestor by
+guesswork. `--workspace PATH` selects the workspace root. `--wiki-dir PATH`
+selects only the canonical direct `wiki` child of that root and requires the
+same `repos/` and `platform/decisions.md` layout because commands may resolve
+repositories beside the wiki. The two selectors are mutually exclusive. A
+repository-owned wiki uses the same layout at the repository root. When both
+the repository and a parent are candidates, callers can select the repository
+directly with `--wiki-dir ./wiki`.
 
 The following commands must not require a workspace:
 
@@ -1008,7 +1013,8 @@ tests are complete.
 
 Add focused tests for:
 
-- workspace discovery and explicit-root precedence;
+- workspace discovery, explicit-root precedence, and explicit wiki-directory
+  selection;
 - ambiguous workspace discovery;
 - repository name and path validation;
 - regular-file and symlink confinement;
@@ -1360,13 +1366,17 @@ The v0.3.0 release records these choices explicitly:
 6. Published-fix vulnerability policy remains outside Achta because advisory,
    ecosystem, and fix-availability semantics belong to a dedicated analyzer.
 
-## 25. Unreleased decisions
+## 25. v0.4.0 decisions
 
 1. Repository-owned wikis use `co_versioned: true` and omit
    `verified_against:`. The containing commit is the version boundary.
 2. `wiki/log.md` takes precedence over a repository-root `log.md` during slice
    checks so locally owned history is mechanically enforced.
-3. Repository-specific facts have exactly one wiki owner; migration removes the
+3. `--wiki-dir PATH` directly selects a repository-owned wiki while preserving
+   the workspace root needed for sibling repository resolution. The selected
+   path must be the canonical direct `wiki` child, and it is mutually exclusive
+   with `--workspace`.
+4. Repository-specific facts have exactly one wiki owner; migration removes the
    former central page, decision, and log records instead of retaining mirrors.
 
 ## 26. Success measure

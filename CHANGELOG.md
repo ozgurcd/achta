@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased
+## v0.4.0 — 2026-09-05
 
 - Moved Achta-specific wiki ownership into the Achta repository.
 - Added co-versioned repository-page freshness and owned-wiki log selection.
-- Raised the executable Rulefloor from 20 to 22 with mutation proofs for both
-  ownership behaviors.
+- Added fail-closed `--wiki-dir` selection for repository-owned wiki authority.
+- Raised the executable Rulefloor from 20 to 23 with mutation proofs for both
+  ownership behaviors and direct wiki selection.
 
 ## v0.3.0 — 2026-09-04
 

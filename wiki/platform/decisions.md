@@ -73,3 +73,16 @@ date; the containing checkout supplies the version boundary.
 Generic workspace governance may route any repository to an owned wiki when
 that repository carries one. It must not special-case this project by name or
 recreate a central page, log entry, or decision.
+
+### P-060 — Direct wiki selection preserves workspace semantics
+
+The global `--wiki-dir PATH` option directly selects repository-owned wiki
+authority without relying on ambiguous ancestor discovery. The path must
+canonicalize to the direct `wiki` child of its workspace root and contain both
+`repos/` and `platform/decisions.md`.
+
+`--wiki-dir` and `--workspace` are mutually exclusive. Achta still retains the
+wiki's parent as the workspace root because wiki pinning, freshness, derivation,
+slice checks, and related operations may resolve repositories beside the wiki.
+An arbitrary detached content directory would silently change those contracts
+and is therefore rejected.

@@ -19,6 +19,16 @@ func flagSet(name string) *flag.FlagSet {
 }
 
 func resolveWorkspace(opts globalOptions) (workspace.Workspace, error) {
+	if opts.workspace != "" && opts.wikiDir != "" {
+		return workspace.Workspace{}, invalid("--workspace and --wiki-dir are mutually exclusive")
+	}
+	if opts.wikiDir != "" {
+		resolved, err := workspace.ResolveWikiDir(opts.wikiDir)
+		if err != nil {
+			return workspace.Workspace{}, invalid("%v", err)
+		}
+		return resolved, nil
+	}
 	cwd, err := os.Getwd()
 	if err != nil {
 		return workspace.Workspace{}, invalid("current directory: %v", err)
