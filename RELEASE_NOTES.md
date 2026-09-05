@@ -19,6 +19,21 @@ Release changes are recorded under their exact version, newest first.
   Caller-specific section-heading references remain outside Achta.
 - A mutation-proved Rulefloor invariant raises the executable floor from 31 to
   32.
+- `ledger rows --file MD --id-cell N --prose-cell N --open-marker TEXT
+  --closed-marker TEXT --identity-end-marker TEXT --completion-marker TEXT...
+  --condition-marker TEXT... --quote-marker TEXT [--exempt-marker TEXT]...`
+  checks caller-shaped Markdown ledger rows. An open ID cell conflicts with a
+  configured completion literal unless an explicit exemption literal is
+  present. A closed row containing a configured condition literal must carry
+  exactly one quote marker followed by a double-quoted string whose bytes also
+  appear elsewhere in the selected prose cell. `achta.ledger-rows.v1` reports
+  line, rule, row identity, and text per violation under the 0/1/2 contract.
+- Every vocabulary token is an explicit flag with no default. Achta refuses to
+  infer that prose means completion, normalize a quote, or assert that a
+  repeated condition was actually satisfied. The local implementation invokes
+  no shell, performs no Git operation, and writes nothing.
+- A mutation-proved Rulefloor invariant raises the executable floor from 32 to
+  33.
 
 ## v0.4.5 — 2026-09-05
 

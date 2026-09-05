@@ -10,6 +10,14 @@
   and their meaning belong to the caller.
 - Raised the executable Rulefloor from 31 to 32 with a mutation proof for
   exact digest and closed-set verification.
+- Added `ledger rows` with caller-supplied cell indexes and exact state,
+  completion, exemption, condition, and quote markers. It reports open rows
+  that explicitly claim completion and closed conditional rows that do not
+  repeat a quoted string verbatim.
+- Refused natural-language completion inference and condition-satisfaction
+  judgement; the command evaluates only the literals named at its call site.
+- Raised the executable Rulefloor from 32 to 33 with a mutation proof for the
+  ledger-row structural checks.
 
 ## v0.4.5 — 2026-09-05
 

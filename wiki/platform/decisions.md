@@ -246,3 +246,32 @@ Verification is fail closed: a matching closed set is exit 0; an edited,
 absent, or unlocked part is evaluated drift and exit 1; malformed, missing,
 unsafe, oversized, or concurrently changing evidence is `cannot_evaluate` and
 exit 2. The commands invoke no shell and perform no Git operation.
+
+### P-068 — Ledger rows are structural, and every vocabulary token is explicit
+
+`ledger rows` takes the two mechanics and refuses the semantic leap between
+them. The caller selects one-based ID and prose cells and supplies exact open
+and closed ID prefixes, an identity terminator, repeatable completion,
+exemption, and condition markers, and a closure quote marker. None has a
+default. This is the same ownership line as P-063, P-065, and P-067: Identuum's
+words do not become Achta's universal vocabulary merely because Achta can
+compare their placement.
+
+The completion half is deliberately literal. An open row violates only when
+its selected prose contains a caller-supplied completion marker and no supplied
+exemption marker. Achta says NO to deciding whether `landed`, `verified`, or any
+other unconfigured prose means completion. This avoids a regex synonym list
+whose false positives and false negatives would be undocumented policy
+decisions.
+
+The close-condition half is also mechanical. A closed row carrying a supplied
+condition marker must contain exactly one supplied quote marker followed by a
+non-empty double-quoted string, and those exact bytes must appear elsewhere in
+the same prose cell. Achta does not normalize or decide that the quoted
+condition was actually satisfied. Repetition proves that the condition was
+read and carried into the closure; truth remains human review.
+
+Malformed, ambiguous, unsafe, or vocabulary-free input is
+`cannot_evaluate`, exit 2, never a pass. The verb reads one confined regular
+file, invokes no shell or Git process, mutates nothing, and names its semantic
+refusals in `achta.ledger-rows.v1`.

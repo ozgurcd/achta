@@ -6,6 +6,7 @@ Achta v0.4.5 capabilities
   decision add
   floor census
   ledger census
+  ledger rows
   mirror check
   parts lock
   parts verify

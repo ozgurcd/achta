@@ -903,6 +903,42 @@ part prose for canonical-document section references. Output uses
 `achta.parts-operation.v1` for writes and `achta.parts-verify.v1` for checks;
 the artifact schema is `achta.parts-lock.v1`.
 
+### 7.21 Ledger row rules
+
+```text
+achta ledger rows --file MD --id-cell N --prose-cell N
+  --open-marker TEXT --closed-marker TEXT --identity-end-marker TEXT
+  --completion-marker TEXT [--completion-marker TEXT]...
+  [--exempt-marker TEXT]...
+  --condition-marker TEXT [--condition-marker TEXT]...
+  --quote-marker TEXT [--json]
+```
+
+`ledger rows` evaluates two bounded structural relationships across selected
+cells in Markdown table rows. The ID and prose cells are explicit, positive,
+one-based indexes. The open and closed markers are distinct exact prefixes of
+the trimmed ID cell; the exact identity end marker terminates the row identity.
+Every marker is caller-supplied and has no default.
+
+First, an open row whose selected prose contains any exact
+`--completion-marker` is a violation unless that prose also contains an exact
+`--exempt-marker`. Achta does not infer synonyms or decide that prose means the
+work is complete. Second, a closed row whose prose contains any exact
+`--condition-marker` must carry exactly one `--quote-marker`, followed by one
+non-empty double-quoted string. The quoted bytes must appear verbatim elsewhere
+in that same prose cell after the marker and its quote are removed. No case,
+whitespace, punctuation, Unicode, or semantic normalization is performed.
+
+Each violation reports `line`, closed rule name, row `identity`, and bounded
+`text`. Exit 0 means no structural violations; exit 1 means at least one rule
+fired; missing vocabulary, malformed or duplicate identities, no matching
+rows, unsafe or unreadable input, and ambiguous markers are
+`cannot_evaluate`, exit 2. The result explicitly refuses natural-language
+completion inference and condition-satisfaction truth. It uses
+`achta.ledger-rows.v1`, reads only the selected workspace-confined regular
+file, invokes no external process, performs no Git operation, and writes
+nothing.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -1017,11 +1053,13 @@ achta/
   internal/slicecheck/
   internal/mirror/
   internal/parts/
+  internal/ledgerrows/
   testdata/
     machine/
     wiki/
     witness/
     amendments/
+    ledgerrows/
 ```
 
 Do not create empty packages. Introduce each package only when executable code
@@ -1054,6 +1092,8 @@ Responsibilities:
   per-mirror results.
 - `internal/parts`: canonical prompt-part lock parsing/rendering, version
   transitions, exact-byte digests, and closed-set verification.
+- `internal/ledgerrows`: caller-shaped Markdown row parsing, exact literal
+  state/prose relationships, and verbatim closure-quote verification.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
@@ -1122,7 +1162,8 @@ define arbitrary executable commands.
 | End-to-end witness freshness | Implemented by `achta witness check`, including explicit no-reach classification |
 | Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
-| Close-condition, count-claim, ledger-claim, and model-mirror checks | Candidates for explicit `achta wiki check` components |
+| Close-condition and ledger-claim checks | Implemented structurally by `achta ledger rows`; caller-owned vocabulary remains explicit and meaning inference is refused |
+| Count-claim and model-mirror checks | Candidates for explicit Achta components |
 | Byte-identical master/mirror checks | Implemented by `achta mirror check`; retain old scripts until caller parity and retirement are explicit |
 | Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
@@ -1212,6 +1253,7 @@ Schemas added after v0.4.5:
 
 - `achta.parts-operation.v1`
 - `achta.parts-verify.v1`
+- `achta.ledger-rows.v1`
 
 Canonical artifact schemas added after v0.4.5:
 
@@ -1269,6 +1311,9 @@ Add focused tests for:
 - canonical part-lock parsing/rendering, initial and bumped versions, exact
   digest agreement, edited and absent locked parts, unlocked neighboring parts,
   malformed locks, unsafe files, and concurrent-change refusal.
+- caller-shaped ledger rows where each structural violation fires, clean rows
+  remain silent, unconfigured semantic synonyms remain outside evaluation, and
+  closure quotes must repeat exact bytes.
 
 ### 15.2 Integration tests
 
@@ -1290,6 +1335,8 @@ Cover complete workflows:
    unchanged.
 7. Part lock creation, explicit version bump, matching verification, edited
    part drift, and unlocked neighboring part drift.
+8. Ledger-row clean, open-completion, absent closure-quote, and paraphrased
+   closure-quote fixtures through the public 0/1/2 command contract.
 
 Use fake executables for Git and Rulefloor argument-vector tests where
 appropriate, while retaining a small end-to-end suite against installed
@@ -1628,6 +1675,13 @@ The v0.3.0 release records these choices explicitly:
    only.
 3. The conversion remains Unreleased on the v0.4.5 source line. No source
    version or release fixture moves until the later combined release.
+4. Ledger-row status and prose vocabulary remains caller-owned: cell indexes,
+   open/closed ID prefixes, identity terminator, completion, exemption,
+   condition, and quote markers are explicit flags with no defaults.
+5. Achta accepts the structural half of completion claims and closure quotes.
+   It refuses natural-language completion inference and condition-satisfaction
+   truth; a configured literal is either present or absent, and a quoted string
+   is either repeated byte-for-byte or it is not.
 
 ## 28. Success measure
 

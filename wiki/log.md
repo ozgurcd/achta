@@ -316,3 +316,24 @@ detection; the bound CLI test then observed an extra part passing at exit 0.
 Restoration returned green and raised the executable floor from 31 to 32. The
 source remains v0.4.5 and the changelog and release-note entries stay under
 Unreleased; no release or remote action belongs to this slice.
+
+
+## [2026-09-05] feature | ledger-row-rules
+
+`ledger rows` reads caller-selected ID and prose cells using exact, required
+open, closed, identity-end, completion, condition, and quote markers plus
+optional exemption markers. An open row with an explicit completion marker and
+no exemption fails. A closed conditional row fails unless the quote marker is
+followed by a non-empty double-quoted string whose bytes occur elsewhere in the
+same prose cell. Violations name line, rule, row identity, and text under
+`achta.ledger-rows.v1`; invalid, unsafe, ambiguous, or vocabulary-free input is
+`cannot_evaluate`, exit 2.
+
+P-068 records the line Achta will not cross: no natural-language completion
+inference, quote normalization, or claim that a repeated condition was actually
+satisfied. The command invokes no shell or Git process and writes nothing.
+LEDGER-ROWS-1 is armed after disabling the open-completion branch made the
+real-ledger-shaped completion fixture pass at exit 0; the CLI and domain tests
+both went red, and restoration returned them green. The executable floor rises
+from 32 to 33. Version remains v0.4.5, entries stay under Unreleased, and no
+remote or release action belongs to this slice.

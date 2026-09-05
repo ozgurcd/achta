@@ -8,6 +8,7 @@ import (
 	"github.com/ozgurcd/achta/internal/census"
 	"github.com/ozgurcd/achta/internal/earned"
 	"github.com/ozgurcd/achta/internal/floorcensus"
+	"github.com/ozgurcd/achta/internal/ledgerrows"
 	"github.com/ozgurcd/achta/internal/mirror"
 	"github.com/ozgurcd/achta/internal/reachability"
 	"github.com/ozgurcd/achta/internal/recipe"
@@ -314,6 +315,22 @@ func assertStableMachineContracts(t *testing.T) {
 				Rows:          2,
 				Sources:       []census.SourceSummary{{Path: "wiki/tools", Kind: "files", Rows: 2, OnDisk: 2, Marks: map[string]int{"KEEP": 2}}},
 				Violations:    []census.Violation{},
+			},
+		},
+		{
+			name: "ledger-rows.json",
+			value: ledgerrows.Result{
+				SchemaVersion: ledgerrows.Schema,
+				Status:        "fail",
+				File:          "wiki/contracts/to-do-queue.MD",
+				Rows:          2,
+				OpenRows:      1,
+				ClosedRows:    1,
+				Violations: []ledgerrows.Violation{
+					{Line: 7, Rule: ledgerrows.RuleOpenCompletion, Identity: "CE-SEC-5b", Text: "open ID cell conflicts with an explicit completion marker in the prose cell"},
+					{Line: 12, Rule: ledgerrows.RuleConditionQuote, Identity: "DOC-2", Text: "quoted string does not appear verbatim elsewhere in the prose cell"},
+				},
+				Refused: []string{ledgerrows.RefusedClaimMeaning, ledgerrows.RefusedConditionTruth},
 			},
 		},
 	}

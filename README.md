@@ -104,6 +104,13 @@ achta --workspace /path/to/workspace recipe check \
 achta --workspace /path/to/workspace ledger census \
   --file wiki/contracts/retirement-ledger.md --dir wiki/tools \
   --tree GO=identuum-idp-oss/tools --ext .go --json
+achta --workspace /path/to/workspace ledger rows \
+  --file wiki/contracts/to-do-queue.MD --id-cell 1 --prose-cell 2 \
+  --open-marker '**' --closed-marker 'DONE **' --identity-end-marker '**' \
+  --completion-marker 'DONE ' --completion-marker '**SATISFIED' \
+  --exempt-marker 'RULED-OPEN' --exempt-marker 'STAYS OPEN' \
+  --condition-marker 'Close condition.' --condition-marker 'Close condition:' \
+  --quote-marker 'CLOSE-CONDITION-MET:' --json
 achta --workspace /path/to/workspace floor census \
   --file wiki/contracts/floor-completeness-census.md --repo identuum-idp-oss \
   --bucket COVERED,OOS-L,OOS-O,OOS-P,OOS-T --covered COVERED --fence-heading '## Full list' \
@@ -151,6 +158,18 @@ totals rows and against the files (`--dir`) or directories (`--tree --ext`) on
 disk: a present row must exist at exactly its stated size, a RETIRED row must
 be gone, and every entry on disk must have a row. Both are read-only,
 workspace-confined, and exit 2 when they cannot evaluate.
+
+`ledger rows` applies two bounded structural rules to explicitly selected
+Markdown cells. The caller supplies one-based ID and prose cells, exact open
+and closed ID prefixes, the identity suffix, repeatable completion, exemption,
+and condition markers, and the closure quote marker; none has a default. An
+open row carrying a configured completion marker without an exemption is a
+violation. A closed row carrying a configured condition marker must have one
+double-quoted string after the quote marker, and those bytes must appear
+verbatim elsewhere in the same prose cell. The stable
+`achta.ledger-rows.v1` result names every violation's line, rule, row identity,
+and text. Achta deliberately does not infer completion from synonyms, normalize
+quoted text, or claim that a repeated condition was actually satisfied.
 
 `floor census` recounts a fenced completeness census against itself and
 against `rulefloor covers --json`, executed as an argument vector: uncited

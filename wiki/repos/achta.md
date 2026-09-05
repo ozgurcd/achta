@@ -50,6 +50,11 @@ infer prose, execute generic gates, fetch, or mutate Git.
   direct `.txt` set, preserving or explicitly bumping `VERSION`; `parts verify`
   names edited, absent, and unlocked parts under the 0/1/2 exit contract. Live
   canonical-document heading references remain caller-owned.
+- `ledger rows` applies caller-supplied cell indexes and exact state, identity,
+  completion, exemption, condition, and quote markers. It catches open rows
+  with explicit completion literals and closed conditional rows without a
+  verbatim repeated quote, while refusing prose-meaning and satisfaction
+  judgements.
 
 ## Verification surface
 
@@ -61,7 +66,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 32 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 33 armed, mutation-proved invariants on the current
   v0.4.5 line.
 
 ## Known limitations
@@ -101,3 +106,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Add workspace-confined, exact-byte `mirror check`, make absent master fail closed, add its stable machine contract and mutation proof, and raise the executable floor from 30 to 31. |
 | 2026-09-05 | `co-versioned` | Advance source, exact machine and human fixtures, current wiki facts, changelog, and release notes together for v0.4.5, retaining the 31-rule floor and adding installed exact-byte proof fixtures. |
 | 2026-09-05 | `co-versioned` | Add Achta-owned `parts lock` and exact closed-set `parts verify`, keep section-reference semantics caller-owned, and raise the mutation-proved floor from 31 to 32 without releasing. |
+| 2026-09-05 | `co-versioned` | Add caller-shaped `ledger rows`, enforce exact completion and closure-quote structure while refusing prose meaning, and raise the mutation-proved floor from 32 to 33 without releasing. |
