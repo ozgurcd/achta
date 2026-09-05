@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Added `mirror check --master PATH --mirror PATH...`: SHA-256 is computed over
+  the exact master and mirror bytes, with per-mirror `match`, `differs`, or
+  `absent` results and both digests for comparable files. No normalization is
+  permitted.
+- An absent mirror is an evaluated failure; an absent master is always
+  `cannot_evaluate`, exit 2. Workspace-root masters work when `--wiki-dir`
+  selects `WORKSPACE/wiki`.
+- Raised the executable Rulefloor from 30 to 31 with a mutation proof for exact
+  digest equality.
+
 ## v0.4.4 — 2026-09-05
 
 - Added opt-in `slice check --log-dir RELATIVE_PATH`. The frozen log file is

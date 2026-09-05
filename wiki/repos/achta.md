@@ -43,6 +43,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
   against `rulefloor covers --json` (executed as an argument vector); the
   census vocabulary is the caller's, every piece a flag, nothing built in. It
   refuses to judge whether a cited rule is armed and says so in its document.
+- The unreleased `mirror check` surface compares exact SHA-256 bytes from one
+  master to explicit mirrors, including a workspace-root master selected through
+  `--wiki-dir`; absent mirrors fail and an absent master is `cannot_evaluate`.
 
 ## Verification surface
 
@@ -54,8 +57,8 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 30 armed, mutation-proved invariants on the current
-  v0.4.4 line.
+- `RULE-FLOOR.md` carries 31 armed, mutation-proved invariants; v0.4.4 remains
+  the current release until the v0.4.5 release completes through Homebrew.
 
 ## Known limitations
 
@@ -91,3 +94,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Prepare v0.4.3 and record that every release completes only after source, tag, release, and tap publication culminate in an installed Homebrew binary proving its version and new capability. |
 | 2026-09-05 | `co-versioned` | Add explicit caller-owned `slice check --log-dir`, deterministic filename ordering, and strict per-file append-only headings, mutation-proved, raising the executable floor from 29 to 30. |
 | 2026-09-05 | `co-versioned` | Advance source, exact machine and human fixtures, current wiki facts, changelog, and release notes together for v0.4.4, retaining the 30-rule floor and adding the installed directory-proof fixture. |
+| 2026-09-05 | `co-versioned` | Add workspace-confined, exact-byte `mirror check`, make absent master fail closed, add its stable machine contract and mutation proof, and raise the executable floor from 30 to 31. |

@@ -8,6 +8,7 @@ import (
 	"github.com/ozgurcd/achta/internal/census"
 	"github.com/ozgurcd/achta/internal/earned"
 	"github.com/ozgurcd/achta/internal/floorcensus"
+	"github.com/ozgurcd/achta/internal/mirror"
 	"github.com/ozgurcd/achta/internal/reachability"
 	"github.com/ozgurcd/achta/internal/recipe"
 	"github.com/ozgurcd/achta/internal/slicecheck"
@@ -227,6 +228,20 @@ func assertStableMachineContracts(t *testing.T) {
 				Lines:           3,
 				Violations:      []recipe.Violation{},
 				MissingExpected: []string{},
+			},
+		},
+		{
+			name: "mirror-check.json",
+			value: mirror.Result{
+				SchemaVersion: mirror.Schema,
+				Status:        "fail",
+				Master:        "AGENTS.md",
+				MasterSHA256:  "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0",
+				Mirrors: []mirror.MirrorResult{
+					{Path: "wiki/contracts/AGENTS.md", Status: "match", MasterSHA256: "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0", MirrorSHA256: "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0"},
+					{Path: "wiki/tools/gate.sh", Status: "differs", MasterSHA256: "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0", MirrorSHA256: "23af1b2f80f3c9377f3a86e3a14f4fe146d6c2640aff50d8380fc7345dcf9b93"},
+					{Path: "wiki/tools/absent.sh", Status: "absent", MasterSHA256: "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0"},
+				},
 			},
 		},
 		{

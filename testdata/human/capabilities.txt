@@ -6,6 +6,7 @@ Achta v0.4.4 capabilities
   decision add
   floor census
   ledger census
+  mirror check
   reachability classify
   recipe check
   slice check

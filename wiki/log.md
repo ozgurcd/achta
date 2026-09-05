@@ -270,3 +270,21 @@ v0.4.4 heading; the executable Rulefloor remains 30. A lexically later tracked
 directory fixture joins this release commit, allowing the installed Homebrew
 binary to prove that it counts the release's frozen-file heading plus the
 directory heading and fails when an additional expected heading is nowhere.
+
+
+## [2026-09-05] feature | mirror-check
+
+`mirror check --master PATH --mirror PATH...` replaces three repeated
+master/copy comparisons with one read-only, workspace-confined surface. It
+computes SHA-256 over exact bytes in caller order and reports `match`, `differs`
+with both digests, or `absent` per mirror. No newline, whitespace, encoding, or
+semantic normalization exists. With `--wiki-dir WORKSPACE/wiki`, the retained
+workspace root permits a root-level master and wiki-contained mirrors.
+
+Decision P-066 makes the old fail-open explicit and rejects it: an absent master
+has no reference bytes and is always `cannot_evaluate`, exit 2, without an
+allowance flag. An absent mirror is an evaluated non-identity, exit 1. The verb
+invokes no shell or Git command and mutates nothing. MIRROR-BYTE-IDENTITY-1 is
+armed after inversion of the digest-equality branch made identical inputs fail
+both the domain and CLI tests; restoration returns green. The executable
+Rulefloor rises from 30 to 31.

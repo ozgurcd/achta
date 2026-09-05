@@ -199,3 +199,25 @@ existing file's headings remain prefixes, so a lexically earlier file cannot
 reorder the evidence and an inserted heading cannot masquerade as an append.
 Explicit absence, links, unreadable inputs, or overlap with the discovered log
 file are `cannot_evaluate`; only absence of both the file and the flag skips.
+
+### P-066 — Mirror identity is exact bytes and an absent master cannot evaluate
+
+`mirror check` computes SHA-256 over the exact bytes of one explicitly selected
+master and every explicitly selected mirror. Newline, whitespace, encoding, and
+semantic normalization are refused: these artifacts are copies, so anything
+other than identical bytes is drift. Mirrors retain caller order and each
+reports `match`, `differs` with both digests, or `absent`.
+
+An absent master is always `cannot_evaluate`, exit 2. Without reference bytes,
+equality has no truth value. An `--allow-absent-master` flag was considered and
+rejected because it would preserve the old fail-open and widen a small command
+solely to encode permission not to compare. A caller intentionally lacking a
+master should not invoke the comparison. An absent mirror is different: once
+the master exists, the named copy is conclusively not identical, so that is an
+evaluated failure, exit 1.
+
+Per P-060, `--wiki-dir WORKSPACE/wiki` retains `WORKSPACE` as the confinement
+root; a root-level master and wiki-contained mirrors therefore share one safe
+boundary. The verb reads bounded regular non-linked files, invokes no shell or
+Git command, and performs no mutation. Existing comparison scripts remain until
+their callers explicitly prove parity and retire them in a later slice.

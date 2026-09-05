@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.4.4 release specification
+Status: v0.4.5 development specification
 
 Project name: Achta
 
@@ -42,7 +42,8 @@ Achta complements existing tools rather than absorbing them:
 - Gograph owns Go source structure and static graph evidence.
 - Dedicated analyzers own their particular source or protocol comparisons.
 - Achta owns workspace bookkeeping, declared-change reconciliation, witness
-  record handling, and deterministic wiki maintenance.
+  record handling, exact document-mirror comparison, and deterministic wiki
+  maintenance.
 
 Achta must not become a generic policy engine, task runner, requirements
 system, documentation platform, source-code analyzer, CI server, or database.
@@ -829,6 +830,27 @@ uses `achta.floor-census.v1`: bucket counts, frozen/plain split, covers stats
 (rules, mapped, absences, allowlisted, new), the executable, violations
 `[{line, class, text}]`, and the refused list.
 
+### 7.19 Mirror check
+
+```text
+achta mirror check --master PATH --mirror PATH [--mirror PATH]... [--json]
+```
+
+`mirror check` reads one master and one or more explicitly selected mirrors
+within the resolved workspace, computes SHA-256 over each file's exact bytes,
+and evaluates mirrors in caller-supplied order. Each mirror reports `match`,
+`differs`, or `absent`; comparable files report both the master and mirror
+digests. There is no newline, whitespace, encoding, or semantic normalization.
+An absent mirror is conclusively not an identical copy and is an evaluated
+mismatch, exit 1. An absent master provides no reference bytes and is always
+`cannot_evaluate`, exit 2; there is no fail-open allowance flag.
+
+The global `--wiki-dir WORKSPACE/wiki` selector retains `WORKSPACE` as the
+confinement root, so the master may be a workspace-root document while mirrors
+sit under the wiki. Linked, special, oversized, unreadable, or escaping paths
+are `cannot_evaluate`. The command invokes no external process and performs no
+Git or filesystem mutation. Output uses `achta.mirror-check.v1`.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -941,6 +963,7 @@ achta/
   internal/rulefloorclient/
   internal/releasenotes/
   internal/slicecheck/
+  internal/mirror/
   testdata/
     machine/
     wiki/
@@ -974,6 +997,8 @@ Responsibilities:
   Rulefloor's stable machine interfaces.
 - `internal/releasenotes`: bounded version-heading validation and extraction.
 - `internal/slicecheck`: read-only landed-slice checks over Git and wiki facts.
+- `internal/mirror`: pure exact-byte SHA-256 comparison and deterministic
+  per-mirror results.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
@@ -1043,6 +1068,7 @@ define arbitrary executable commands.
 | Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition, count-claim, ledger-claim, and model-mirror checks | Candidates for explicit `achta wiki check` components |
+| Byte-identical master/mirror checks | Implemented by `achta mirror check`; retain old scripts until caller parity and retirement are explicit |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
 | Ledger census versus source graph | Keep as a composition gate; Rulefloor and Gograph retain ownership |
@@ -1122,6 +1148,10 @@ Schemas added after v0.4.2:
 
 - `achta.floor-census.v1`
 
+Schemas added after v0.4.4:
+
+- `achta.mirror-check.v1`
+
 Do not publish a schema until the corresponding implementation and conformance
 tests are complete.
 
@@ -1168,6 +1198,9 @@ Add focused tests for:
   CI provenance ancestry checks;
 - fail-closed reachability, catch-all rejection, exact skip evidence, record-only
   witness-cycle refusal, and toolchain pin/digest parity.
+- exact master/mirror byte equality, one-byte and whitespace differences,
+  absent mirrors, absent masters, and a workspace-root master selected through
+  `--wiki-dir`.
 
 ### 15.2 Integration tests
 
@@ -1503,7 +1536,17 @@ The v0.3.0 release records these choices explicitly:
 4. Repository-specific facts have exactly one wiki owner; migration removes the
    former central page, decision, and log records instead of retaining mirrors.
 
-## 26. Success measure
+## 26. v0.4.5 decisions
+
+1. A missing master is always `cannot_evaluate`, exit 2. Without reference bytes
+   equality has no truth value; adding an allowance flag would preserve the
+   silent fail-open this command is intended to remove.
+2. A missing mirror is an evaluated mismatch, exit 1: once the master exists,
+   absence conclusively means the named mirror is not an identical copy.
+3. Mirror equality is SHA-256 over exact file bytes. Achta refuses newline,
+   whitespace, encoding, or semantic normalization.
+
+## 27. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

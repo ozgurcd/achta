@@ -2,6 +2,25 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Added
+
+- `mirror check --master PATH --mirror PATH [--mirror PATH]...` replaces
+  repeated file-copy comparisons with one workspace-confined, read-only verb.
+  It computes SHA-256 over the exact bytes of the master and every mirror in
+  caller order, reporting `match`, `differs` with both digests, or `absent` per
+  mirror through the stable `achta.mirror-check.v1` interface. It never
+  normalizes newlines, whitespace, encoding, or document meaning and invokes no
+  shell or Git command. A master at the workspace root remains selectable when
+  `--wiki-dir WORKSPACE/wiki` is used because that selector retains the parent
+  workspace as the confinement root.
+- An absent mirror is an evaluated non-identity and returns exit 1. An absent
+  master has no reference bytes, is always `cannot_evaluate`, and returns exit
+  2; no allowance flag preserves the former fail-open behavior.
+- A mutation-proved Rulefloor invariant raises the executable floor from 30 to
+  31.
+
 ## v0.4.4 — 2026-09-05
 
 ### Added

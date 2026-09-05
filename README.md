@@ -109,6 +109,10 @@ achta --workspace /path/to/workspace floor census \
   --bucket COVERED,OOS-L,OOS-O,OOS-P,OOS-T --covered COVERED --fence-heading '## Full list' \
   --marker '~' --count-sum '^## Totals \(sum = (\d+)' --allow-prefix '- ALLOW-COVERS-ABSENCE:' --json
 
+achta --wiki-dir /path/to/workspace/wiki mirror check \
+  --master AGENTS.md --mirror wiki/contracts/AGENTS.md \
+  --mirror wiki/tools/AGENTS.md --json
+
 go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 ```
 
@@ -151,6 +155,15 @@ no row cites, and absences not on the frozen allowlist. Every piece of the
 census's vocabulary is a flag; nothing is built in. It refuses to say whether a
 cited rule is armed — that is RULE-FLOOR.md's column, Rulefloor's format — and
 says so in its document.
+
+`mirror check` computes SHA-256 over one master's exact bytes and compares each
+explicit `--mirror` in caller order. It performs no newline, whitespace, or
+semantic normalization: identical bytes match and any byte change differs.
+Each result carries both digests when comparison is possible. An absent mirror
+is an evaluated mismatch (exit 1); an absent master cannot establish the
+reference digest and is `cannot_evaluate` (exit 2). Paths are read-only and
+workspace-confined. With `--wiki-dir WORKSPACE/wiki`, a master at the workspace
+root remains addressable because the selector retains `WORKSPACE` as its root.
 
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,
