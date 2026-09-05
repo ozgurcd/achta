@@ -129,3 +129,20 @@ workflow publishes the matching private archives and Homebrew Cask metadata.
 The first v0.4.0 tag run stopped before publication because the source version
 and exact machine fixtures still reported v0.3.0. They now advance together to
 v0.4.0 so the tag, release binary, and toolchain version agree.
+
+
+## [2026-09-05] feature | wiki-check-selection
+
+A caller measured against v0.4.0 that no command enforces pin freshness on a
+dirty working tree: `wiki check` couples freshness with derive, whose block
+records `Working tree vs HEAD`, and `wiki freshness` only reports. `wiki check
+--only NAME[,NAME...]` now evaluates and reports exactly the selected checks in
+canonical order under the unchanged exit contract; an empty, unknown, or
+repeated name is exit 2 with nothing evaluated, and naming every check is the
+composed check. Selection is a set, not a per-check exit code (P-061).
+Independently, `achta.wiki-check.v1` carries `wiki_dir` and the text output
+prints it first, so a pass against the wrong wiki is no longer silent. Both
+behaviors are armed with mutation proofs (WIKI-CHECK-SELECTION-1,
+WIKI-CHECK-WIKI-DIR-1), raising the executable floor from 23 to 25. The
+decisions register gained its missing `## Decisions` section because `decision
+add` refused the page without one.

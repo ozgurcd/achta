@@ -585,7 +585,7 @@ Until those checks exist, clearing remains an explicit reviewed edit.
 achta wiki freshness [--strict] [--repo NAME] [--json]
 achta wiki derive [--check | --print REPOSITORY] [--json]
 achta wiki unpushed [--repo PATH] [--json]
-achta wiki check [--json]
+achta wiki check [--only NAME[,NAME...]] [--json]
 ```
 
 `wiki freshness` compares each externally owned repository page's anchored
@@ -609,7 +609,14 @@ closed statuses are `published`, `unpushed`, `behind`, and `diverged`.
 
 `wiki check` composes strict freshness and derived-block checks, exposes both
 results separately, and preserves `cannot_evaluate`; a green aggregate never
-hides a skipped or unevaluated component.
+hides a skipped or unevaluated component. `--only NAME[,NAME...]` selects the
+checks to evaluate from `freshness` and `derive`: the selected checks are the
+only ones evaluated and the only ones in `checks[]`, in canonical order, and
+the exit contract applies unchanged to that selection. The selection is a set,
+never a per-check exit code. An empty, unknown, or repeated name is invalid
+input: exit 2 and nothing is evaluated. Without `--only`, every check runs. The
+JSON document also carries `wiki_dir`, the wiki directory Achta actually
+resolved, because a pass against the wrong wiki would otherwise be silent.
 
 The stable schemas are `achta.wiki-freshness.v1`, `achta.wiki-derive.v1`,
 `achta.wiki-unpushed.v1`, and `achta.wiki-check.v1`.

@@ -422,7 +422,7 @@ Commands:
   wiki freshness compare repository-page pins with local HEADs
   wiki derive   check, print, or update generated repository facts
   wiki unpushed compare a repository with its local upstream ref
-  wiki check    report freshness and derived-block checks separately
+  wiki check    report freshness and derived-block checks separately; --only NAME[,NAME] selects a subset
   witness summarize summarize a gate-run.v1 record
   witness init  create or restart a bounded witness record
   witness step  append one explicitly observed target result

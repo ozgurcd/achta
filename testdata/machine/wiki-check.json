@@ -1,1 +1,1 @@
-{"schema_version":"achta.wiki-check.v1","status":"pass","checks":[{"name":"freshness","status":"pass","detail":"all repository pages are current"},{"name":"derive","status":"pass","detail":"all generated blocks are current"}]}
+{"schema_version":"achta.wiki-check.v1","status":"pass","wiki_dir":"/workspace/wiki","checks":[{"name":"freshness","status":"pass","detail":"all repository pages are current"},{"name":"derive","status":"pass","detail":"all generated blocks are current"}]}

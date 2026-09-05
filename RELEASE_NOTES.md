@@ -2,6 +2,22 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Added
+
+- `wiki check --only NAME[,NAME...]` selects which of `freshness` and `derive`
+  to evaluate. The selected checks are the only ones evaluated and the only
+  ones reported, in canonical order; the exit contract is unchanged and applies
+  to the selection. An empty, unknown, or repeated name is invalid input:
+  exit 2, nothing evaluated. This gives callers an enforcing freshness check
+  on a working tree they have legitimately dirtied, which no command offered.
+- `achta.wiki-check.v1` carries `wiki_dir`, the wiki directory Achta resolved,
+  and the text output prints it first, so a pass against the wrong wiki is no
+  longer silent.
+- Two mutation-proved Rulefloor invariants for check selection and resolved
+  wiki reporting, raising the executable floor from 23 to 25.
+
 ## v0.4.0 — 2026-09-05
 
 ### Added

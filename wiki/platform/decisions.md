@@ -7,6 +7,8 @@ updated: 2026-09-05
 
 # Achta Decisions
 
+## Decisions
+
 ### P-058 — The wiki close runs through Achta
 
 THE-ACHTA-WIKI-CLOSE (owner ruling: Achta v0.2.5 is the tool). The wiki half of
@@ -86,3 +88,27 @@ wiki's parent as the workspace root because wiki pinning, freshness, derivation,
 slice checks, and related operations may resolve repositories beside the wiki.
 An arbitrary detached content directory would silently change those contracts
 and is therefore rejected.
+
+### P-061 — Wiki check selection is a set under the single exit contract
+`wiki check --only NAME[,NAME...]` selects which of `freshness` and `derive`
+are evaluated. The selected checks are the only ones evaluated and the only
+ones reported, in canonical order, and the existing three-way exit contract
+applies to that selection unchanged. Selection is a set: Achta does not encode
+per-check outcomes in the exit status, because a per-check code would have to
+encode a set — a bitmask, not an exit status — and the process contract is one
+verdict per invocation.
+
+An empty, unknown, or repeated name is invalid input: exit 2 and nothing is
+evaluated. Without `--only`, every check runs, which is the prior behaviour.
+
+The need was measured by a caller against v0.4.0. `wiki check` was the only
+enforcing wiki command and it coupled freshness with derive; derive records
+`Working tree vs HEAD`, so it fails on a tree the caller legitimately dirtied,
+and `make verify` dirties its own gate record by definition. `wiki freshness`
+only reports. So "are the pins fresh on a dirty tree" had no enforcing command,
+and the caller parsed `checks[]` out of the JSON in a Makefile.
+
+Independently, `achta.wiki-check.v1` carries `wiki_dir`, the wiki directory
+Achta actually resolved, and the text output prints it first. Callers pass
+`--wiki-dir` because a pass against the wrong wiki was silent; the document now
+says which wiki it judged.

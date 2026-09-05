@@ -49,6 +49,7 @@ achta --workspace /path/to/workspace wiki pin REPOSITORY \
   --sha FULL_HEAD_SHA --verified YYYY-MM-DD --attest-reviewed --check
 
 achta --wiki-dir /path/to/repository/wiki wiki check --json
+achta --wiki-dir /path/to/repository/wiki wiki check --only freshness --json
 
 achta --workspace /path/to/workspace decision add \
   --title 'complete decision title' --body-file decision-body.md --check
@@ -115,7 +116,12 @@ the complete title; Achta invents neither dates nor content.
 `wiki freshness`, `wiki derive`, `wiki unpushed`, and `wiki check` reproduce the
 workspace's mechanical page checks from local Git and filesystem facts.
 `wiki unpushed` deliberately uses only the local upstream tracking ref and does
-not fetch. The composed check reports freshness and derivation separately.
+not fetch. The composed check reports freshness and derivation separately;
+`--only freshness` (or `derive`, or both) evaluates and reports exactly the
+named checks under the unchanged exit contract, so a gate can enforce pin
+freshness on a working tree it has legitimately dirtied. An empty or unknown
+name is exit 2 with nothing evaluated. The JSON document names the resolved
+`wiki_dir` so a pass against the wrong wiki cannot be silent.
 
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,

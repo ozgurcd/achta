@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Added `wiki check --only NAME[,NAME...]` to evaluate and report exactly the
+  selected checks under the unchanged exit contract; empty, unknown, or
+  repeated names are exit 2 with nothing evaluated.
+- Added `wiki_dir` to `achta.wiki-check.v1` (and a text line) naming the wiki
+  directory Achta resolved.
+- Raised the executable Rulefloor from 23 to 25 with mutation proofs for check
+  selection and resolved-wiki reporting.
+
 ## v0.4.0 — 2026-09-05
 
 - Moved Achta-specific wiki ownership into the Achta repository.

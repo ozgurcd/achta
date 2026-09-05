@@ -26,6 +26,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
   private assets requires authorized GitHub access.
 - Achta-specific wiki material is co-versioned under `wiki/` in this
   repository and is not duplicated in the parent workspace wiki.
+- `wiki check --only NAME[,NAME...]` evaluates and reports exactly the selected
+  checks under the unchanged exit contract; an empty, unknown, or repeated name
+  is exit 2 with nothing evaluated. `achta.wiki-check.v1` names the resolved
+  `wiki_dir`.
 
 ## Verification surface
 
@@ -34,7 +38,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
   repository-owned wiki check.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
-- `RULE-FLOOR.md` carries 23 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 25 armed, mutation-proved invariants on the current
   v0.4.0 line.
 
 ## Known limitations
@@ -62,3 +66,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Move all Achta-specific wiki information into this repository and enforce local wiki freshness and history selection with two new armed invariants. |
 | 2026-09-05 | `co-versioned` | Add explicit, fail-closed repository wiki selection and prepare the v0.4.0 release and Homebrew update. |
 | 2026-09-05 | `co-versioned` | Advance the source and exact machine version contracts to v0.4.0 after the release gate rejected the stale v0.3.0 pin. |
+| 2026-09-05 | `co-versioned` | Add fail-closed `wiki check --only` selection and the resolved `wiki_dir` field, both mutation-proved, raising the executable floor from 23 to 25. |

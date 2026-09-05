@@ -128,6 +128,7 @@ func assertStableMachineContracts(t *testing.T) {
 			value: wikiCheckDocument{
 				SchemaVersion: wikiCheckSchema,
 				Status:        "pass",
+				WikiDir:       "/workspace/wiki",
 				Checks: []wikiCheckItem{
 					{Name: "freshness", Status: "pass", Detail: "all repository pages are current"},
 					{Name: "derive", Status: "pass", Detail: "all generated blocks are current"},
