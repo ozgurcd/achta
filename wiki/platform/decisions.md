@@ -112,3 +112,35 @@ Independently, `achta.wiki-check.v1` carries `wiki_dir`, the wiki directory
 Achta actually resolved, and the text output prints it first. Callers pass
 `--wiki-dir` because a pass against the wrong wiki was silent; the document now
 says which wiki it judged.
+
+### P-062 — New workspace tooling is an Achta command, never a new script
+Owner ruling, 2026-09-05: new workspace tooling is an Achta command, never a
+new shell script. Two identuum wiki gates existed as shell only because Achta
+had no verb for them; both are read-only, workspace-local, deterministic, and
+use the standard 0/1/2 exit contract.
+
+`recipe check --makefile PATH --target NAME [--expect-line S]... [--expect-file
+PATH] [--forbid-noop]` reads one target's recipe as text and refuses
+neutralizers — edits that keep a gate looking present while make ignores its
+exit: a line beginning `-` (before or after `@`), a pipe (a `||` is not a pipe),
+a line ending `&`, a swallowed exit (`|| true`, `|| :`, `; true`, `exit 0`), and
+with `--forbid-noop` a command that is `true`, `:`, `echo` or `printf`.
+`--expect-line` and `--expect-file` are EQUALITY, byte for byte, on the physical
+recipe line without its leading tab: substring matching is the bug this exists
+for, so anything appended must fail. Measured cause: macOS make 3.81 silently
+ignores `.SHELLFLAGS := -o pipefail -c` (GNU Make 4.3 honours it), so a static
+rule is the only guard on that toolchain.
+
+`ledger census --file MD --dir [LABEL=]PATH... --tree [LABEL=]PATH... --ext E`
+recounts a markdown table against itself and against disk: per-mark counts and
+line sums against the totals rows, the total row against every row summed,
+unique subjects, a present-marked row existing at exactly the stated size, a
+RETIRED row absent, and every file (or subdirectory, for --tree) under a source
+rowed. Measured cause: a row added with the totals untouched passed every gate
+the workspace had.
+
+Out of Achta's boundary and refused: rule 5 of the retired shell (every wiki
+script that implements `--selftest` must have a `check` entry) — it inspects
+other scripts' contents for a workspace convention — and gate-witness entry
+semantics (`name=command`), which are the identuum wiki's Makefile convention,
+not a make concept; `--expect-file` covers them byte-exactly instead.

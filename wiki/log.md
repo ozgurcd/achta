@@ -162,3 +162,27 @@ Achta's cask publisher now fail-closed converts GoReleaser's deprecated
 `postflight` hook into structured `postflight_steps` while retaining private
 asset authentication and macOS quarantine handling. A mutation-proved rule
 raises the executable Rulefloor from 25 to 26.
+
+
+## [2026-09-05] feature | recipe-check-and-ledger-census
+
+Owner ruling: new workspace tooling is an Achta command, never a new script
+(P-062). Two identuum wiki gates were shell only because Achta had no verb for
+them. `recipe check` reads one Makefile target's recipe as text and refuses
+neutralizers — a `-` prefix whose exit make ignores, a pipe, a trailing `&`, a
+swallowed exit, and with `--forbid-noop` a command that cannot fail — and
+matches `--expect-line` / `--expect-file` by byte-for-byte equality, because a
+prefix match let anything appended pass. The measured cause behind it is
+macOS make 3.81 silently ignoring `.SHELLFLAGS := -o pipefail -c`. `ledger
+census` recounts a markdown ledger table against its totals rows and against
+files (`--dir`) or directories (`--tree --ext`) on disk: a row added with the
+totals untouched, a stale size, a RETIRED subject still present, or an
+unrowed entry all fail; the measured cause is exactly that first case passing
+every gate a workspace had. Both are read-only, workspace-confined, and exit 2
+when they cannot evaluate. Refused as outside the boundary: a rule that every
+wiki script implementing `--selftest` has a check entry (it inspects other
+scripts for a workspace convention) and gate-witness entry semantics (an
+identuum Makefile convention) — `--expect-file` covers the latter byte-exactly.
+RECIPE-CHECK-1 and LEDGER-CENSUS-1 are armed with mutation proofs; the
+executable Rulefloor rises from 26 to 28. Both machine interfaces have exact
+fixtures and the capabilities documents advertise them.

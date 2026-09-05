@@ -30,6 +30,12 @@ infer prose, execute generic gates, fetch, or mutate Git.
   checks under the unchanged exit contract; an empty, unknown, or repeated name
   is exit 2 with nothing evaluated. `achta.wiki-check.v1` names the resolved
   `wiki_dir`.
+- `recipe check` refuses neutralized make recipe lines (a `-` prefix, a pipe, a
+  trailing `&`, a swallowed exit, with `--forbid-noop` a no-op command) and
+  matches `--expect-line` / `--expect-file` byte for byte. `ledger census`
+  recounts a markdown ledger table against its totals and against files
+  (`--dir`) or directories (`--tree --ext`) on disk. Both read only, both
+  workspace-confined, both `cannot_evaluate` on unreadable input.
 
 ## Verification surface
 
@@ -38,7 +44,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
   repository-owned wiki check.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
-- `RULE-FLOOR.md` carries 26 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 28 armed, mutation-proved invariants on the current
   v0.4.1 line.
 
 ## Known limitations
@@ -69,3 +75,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Add fail-closed `wiki check --only` selection and the resolved `wiki_dir` field, both mutation-proved, raising the executable floor from 23 to 25. |
 | 2026-09-05 | `co-versioned` | Advance the release surfaces to v0.4.1 and move the wiki-check selection notes under their exact release heading without changing the 25-rule floor. |
 | 2026-09-05 | `co-versioned` | Publish only structured Homebrew postflight steps while preserving authenticated private-asset rewriting and macOS quarantine handling. |
+| 2026-09-05 | `co-versioned` | Add `recipe check` (byte-exact recipe expectations, neutralizer refusal) and `ledger census` (a ledger table recounted against its totals and disk), both mutation-proved, raising the executable floor from 26 to 28. |

@@ -4,7 +4,9 @@ Achta v0.4.1 capabilities
   amendments reconcile
   capabilities
   decision add
+  ledger census
   reachability classify
+  recipe check
   slice check
   toolchain check
   version

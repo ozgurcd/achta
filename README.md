@@ -99,6 +99,12 @@ achta --workspace /path/to/workspace amendments rebase \
 achta --workspace /path/to/workspace amendments reconcile \
   --manifest REPOSITORY/ledger-amendments.json --repo REPOSITORY --json
 
+achta --workspace /path/to/workspace recipe check \
+  --makefile wiki/Makefile --target check --expect-file wiki/contracts/check-recipe.txt --json
+achta --workspace /path/to/workspace ledger census \
+  --file wiki/contracts/retirement-ledger.md --dir wiki/tools \
+  --tree GO=identuum-idp-oss/tools --ext .go --json
+
 go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 ```
 
@@ -122,6 +128,16 @@ named checks under the unchanged exit contract, so a gate can enforce pin
 freshness on a working tree it has legitimately dirtied. An empty or unknown
 name is exit 2 with nothing evaluated. The JSON document names the resolved
 `wiki_dir` so a pass against the wrong wiki cannot be silent.
+
+`recipe check` reads one Makefile target's recipe as text and refuses
+neutralizers — a `-` prefix whose exit make ignores, a pipe, a trailing `&`, a
+swallowed exit, and with `--forbid-noop` a command that cannot fail — while
+`--expect-line` and `--expect-file` demand byte-exact lines, so anything
+appended fails. `ledger census` recounts a markdown ledger table against its
+totals rows and against the files (`--dir`) or directories (`--tree --ext`) on
+disk: a present row must exist at exactly its stated size, a RETIRED row must
+be gone, and every entry on disk must have a row. Both are read-only,
+workspace-confined, and exit 2 when they cannot evaluate.
 
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,

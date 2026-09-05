@@ -2,6 +2,29 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Added
+
+- `recipe check --makefile PATH --target NAME [--expect-line S]...
+  [--expect-file PATH] [--forbid-noop]` reads one target's recipe as text and
+  refuses neutralizers: a line beginning `-` (before or after `@`) whose exit
+  make ignores, a pipe (a `||` is not a pipe), a line ending `&`, a swallowed
+  exit (`|| true`, `|| :`, `; true`, `exit 0`), and with `--forbid-noop` a
+  command that is `true`, `:`, `echo` or `printf`. Expectations are equality,
+  byte for byte, on the physical line without its leading tab — anything
+  appended fails. Measured cause: macOS make 3.81 silently ignores
+  `.SHELLFLAGS := -o pipefail -c`, so a static rule is the only guard there.
+- `ledger census --file MD --dir [LABEL=]PATH... --tree [LABEL=]PATH... --ext E`
+  recounts a markdown table against itself and against disk: per-mark counts
+  and sums against the totals rows (`LABEL-MARK`, `LABEL-total`), the total row
+  against every row summed, unique subjects, a present-marked row existing at
+  exactly the stated size, a RETIRED row absent, and every file or subdirectory
+  under a source rowed. Measured cause: a row added with the totals untouched
+  passed every gate a workspace had.
+- Two mutation-proved Rulefloor invariants, raising the executable floor from
+  26 to 28.
+
 ## v0.4.1 — 2026-09-05
 
 ### Added

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- Added `recipe check`: a Makefile target's recipe is read as text and
+  neutralizers are refused — a `-` prefix, a pipe, a trailing `&`, a swallowed
+  exit, and with `--forbid-noop` a `true`/`:`/`echo`/`printf` command;
+  `--expect-line` and `--expect-file` are byte-exact equality.
+- Added `ledger census`: a markdown ledger table is recounted against its
+  totals rows and against files (`--dir`) or directories (`--tree --ext`) on
+  disk; a present row must exist at exactly its stated size, a RETIRED row must
+  be gone, and every entry on disk must have a row.
+- Raised the executable Rulefloor from 26 to 28 with mutation proofs for
+  byte-exact recipe expectations and totals recounting.
+
 ## v0.4.1 — 2026-09-05
 
 - Added `wiki check --only NAME[,NAME...]` to evaluate and report exactly the

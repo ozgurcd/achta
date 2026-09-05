@@ -727,6 +727,57 @@ paths outside the repository fail closed. The manifest cannot define commands;
 the check executes no external process. Output uses
 `achta.toolchain-parity.v1`.
 
+### 7.16 Recipe check
+
+```text
+achta recipe check --makefile PATH --target NAME [--expect-line S]... [--expect-file PATH] [--forbid-noop] [--json]
+```
+
+`recipe check` reads one Makefile target's recipe as TEXT — the physical lines
+that begin with a tab after `NAME:` up to the next non-recipe line, comment
+lines skipped — and refuses NEUTRALIZERS: edits that keep a gate looking
+present while make ignores its exit. A line beginning `-` after the tab,
+before or after `@`, is `ignored-exit`; a pipe is `pipe` (a `||` is not a
+pipe); a line ending `&` is `background`; `|| true`, `|| :`, `; true` or
+`exit 0` is `swallowed-exit`; and with `--forbid-noop` a command whose first
+word is `true`, `:`, `echo` or `printf` is `noop`. Every `--expect-line` and
+every line of `--expect-file` must EQUAL some recipe line byte for byte,
+without the leading tab; substring or prefix matching is the defect this
+command exists for, so anything appended must fail. The measured cause is
+that macOS make 3.81 silently ignores `.SHELLFLAGS := -o pipefail -c`
+(GNU Make 4.3 honours it), leaving a static rule as the only guard on that
+toolchain. Exit 1 on any violation or absent expectation; a missing or
+duplicated target, an empty recipe, or an unreadable makefile is
+`cannot_evaluate` and exit 2. The makefile and expect-file are confined to
+the workspace. Output uses `achta.recipe-check.v1`.
+
+### 7.17 Ledger census
+
+```text
+achta ledger census --file PATH [--dir [LABEL=]PATH]... [--tree [LABEL=]PATH]... [--ext EXT] [--json]
+```
+
+`ledger census` recounts a markdown ledger table against ITSELF and against
+disk. A row is any table line whose first cell is an integer row number and
+whose third cell is an integer size; its second cell names the subject and
+its last cell's first word is the mark. A totals row is any three-cell line
+whose label is not a number and whose other two cells are integers; the key
+is the label's first word, `MARK` or `total`, prefixed `LABEL-` for a
+labelled source. Per source, per mark, the row count and size sum must equal
+the totals row; the `total` row must equal every row summed; a totals row for
+a mark with no rows must read zero; subjects are unique. Against disk, a
+`--dir` source censuses every regular file directly under PATH (size = line
+count) and a `--tree` source every subdirectory (size = summed lines of files
+with `--ext` under it, recursive); a present-marked row must exist at EXACTLY
+the stated size, a `RETIRED` row must NOT exist, and every entry on disk must
+have a row. Rows are assigned to a `--dir` source when their subject is a bare
+file name and to a `--tree` source when it starts with the source directory's
+base name and a slash; a row matching no source is a violation. The measured
+cause is a row added with the totals untouched that passed every gate a
+workspace had. Exit 1 on any violation; no sources, an unreadable source, or
+no rows at all is `cannot_evaluate` and exit 2. Nothing is written. Output
+uses `achta.ledger-census.v1`.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -1010,6 +1061,11 @@ Schemas added for v0.3.0:
 - `achta.reachability.v1`
 - `achta.toolchain-parity.v1`
 - `achta.witness-earned.v1`
+
+Schemas added after v0.4.1:
+
+- `achta.recipe-check.v1`
+- `achta.ledger-census.v1`
 
 Do not publish a schema until the corresponding implementation and conformance
 tests are complete.

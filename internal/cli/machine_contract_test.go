@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	"github.com/ozgurcd/achta/internal/amendments"
+	"github.com/ozgurcd/achta/internal/census"
 	"github.com/ozgurcd/achta/internal/earned"
 	"github.com/ozgurcd/achta/internal/reachability"
+	"github.com/ozgurcd/achta/internal/recipe"
 	"github.com/ozgurcd/achta/internal/slicecheck"
 	"github.com/ozgurcd/achta/internal/toolchain"
 	achtawiki "github.com/ozgurcd/achta/internal/wiki"
@@ -213,6 +215,27 @@ func assertStableMachineContracts(t *testing.T) {
 					Status: "pass",
 					Detail: "working tree is clean",
 				}},
+			},
+		},
+		{
+			name: "recipe-check.json",
+			value: recipe.Result{
+				SchemaVersion:   recipe.Schema,
+				Status:          "pass",
+				Target:          "check",
+				Lines:           3,
+				Violations:      []recipe.Violation{},
+				MissingExpected: []string{},
+			},
+		},
+		{
+			name: "ledger-census.json",
+			value: census.Result{
+				SchemaVersion: census.Schema,
+				Status:        "pass",
+				Rows:          2,
+				Sources:       []census.SourceSummary{{Path: "wiki/tools", Kind: "files", Rows: 2, OnDisk: 2, Marks: map[string]int{"KEEP": 2}}},
+				Violations:    []census.Violation{},
 			},
 		},
 	}
