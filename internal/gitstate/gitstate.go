@@ -162,6 +162,45 @@ func TrackedPaths(repo, pathspec string) ([]string, error) {
 	return paths, nil
 }
 
+// TreeFilesAt returns sorted regular-file paths beneath a repository-relative
+// directory at a commit. Linked and non-file tree entries are rejected.
+func TreeFilesAt(repo, revision, directory string) ([]string, error) {
+	clean := filepath.Clean(directory)
+	if clean == "." || filepath.IsAbs(clean) || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) || strings.ContainsAny(directory, "\r\n\x00") {
+		return nil, errors.New("invalid repository directory request")
+	}
+	commit, err := ResolveCommit(repo, revision)
+	if err != nil {
+		return nil, err
+	}
+	out, err := run(repo, nil, "ls-tree", "-r", "-z", commit, "--", filepath.ToSlash(clean))
+	if err != nil {
+		return nil, err
+	}
+	var paths []string
+	for _, record := range strings.Split(out, "\x00") {
+		if record == "" {
+			continue
+		}
+		tab := strings.IndexByte(record, '\t')
+		if tab < 0 {
+			return nil, errors.New("git returned malformed tree entry")
+		}
+		fields := strings.Fields(record[:tab])
+		if len(fields) != 3 || fields[1] != "blob" || (fields[0] != "100644" && fields[0] != "100755") {
+			return nil, fmt.Errorf("repository log directory contains a linked or non-file entry: %s", record[tab+1:])
+		}
+		path := filepath.FromSlash(record[tab+1:])
+		relative, relErr := filepath.Rel(clean, path)
+		if relErr != nil || relative == "." || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+			return nil, errors.New("git returned a path outside the requested directory")
+		}
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	return paths, nil
+}
+
 type CommitIdentity struct {
 	SHA            string
 	AuthorEmail    string

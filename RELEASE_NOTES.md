@@ -2,6 +2,25 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Added
+
+- `slice check --log-dir RELATIVE_PATH` optionally combines the automatically
+  discovered frozen log file with regular files recursively found under an
+  explicit repository-relative directory. Sources are ordered with the log file
+  first and directory files in bytewise filename order. Existing source names
+  must remain an exact prefix, and every existing file's headings must retain
+  their prior sequence as a prefix, so lexically earlier additions, removals,
+  reordering, and mid-file heading insertion fail. `--entries` is the exact sum
+  of appended headings across both sources. The flag has no default because the
+  caller owns the log-directory vocabulary; an explicitly missing, linked,
+  unreadable, or overlapping directory is `cannot_evaluate`, exit 2. The verb
+  retains its direct argument-vector Git reads and performs no shell invocation
+  or Git mutation.
+- A mutation-proved Rulefloor invariant, raising the executable floor from 29
+  to 30.
+
 ## v0.4.3 — 2026-09-05
 
 ### Added

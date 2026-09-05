@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.4.3.
+- Current release line: v0.4.3, with `slice check --log-dir` unreleased.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -51,8 +51,11 @@ infer prose, execute generic gates, fetch, or mutate Git.
   repository-owned wiki check.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
-- `RULE-FLOOR.md` carries 29 armed, mutation-proved invariants on the current
-  v0.4.3 line.
+- `slice check` can combine its discovered log file with an explicit,
+  caller-named directory in deterministic filename order while preserving
+  per-file append-only heading history.
+- `RULE-FLOOR.md` carries 30 armed, mutation-proved invariants on the current
+  v0.4.3 source line.
 
 ## Known limitations
 
@@ -86,3 +89,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Advance source, exact version fixtures, release notes, current wiki facts, and Homebrew publication metadata together for v0.4.2 without changing the 28-rule floor. |
 | 2026-09-05 | `co-versioned` | Add `floor census` (a fenced completeness census recounted against itself and rulefloor covers, vocabulary by flags, armed state refused), mutation-proved, raising the executable floor from 28 to 29. |
 | 2026-09-05 | `co-versioned` | Prepare v0.4.3 and record that every release completes only after source, tag, release, and tap publication culminate in an installed Homebrew binary proving its version and new capability. |
+| 2026-09-05 | `co-versioned` | Add explicit caller-owned `slice check --log-dir`, deterministic filename ordering, and strict per-file append-only headings, mutation-proved, raising the executable floor from 29 to 30. |

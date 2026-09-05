@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Added opt-in `slice check --log-dir RELATIVE_PATH`. The frozen log file is
+  followed by recursively discovered regular directory files in deterministic
+  filename order; old filenames and each file's old headings remain strict
+  append-only prefixes, and `--entries` counts new headings across both.
+- Kept the log-directory layout caller-owned: there is no conventional default,
+  and an explicitly missing, linked, or overlapping directory is
+  `cannot_evaluate`.
+- Raised the executable Rulefloor from 29 to 30 with a mutation proof for
+  filename-order enforcement.
+
 ## v0.4.3 — 2026-09-05
 
 - Added `floor census`: a fenced completeness census is recounted against

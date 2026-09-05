@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/ozgurcd/achta/internal/gitstate"
@@ -16,6 +17,8 @@ import (
 
 const Schema = "achta.slice-check.v1"
 
+const maxLogFiles = 10_000
+
 var secretPathPattern = regexp.MustCompile(`(?i)(^|/)\.env($|\.)|(^|/)[^/]*\.env$|\.(lic|key|pem|p12|pfx)$|(^|/)id_(rsa|ed25519)$`)
 
 type Options struct {
@@ -24,6 +27,7 @@ type Options struct {
 	Commits         int
 	ExpectedEntries int
 	ExactAhead      *int
+	LogDirectory    string
 }
 
 type Check struct {
@@ -177,14 +181,22 @@ func Run(options Options) Result {
 	}
 
 	logRelative, logErr := repositoryLog(options.Repository)
-	if errors.Is(logErr, os.ErrNotExist) {
-		add("log-append", "skip", "repository has no log.md")
-	} else if logErr != nil {
+	logDirectory, directoryErr := repositoryLogDirectory(options.Repository, options.LogDirectory)
+	if errors.Is(logErr, os.ErrNotExist) && options.LogDirectory == "" {
+		add("log-append", "skip", "repository has no log.md and no --log-dir")
+	} else if logErr != nil && !errors.Is(logErr, os.ErrNotExist) {
 		add("log-append", "cannot_evaluate", logErr.Error())
-	} else if status, detail := logAppend(options.Repository, base, logRelative, options.ExpectedEntries); status != "pass" {
-		add("log-append", status, detail)
+	} else if options.LogDirectory != "" && directoryErr != nil {
+		add("log-append", "cannot_evaluate", directoryErr.Error())
 	} else {
-		add("log-append", "pass", detail)
+		if errors.Is(logErr, os.ErrNotExist) {
+			logRelative = ""
+		}
+		if options.LogDirectory == "" {
+			logDirectory = ""
+		}
+		status, detail := logAppend(options.Repository, base, logRelative, logDirectory, options.ExpectedEntries)
+		add("log-append", status, detail)
 	}
 
 	freshness, freshnessErr := achtawiki.Freshness(options.Workspace, result.Repository)
@@ -251,21 +263,145 @@ func repositoryLog(repo string) (string, error) {
 	return "", os.ErrNotExist
 }
 
-func logAppend(repo, base, relative string, expected int) (string, string) {
-	current, err := safefile.Read(repo, filepath.Join(repo, relative), 8<<20)
+func repositoryLogDirectory(repo, relative string) (string, error) {
+	if relative == "" {
+		return "", os.ErrNotExist
+	}
+	clean := filepath.Clean(relative)
+	if clean == "." || filepath.IsAbs(clean) || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) || strings.ContainsAny(relative, "\r\n\x00") {
+		return "", errors.New("--log-dir must be a repository-relative directory")
+	}
+	current := repo
+	for _, component := range strings.Split(clean, string(filepath.Separator)) {
+		current = filepath.Join(current, component)
+		info, err := os.Lstat(current)
+		if err != nil {
+			return "", fmt.Errorf("inspect --log-dir %s: %w", clean, err)
+		}
+		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+			return "", fmt.Errorf("--log-dir must be a non-linked directory: %s", clean)
+		}
+	}
+	return clean, nil
+}
+
+type logDocument struct {
+	path     string
+	headings []string
+}
+
+func logAppend(repo, base, logFile, logDirectory string, expected int) (string, string) {
+	before, err := historicalLogDocuments(repo, base, logFile, logDirectory)
 	if err != nil {
 		return "cannot_evaluate", err.Error()
 	}
-	previous, err := gitstate.FileAt(repo, base, relative, 8<<20)
+	after, err := currentLogDocuments(repo, logFile, logDirectory)
 	if err != nil {
 		return "cannot_evaluate", err.Error()
 	}
-	before := logHeadings(previous)
-	after := logHeadings(current.Data)
-	if len(after) != len(before)+expected || !equalStrings(before, after[:min(len(before), len(after))]) {
-		return "fail", fmt.Sprintf("expected %d appended log heading(s), found %d", expected, len(after)-len(before))
+	if len(after) < len(before) {
+		return "fail", "log sources were removed or reordered"
 	}
-	return "pass", fmt.Sprintf("exactly %d log heading(s) appended at the end", expected)
+	appended := 0
+	for index, previous := range before {
+		current := after[index]
+		if current.path != previous.path {
+			return "fail", "log directory filenames were inserted, removed, or reordered"
+		}
+		if len(current.headings) < len(previous.headings) || !equalStrings(previous.headings, current.headings[:min(len(previous.headings), len(current.headings))]) {
+			return "fail", fmt.Sprintf("prior log headings changed or were not preserved at the start of %s", current.path)
+		}
+		appended += len(current.headings) - len(previous.headings)
+	}
+	for _, current := range after[len(before):] {
+		appended += len(current.headings)
+	}
+	if appended != expected {
+		return "fail", fmt.Sprintf("expected %d appended log heading(s), found %d", expected, appended)
+	}
+	return "pass", fmt.Sprintf("exactly %d log heading(s) appended at the end of ordered log sources", expected)
+}
+
+func historicalLogDocuments(repo, base, logFile, logDirectory string) ([]logDocument, error) {
+	var paths []string
+	if logFile != "" {
+		paths = append(paths, logFile)
+	}
+	if logDirectory != "" {
+		directoryPaths, err := gitstate.TreeFilesAt(repo, base, logDirectory)
+		if err != nil {
+			return nil, err
+		}
+		paths = append(paths, directoryPaths...)
+	}
+	if len(paths) > maxLogFiles {
+		return nil, fmt.Errorf("log sources exceed %d-file limit", maxLogFiles)
+	}
+	documents := make([]logDocument, 0, len(paths))
+	for index, path := range paths {
+		if index > 0 && path == logFile {
+			return nil, fmt.Errorf("--log-dir overlaps discovered log file: %s", logFile)
+		}
+		data, err := gitstate.FileAt(repo, base, path, 8<<20)
+		if err != nil {
+			return nil, err
+		}
+		documents = append(documents, logDocument{path: filepath.ToSlash(path), headings: logHeadings(data)})
+	}
+	return documents, nil
+}
+
+func currentLogDocuments(repo, logFile, logDirectory string) ([]logDocument, error) {
+	var paths []string
+	if logFile != "" {
+		paths = append(paths, logFile)
+	}
+	if logDirectory != "" {
+		var directoryPaths []string
+		root := filepath.Join(repo, logDirectory)
+		err := filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
+			}
+			if path == root {
+				return nil
+			}
+			if entry.Type()&os.ModeSymlink != 0 {
+				return fmt.Errorf("repository log directory contains a linked entry: %s", path)
+			}
+			if entry.IsDir() {
+				return nil
+			}
+			relative, err := filepath.Rel(repo, path)
+			if err != nil {
+				return err
+			}
+			directoryPaths = append(directoryPaths, relative)
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		sort.Slice(directoryPaths, func(i, j int) bool {
+			return filepath.ToSlash(directoryPaths[i]) < filepath.ToSlash(directoryPaths[j])
+		})
+		paths = append(paths, directoryPaths...)
+	}
+	if len(paths) > maxLogFiles {
+		return nil, fmt.Errorf("log sources exceed %d-file limit", maxLogFiles)
+	}
+	documents := make([]logDocument, 0, len(paths))
+	for index, path := range paths {
+		if index > 0 && path == logFile {
+			return nil, fmt.Errorf("--log-dir overlaps discovered log file: %s", logFile)
+		}
+		current, err := safefile.Read(repo, filepath.Join(repo, path), 8<<20)
+		if err != nil {
+			return nil, err
+		}
+		documents = append(documents, logDocument{path: filepath.ToSlash(path), headings: logHeadings(current.Data)})
+	}
+	return documents, nil
 }
 
 func logHeadings(data []byte) []string {

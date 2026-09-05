@@ -14,6 +14,7 @@ func runSlice(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	}
 	set := flagSet("slice check")
 	repoValue := set.String("repo", "", "repository path")
+	logDirectory := set.String("log-dir", "", "repository-relative log directory")
 	commits := set.Int("commits", 1, "number of slice commits")
 	entries := set.Int("entries", 1, "expected appended log entries")
 	ahead := set.Int("ahead", -1, "exact total commits ahead of upstream")
@@ -38,7 +39,7 @@ func runSlice(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	if *ahead >= 0 {
 		exactAhead = ahead
 	}
-	result := slicecheck.Run(slicecheck.Options{Workspace: ws.Root, Repository: repo, Commits: *commits, ExpectedEntries: *entries, ExactAhead: exactAhead})
+	result := slicecheck.Run(slicecheck.Options{Workspace: ws.Root, Repository: repo, Commits: *commits, ExpectedEntries: *entries, ExactAhead: exactAhead, LogDirectory: *logDirectory})
 	code := 0
 	if result.Status == "cannot_evaluate" {
 		code = 2

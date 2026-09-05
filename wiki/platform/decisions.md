@@ -183,3 +183,19 @@ release.
 Completion evidence is the installed `/opt/homebrew/bin/achta` reporting the
 exact release version with version agreement `pass` and advertising the newly
 shipped capability. This sequence applies to every future release.
+
+### P-065 — A log directory is caller vocabulary, selected explicitly
+
+`slice check` accepts a repository-relative `--log-dir` with no default. This is
+the same ownership boundary as P-063: Achta owns deterministic ordering and
+append-only mechanics, but `log/`, `wiki/log/`, or another directory name is a
+workspace layout decision. Auto-detecting one conventional name would make
+Achta own Identuum's migration vocabulary and could silently change the evidence
+set in an unrelated workspace.
+
+When selected, the discovered frozen log file is ordered first and recursive
+directory files follow in bytewise filename order. Existing filenames and each
+existing file's headings remain prefixes, so a lexically earlier file cannot
+reorder the evidence and an inserted heading cannot masquerade as an append.
+Explicit absence, links, unreadable inputs, or overlap with the discovered log
+file are `cannot_evaluate`; only absence of both the file and the flag skips.

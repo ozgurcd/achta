@@ -238,3 +238,24 @@ is not complete at a local commit or green build. Source push, tag and private
 release publication, Homebrew tap commit and push, and installation through
 Homebrew are all required, with the installed binary's exact version and new
 capability as the final proof.
+
+
+## [2026-09-05] feature | slice-log-directory
+
+`slice check --log-dir RELATIVE_PATH` combines the discovered frozen log file
+with regular files recursively read from an explicit repository-relative
+directory. The file is first and directory paths follow in deterministic
+bytewise filename order; old filenames must remain a prefix, and old headings
+must remain a prefix inside each existing file. A lexically earlier file,
+removal or reordering, or a heading inserted before an old heading therefore
+fails. `--entries` counts appends across both sources. Explicit missing, linked,
+unreadable, or overlapping directories are `cannot_evaluate`, exit 2; only no
+log file plus no flag skips. The verb keeps direct argument-vector Git reads and
+does not invoke a shell or mutate Git.
+
+Decision P-065 keeps the directory name caller-owned, parallel to P-063's census
+vocabulary: auto-detecting `log/` would make Achta own an Identuum migration
+convention and could silently widen another workspace's evidence. The new
+SLICE-LOG-DIRECTORY-1 invariant is mutation-proved: disabling the filename-order
+guard made a lexically earlier file pass, so the bound test failed; restoring
+the guard returned it green. The executable Rulefloor rises from 29 to 30.

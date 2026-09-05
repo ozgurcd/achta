@@ -211,24 +211,42 @@ func TestWitnessInitRefusesMalformedExistingRecord(t *testing.T) {
 
 // RULE: SLICE-CHECK-1
 func TestSliceCheckAuditsLandedCommit(t *testing.T) {
-	root, repo, base := testWorkspaceRepo(t, "sample")
+	root, repo, _ := testWorkspaceRepo(t, "sample")
+	if err := os.MkdirAll(filepath.Join(repo, "log"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, filepath.Join(repo, "log", "001-baseline.md"), "## [2026-09-04] baseline\n")
+	runGit(t, repo, "add", "log/001-baseline.md")
+	runGit(t, repo, "commit", "-m", "log baseline")
+	base := strings.TrimSpace(runGit(t, repo, "rev-parse", "HEAD"))
 	runGit(t, repo, "remote", "add", "origin", repo)
 	runGit(t, repo, "update-ref", "refs/remotes/origin/main", base)
 	runGit(t, repo, "branch", "--set-upstream-to=origin/main", "main")
 	writeTestFile(t, filepath.Join(repo, "slice.txt"), "landed slice\n")
-	runGit(t, repo, "add", "slice.txt")
+	writeTestFile(t, filepath.Join(repo, "log", "002-slice.md"), "## [2026-09-05] slice\n")
+	runGit(t, repo, "add", "slice.txt", "log/002-slice.md")
 	runGit(t, repo, "commit", "-m", "fixture slice")
 	head := strings.TrimSpace(runGit(t, repo, "rev-parse", "HEAD"))
 	page := "---\ntitle: sample\ncategory: repo\nverified: 2026-09-04\nverified_against: sample @ " + head + " (main)\n---\n"
 	writeTestFile(t, filepath.Join(root, "wiki", "repos", "sample.md"), page)
 
 	var stdout, stderr bytes.Buffer
-	args := []string{"--workspace", root, "slice", "check", "--repo", "sample", "--commits", "1", "--entries", "0", "--ahead", "1", "--json"}
+	args := []string{"--workspace", root, "slice", "check", "--repo", "sample", "--log-dir", "log", "--commits", "1", "--entries", "1", "--ahead", "1", "--json"}
 	if code := Run(args, &stdout, &stderr, "v0.2.0"); code != 0 {
 		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), `"schema_version":"achta.slice-check.v1"`) || !strings.Contains(stdout.String(), `"status":"pass"`) {
 		t.Fatalf("unexpected slice JSON: %s", stdout.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	args = []string{"--workspace", root, "slice", "check", "--repo", "sample", "--log-dir", "missing", "--commits", "1", "--entries", "1", "--ahead", "1", "--json"}
+	if code := Run(args, &stdout, &stderr, "v0.2.0"); code != 2 {
+		t.Fatalf("missing log directory code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"status":"cannot_evaluate"`) {
+		t.Fatalf("missing directory did not fail closed: %s", stdout.String())
 	}
 }
 

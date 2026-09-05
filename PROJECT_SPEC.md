@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.4.3 release specification
+Status: v0.4.3 release specification plus unreleased slice-log directory selection
 
 Project name: Achta
 
@@ -682,7 +682,8 @@ writable witness appear stronger than it is.
 ### 7.13 Slice check
 
 ```text
-achta slice check --repo PATH [--commits N] [--entries N] [--ahead N] [--json]
+achta slice check --repo PATH [--log-dir RELATIVE_PATH] \
+  [--commits N] [--entries N] [--ahead N] [--json]
 ```
 
 The command audits local Git and wiki evidence for an already landed slice. It
@@ -690,10 +691,21 @@ checks a clean tree, upstream availability and ancestry, total commits ahead,
 slice author and committer identity, absence of agent identities and
 secret-like paths, module-boundary changes, expected log heading appends, and
 wiki freshness. A repository-owned `wiki/log.md` takes precedence over a root
-`log.md`; a co-versioned wiki page is tied by the containing commit rather than
-an impossible self-SHA. `--commits` and `--entries` default to one;
-`--ahead` optionally requires an exact total. It performs no fetch and no Git
-mutation. Every component is returned separately using
+`log.md`. The optional `--log-dir` has no default and names a repository-relative,
+non-linked directory whose regular files are read recursively in bytewise
+filename order after the discovered log file. Existing filenames must remain an
+exact prefix of that order, and the prior headings in every existing file must
+remain an exact prefix within that file; inserting a lexically earlier file,
+removing or reordering a file, or inserting a heading before a prior heading
+fails. Appended headings across the file and directory together must equal
+`--entries`. An explicitly selected directory that is absent, linked, unreadable,
+or overlaps the discovered log file is `cannot_evaluate`; the log check skips
+only when no log file exists and `--log-dir` was not supplied. The caller owns
+the directory name and layout vocabulary, so Achta does not auto-detect a
+conventional `log/` directory. A co-versioned wiki page is tied by the containing
+commit rather than an impossible self-SHA. `--commits` and `--entries` default to
+one; `--ahead` optionally requires an exact total. It performs no fetch, shell
+invocation, or Git mutation. Every component is returned separately using
 `achta.slice-check.v1`; inability to measure a required fact is exit 2 rather
 than a pass.
 

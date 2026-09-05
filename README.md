@@ -86,7 +86,7 @@ achta --workspace /path/to/workspace toolchain check \
   --workflow REPOSITORY/.github/workflows/verify.yml --json
 
 achta --workspace /path/to/workspace slice check \
-  --repo REPOSITORY --commits 1 --entries 1 --json
+  --repo REPOSITORY --log-dir wiki/log --commits 1 --entries 1 --json
 
 achta --workspace /path/to/workspace amendments declare \
   --manifest REPOSITORY/ledger-amendments.json \
@@ -173,7 +173,14 @@ with top-level CI workflow pins and never accepts an executable command.
 
 `slice check` audits an already landed slice using local Git and wiki facts. A
 repository-owned `wiki/log.md` takes precedence over a root `log.md`. The
-command does not fetch, stage, commit, or otherwise mutate Git.
+optional, repo-relative `--log-dir` has no default: Achta reads its regular files
+recursively in deterministic filename order after the frozen log file, requires
+old filenames and per-file headings to remain append-only prefixes, and counts
+new headings across both sources. An explicit missing or linked directory is
+`cannot_evaluate`; only absence of both an automatically discovered log file and
+the flag skips the check. The directory name stays caller-owned, consistent with
+the flag-only vocabulary decision for `floor census`. The command invokes no
+shell and does not fetch, stage, commit, or otherwise mutate Git.
 
 `amendments declare` records human intent; it never infers a declaration.
 `amendments rebase` selects the newest reachable commit with the accepted
