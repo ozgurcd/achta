@@ -221,3 +221,28 @@ root; a root-level master and wiki-contained mirrors therefore share one safe
 boundary. The verb reads bounded regular non-linked files, invokes no shell or
 Git command, and performs no mutation. Existing comparison scripts remain until
 their callers explicitly prove parity and retire them in a later slice.
+
+### P-067 — Achta owns the prompt-part lock, not the referenced heading vocabulary
+
+`parts lock --dir DIR --lock FILE [--bump]` writes a canonical
+`achta.parts-lock.v1` artifact and `parts verify --dir DIR --lock FILE` is its
+only semantic reader. Achta owns this format because it creates the fact being
+enforced, as it owns `gate-run.v1`: one schema marker, one `VERSION vN`, and one
+unique bytewise filename-sorted `name sha256` record for every direct `.txt`
+part. Making those tokens flags would let callers redefine the artifact the
+writer claims to own and would weaken cross-caller interoperability. A caller
+with the former hand-written lock migrates it when adopting these commands;
+Achta does not silently accept unversioned comment dialects as the canonical
+format.
+
+The answer on “each part names a live section of a canonical document” is NO.
+A content lock can establish exact part identity and closed-set membership, but
+the canonical document, its heading grammar, and what a reference means are
+caller vocabulary. Folding that assertion into Achta would repeat the P-063
+ownership error and turn a workspace-specific naming convention into a product
+contract. The caller keeps that one semantic analyzer line.
+
+Verification is fail closed: a matching closed set is exit 0; an edited,
+absent, or unlocked part is evaluated drift and exit 1; malformed, missing,
+unsafe, oversized, or concurrently changing evidence is `cannot_evaluate` and
+exit 2. The commands invoke no shell and perform no Git operation.

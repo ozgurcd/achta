@@ -247,6 +247,28 @@ Achta must parse records strictly enough to distinguish:
 Missing timing information remains unknown. Achta must not fabricate durations,
 timestamps, targets, or command execution.
 
+### 6.5 Prompt-part lock
+
+Achta owns the lock artifact it writes:
+
+```text
+# achta.parts-lock.v1
+VERSION vN
+
+name.txt LOWERCASE_SHA256
+```
+
+The artifact contains one unique record for every direct `.txt` part, ordered
+bytewise by filename. The schema marker, version grammar, filename grammar,
+single-space separator, lowercase digest, LF line endings, ordering, and final
+newline are canonical rather than caller-configurable. A workspace adopting
+the command migrates its former comment dialect to this format.
+
+The lock establishes exact bytes and closed-set membership. Whether a part
+names a live section of some canonical document is not part of this artifact:
+the document selection, heading grammar, and reference semantics belong to the
+caller.
+
 ## 7. Command-line design
 
 ### 7.1 General form
@@ -851,6 +873,36 @@ sit under the wiki. Linked, special, oversized, unreadable, or escaping paths
 are `cannot_evaluate`. The command invokes no external process and performs no
 Git or filesystem mutation. Output uses `achta.mirror-check.v1`.
 
+### 7.20 Parts lock and verification
+
+```text
+achta parts lock   --dir DIR --lock FILE [--bump] [--json]
+achta parts verify --dir DIR --lock FILE [--json]
+```
+
+`parts lock` reads every direct `.txt` regular file beneath the explicit,
+workspace-confined directory and writes the explicit lock artifact atomically.
+Names are unique and bytewise filename-sorted; SHA-256 is computed over exact
+bytes without newline, whitespace, encoding, or semantic normalization. A new
+lock starts at `VERSION v1`. Rewriting an existing canonical lock preserves its
+version; `--bump` requires an existing lock and increments the positive decimal
+version exactly once. An unchanged render does not replace the file.
+
+`parts verify` parses only canonical `achta.parts-lock.v1`, recomputes the same
+exact digests, and reports every locked name as `match`, `differs`, or `absent`,
+followed by every neighboring unlocked `.txt` file as `unlocked`. It reports
+the lock version and both locked and on-disk counts. Exit 0 means the complete
+set matches. An edited, absent, or unlocked part is evaluated drift, exit 1.
+A missing or malformed lock, missing or unsafe directory, linked or special
+part, bound violation, or concurrently changing lock/directory is
+`cannot_evaluate`, exit 2.
+
+The commands enumerate only direct `.txt` files, accept no format-shaping
+flags, invoke no external process, perform no Git operation, and never inspect
+part prose for canonical-document section references. Output uses
+`achta.parts-operation.v1` for writes and `achta.parts-verify.v1` for checks;
+the artifact schema is `achta.parts-lock.v1`.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -964,6 +1016,7 @@ achta/
   internal/releasenotes/
   internal/slicecheck/
   internal/mirror/
+  internal/parts/
   testdata/
     machine/
     wiki/
@@ -999,6 +1052,8 @@ Responsibilities:
 - `internal/slicecheck`: read-only landed-slice checks over Git and wiki facts.
 - `internal/mirror`: pure exact-byte SHA-256 comparison and deterministic
   per-mirror results.
+- `internal/parts`: canonical prompt-part lock parsing/rendering, version
+  transitions, exact-byte digests, and closed-set verification.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
@@ -1069,13 +1124,14 @@ define arbitrary executable commands.
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition, count-claim, ledger-claim, and model-mirror checks | Candidates for explicit `achta wiki check` components |
 | Byte-identical master/mirror checks | Implemented by `achta mirror check`; retain old scripts until caller parity and retirement are explicit |
+| Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
 | Ledger census versus source graph | Keep as a composition gate; Rulefloor and Gograph retain ownership |
 | Rulefloor installation-route gate | Keep outside; it audits workflow/distribution policy |
 | Vulnerability fix-availability policy | Keep in a dedicated vulnerability analyzer; Achta does not own advisory or fix semantics |
 | Route, link, inert-parameter, clock, and wire analyzers | Keep dedicated |
-| Prompt inclusion, prompt locks, commit hook, and source-navigation hook | Keep in the agent harness initially |
+| Prompt inclusion, canonical-section reference checking, commit hook, and source-navigation hook | Keep in the agent harness; the caller owns heading vocabulary and hook wiring |
 
 ### 13.3 Parity procedure
 
@@ -1152,6 +1208,15 @@ Schemas added after v0.4.4:
 
 - `achta.mirror-check.v1`
 
+Schemas added after v0.4.5:
+
+- `achta.parts-operation.v1`
+- `achta.parts-verify.v1`
+
+Canonical artifact schemas added after v0.4.5:
+
+- `achta.parts-lock.v1`
+
 Do not publish a schema until the corresponding implementation and conformance
 tests are complete.
 
@@ -1201,6 +1266,9 @@ Add focused tests for:
 - exact master/mirror byte equality, one-byte and whitespace differences,
   absent mirrors, absent masters, and a workspace-root master selected through
   `--wiki-dir`.
+- canonical part-lock parsing/rendering, initial and bumped versions, exact
+  digest agreement, edited and absent locked parts, unlocked neighboring parts,
+  malformed locks, unsafe files, and concurrent-change refusal.
 
 ### 15.2 Integration tests
 
@@ -1220,6 +1288,8 @@ Cover complete workflows:
    timeout, and nonzero exit behavior.
 6. Failure after staging but before replacement leaves canonical bytes
    unchanged.
+7. Part lock creation, explicit version bump, matching verification, edited
+   part drift, and unlocked neighboring part drift.
 
 Use fake executables for Git and Rulefloor argument-vector tests where
 appropriate, while retaining a small end-to-end suite against installed
@@ -1546,7 +1616,20 @@ The v0.3.0 release records these choices explicitly:
 3. Mirror equality is SHA-256 over exact file bytes. Achta refuses newline,
    whitespace, encoding, or semantic normalization.
 
-## 27. Success measure
+## 27. Unreleased decisions
+
+1. Achta owns `achta.parts-lock.v1` because `parts lock` creates the artifact;
+   the format is not shapeable through flags. This differs from P-063 census
+   input: the census already belongs to the caller, while the lock is an Achta
+   output and shared contract.
+2. “Each part names a live section of a canonical document” remains outside
+   Achta. The caller owns the canonical document, heading vocabulary, and
+   reference semantics; Achta establishes exact bytes and closed-set membership
+   only.
+3. The conversion remains Unreleased on the v0.4.5 source line. No source
+   version or release fixture moves until the later combined release.
+
+## 28. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

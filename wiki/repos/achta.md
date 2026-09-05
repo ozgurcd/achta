@@ -46,6 +46,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `mirror check` compares exact SHA-256 bytes from one
   master to explicit mirrors, including a workspace-root master selected through
   `--wiki-dir`; absent mirrors fail and an absent master is `cannot_evaluate`.
+- `parts lock` writes the Achta-owned `achta.parts-lock.v1` artifact for a
+  direct `.txt` set, preserving or explicitly bumping `VERSION`; `parts verify`
+  names edited, absent, and unlocked parts under the 0/1/2 exit contract. Live
+  canonical-document heading references remain caller-owned.
 
 ## Verification surface
 
@@ -57,7 +61,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 31 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 32 armed, mutation-proved invariants on the current
   v0.4.5 line.
 
 ## Known limitations
@@ -96,3 +100,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Advance source, exact machine and human fixtures, current wiki facts, changelog, and release notes together for v0.4.4, retaining the 30-rule floor and adding the installed directory-proof fixture. |
 | 2026-09-05 | `co-versioned` | Add workspace-confined, exact-byte `mirror check`, make absent master fail closed, add its stable machine contract and mutation proof, and raise the executable floor from 30 to 31. |
 | 2026-09-05 | `co-versioned` | Advance source, exact machine and human fixtures, current wiki facts, changelog, and release notes together for v0.4.5, retaining the 31-rule floor and adding installed exact-byte proof fixtures. |
+| 2026-09-05 | `co-versioned` | Add Achta-owned `parts lock` and exact closed-set `parts verify`, keep section-reference semantics caller-owned, and raise the mutation-proved floor from 31 to 32 without releasing. |

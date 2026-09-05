@@ -113,6 +113,11 @@ achta --wiki-dir /path/to/workspace/wiki mirror check \
   --master AGENTS.md --mirror wiki/contracts/AGENTS.md \
   --mirror wiki/tools/AGENTS.md --json
 
+achta --wiki-dir /path/to/workspace/wiki parts lock \
+  --dir wiki/prompt/parts --lock wiki/prompt/parts.lock --bump
+achta --wiki-dir /path/to/workspace/wiki parts verify \
+  --dir wiki/prompt/parts --lock wiki/prompt/parts.lock --json
+
 go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 ```
 
@@ -164,6 +169,18 @@ is an evaluated mismatch (exit 1); an absent master cannot establish the
 reference digest and is `cannot_evaluate` (exit 2). Paths are read-only and
 workspace-confined. With `--wiki-dir WORKSPACE/wiki`, a master at the workspace
 root remains addressable because the selector retains `WORKSPACE` as its root.
+
+`parts lock` writes Achta's strict `achta.parts-lock.v1` artifact for every
+direct `.txt` file under `--dir`, in bytewise filename order. A new lock starts
+at `VERSION v1`; an existing lock keeps its version unless `--bump` explicitly
+increments it. `parts verify` recomputes exact SHA-256 bytes, reports the lock
+version, and fails by name when a locked part is edited or absent or when an
+unlocked `.txt` file appears beside the set. Missing, malformed, linked,
+oversized, or concurrently changing evidence is `cannot_evaluate`, never a
+pass. Neither command invokes a shell or Git; only `parts lock` writes, and it
+atomically replaces the explicitly named lock. The separate question “does
+each part name a live canonical-document section?” remains caller-owned because
+heading vocabulary and document meaning are not properties of a byte lock.
 
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,

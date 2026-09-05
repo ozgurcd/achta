@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Added `parts lock --dir DIR --lock FILE [--bump]` and `parts verify --dir
+  DIR --lock FILE`: Achta owns a strict `achta.parts-lock.v1` artifact, hashes
+  direct `.txt` parts in bytewise filename order, reports its `VERSION`, and
+  fails on an edited, absent, or unlocked part.
+- Kept canonical-document heading references outside Achta because those names
+  and their meaning belong to the caller.
+- Raised the executable Rulefloor from 31 to 32 with a mutation proof for
+  exact digest and closed-set verification.
+
 ## v0.4.5 — 2026-09-05
 
 - Added `mirror check --master PATH --mirror PATH...`: SHA-256 is computed over

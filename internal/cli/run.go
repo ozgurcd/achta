@@ -142,6 +142,8 @@ func dispatch(args []string, stdout, stderr io.Writer, releaseVersion string, op
 		return runFloor(rest, stdout, stderr, opts)
 	case "mirror":
 		return runMirror(rest, stdout, stderr, opts)
+	case "parts":
+		return runParts(rest, stdout, stderr, opts)
 	default:
 		return renderError(stdout, stderr, opts.json, "achta.error.v1", invalid("unknown command %q", command))
 	}
@@ -318,6 +320,8 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "recipe check", Reads: true, RequiresWorkspace: true},
 		{Name: "ledger census", Reads: true, RequiresWorkspace: true},
 		{Name: "mirror check", Reads: true, RequiresWorkspace: true},
+		{Name: "parts lock", Reads: true, Writes: true, RequiresWorkspace: true},
+		{Name: "parts verify", Reads: true, RequiresWorkspace: true},
 		{Name: "floor census", Reads: true, ExecutesExternal: true, RequiresWorkspace: true},
 		{Name: "slice check", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "toolchain check", Reads: true, RequiresWorkspace: true},
@@ -338,10 +342,10 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 	doc := capabilitiesDocument{
 		SchemaVersion:     capabilitiesSchema,
 		Version:           normalizeVersion(releaseVersion),
-		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, floorcensus.Schema, mirror.Schema},
+		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, floorcensus.Schema, mirror.Schema, "achta.parts-operation.v1", "achta.parts-verify.v1"},
 		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--wiki-dir", "--workspace"},
 		Commands:          commands,
-		ArtifactSchemas:   []string{"achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
+		ArtifactSchemas:   []string{"achta.parts-lock.v1", "achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
 		RulefloorSchemas:  []string{"rulefloor.capabilities.v1", "rulefloor.covers.v1", "rulefloor.ledger-diff.v1"},
 		SupportedOS:       []string{"darwin", "linux"},
 		Limitations: []string{
@@ -437,6 +441,8 @@ Commands:
   ledger census recount a markdown ledger table against its totals and the files on disk
   floor census  recount a fenced completeness census against itself and rulefloor's covers map
   mirror check  compare one master with mirrors using exact-byte SHA-256 digests
+  parts lock    write the canonical versioned SHA-256 lock for direct .txt parts
+  parts verify  compare every locked part and reject unlocked neighboring .txt files
   toolchain check compare declared workspace versions and script digests with CI pins
   wiki pin      update a reviewed repository verification pin
   wiki freshness compare repository-page pins with local HEADs

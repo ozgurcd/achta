@@ -7,6 +7,8 @@ Achta v0.4.5 capabilities
   floor census
   ledger census
   mirror check
+  parts lock
+  parts verify
   reachability classify
   recipe check
   slice check

@@ -298,3 +298,21 @@ entries move unchanged in substance from Unreleased to the exact v0.4.5
 heading; the executable Rulefloor remains 31. The committed master, identical,
 and one-byte-changed fixtures support final proof through the Homebrew-installed
 binary after the authorized source, tag, release, and tap publication steps.
+
+
+## [2026-09-05] feature | parts-lock-and-verify
+
+`parts lock --dir DIR --lock FILE [--bump]` writes the canonical
+`achta.parts-lock.v1` schema marker, `VERSION vN`, and one exact SHA-256 record
+per direct `.txt` part in bytewise filename order. `parts verify` recomputes the
+closed set, names edited, absent, and unlocked files, returns exit 1 for drift,
+and preserves exit 2 for missing, malformed, unsafe, or concurrently changing
+evidence. Neither command invokes a shell or Git.
+
+P-067 records the ownership boundary: Achta owns the format it writes, while
+the canonical document and heading vocabulary behind section references remain
+the caller's semantic analyzer. PARTS-LOCK-1's mutation disabled unlocked-file
+detection; the bound CLI test then observed an extra part passing at exit 0.
+Restoration returned green and raised the executable floor from 31 to 32. The
+source remains v0.4.5 and the changelog and release-note entries stay under
+Unreleased; no release or remote action belongs to this slice.

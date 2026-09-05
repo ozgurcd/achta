@@ -231,6 +231,55 @@ func assertStableMachineContracts(t *testing.T) {
 			},
 		},
 		{
+			name: "parts-operation.json",
+			value: partsOperationDocument{
+				SchemaVersion: "achta.parts-operation.v1",
+				Operation:     "lock",
+				Status:        "updated",
+				Directory:     "wiki/prompt/parts",
+				LockFile:      "wiki/prompt/parts.lock",
+				Version:       "v9",
+				Parts:         2,
+				Changed:       true,
+				Bumped:        true,
+			},
+		},
+		{
+			name: "parts-verify.json",
+			value: struct {
+				SchemaVersion string `json:"schema_version"`
+				Status        string `json:"status"`
+				Directory     string `json:"dir"`
+				LockFile      string `json:"lock"`
+				Version       string `json:"version"`
+				Locked        int    `json:"locked"`
+				OnDisk        int    `json:"on_disk"`
+				Checks        []struct {
+					Name         string `json:"name"`
+					Status       string `json:"status"`
+					LockedSHA256 string `json:"locked_sha256,omitempty"`
+					ActualSHA256 string `json:"actual_sha256,omitempty"`
+				} `json:"checks"`
+			}{
+				SchemaVersion: "achta.parts-verify.v1",
+				Status:        "fail",
+				Directory:     "wiki/prompt/parts",
+				LockFile:      "wiki/prompt/parts.lock",
+				Version:       "v9",
+				Locked:        2,
+				OnDisk:        2,
+				Checks: []struct {
+					Name         string `json:"name"`
+					Status       string `json:"status"`
+					LockedSHA256 string `json:"locked_sha256,omitempty"`
+					ActualSHA256 string `json:"actual_sha256,omitempty"`
+				}{
+					{Name: "commit.txt", Status: "match", LockedSHA256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", ActualSHA256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+					{Name: "extra.txt", Status: "unlocked", ActualSHA256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+				},
+			},
+		},
+		{
 			name: "mirror-check.json",
 			value: mirror.Result{
 				SchemaVersion: mirror.Schema,

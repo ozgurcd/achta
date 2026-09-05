@@ -2,6 +2,24 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Added
+
+- `parts lock --dir DIR --lock FILE [--bump]` writes the canonical
+  `achta.parts-lock.v1` artifact from direct `.txt` files, preserving its
+  `VERSION` unless `--bump` explicitly increments it. `parts verify --dir DIR
+  --lock FILE` recomputes exact SHA-256 bytes, requires every locked name at
+  its digest, and rejects every unlocked `.txt` neighbor. Its stable
+  `achta.parts-verify.v1` result names each `match`, `differs`, `absent`, or
+  `unlocked` part; drift is exit 1 and unsafe, missing, malformed, or
+  concurrently changing evidence is `cannot_evaluate`, exit 2.
+- Achta owns the lock grammar because it writes the artifact: schema marker,
+  `VERSION vN`, then unique bytewise filename-sorted `name sha256` records.
+  Caller-specific section-heading references remain outside Achta.
+- A mutation-proved Rulefloor invariant raises the executable floor from 31 to
+  32.
+
 ## v0.4.5 — 2026-09-05
 
 ### Added
