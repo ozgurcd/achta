@@ -24,6 +24,19 @@ const (
 // Rewrite replaces each browser download URL with the corresponding release
 // asset API URL. GitHub requires the API endpoint for authenticated private
 // release downloads.
+var (
+	legacyPostflight = []byte(`  postflight do
+    if OS.mac?
+      system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/achta"]
+    end
+  end`)
+	structuredPostflight = []byte(`  postflight_steps do
+    on_macos do
+      run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{staged_path}}/achta"]
+    end
+  end`)
+)
+
 func Rewrite(cask, releaseJSON []byte) ([]byte, error) {
 	for _, header := range []string{
 		"Accept: application/octet-stream",
@@ -84,5 +97,18 @@ func Rewrite(cask, releaseJSON []byte) ([]byte, error) {
 	if bytes.Contains(rewritten, []byte(browserURLPrefix)) {
 		return nil, fmt.Errorf("generated cask retains a private release browser URL")
 	}
-	return rewritten, nil
+	return rewritePostflight(rewritten)
+}
+
+func rewritePostflight(cask []byte) ([]byte, error) {
+	legacyCount := bytes.Count(cask, legacyPostflight)
+	structuredCount := bytes.Count(cask, structuredPostflight)
+	switch {
+	case legacyCount == 1 && structuredCount == 0:
+		return bytes.Replace(cask, legacyPostflight, structuredPostflight, 1), nil
+	case legacyCount == 0 && structuredCount == 1:
+		return bytes.Clone(cask), nil
+	default:
+		return nil, fmt.Errorf("generated cask contains legacy postflight %d times and structured postflight_steps %d times; want exactly one supported form", legacyCount, structuredCount)
+	}
 }

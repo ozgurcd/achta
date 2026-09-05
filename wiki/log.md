@@ -154,3 +154,11 @@ The source version, exact machine contracts, human goldens, current release
 facts, changelog, and release notes advance together to v0.4.1. The wiki-check
 selection and resolved-wiki reporting entries move unchanged in substance from
 Unreleased to the exact v0.4.1 heading. The executable Rulefloor remains 25.
+
+
+## [2026-09-05] release-fix | structured-homebrew-postflight
+
+Achta's cask publisher now fail-closed converts GoReleaser's deprecated
+`postflight` hook into structured `postflight_steps` while retaining private
+asset authentication and macOS quarantine handling. A mutation-proved rule
+raises the executable Rulefloor from 25 to 26.
