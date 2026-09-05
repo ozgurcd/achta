@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.4.5 — 2026-09-05
 
 - Added `mirror check --master PATH --mirror PATH...`: SHA-256 is computed over
   the exact master and mirror bytes, with per-mirror `match`, `differs`, or

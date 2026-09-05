@@ -288,3 +288,13 @@ invokes no shell or Git command and mutates nothing. MIRROR-BYTE-IDENTITY-1 is
 armed after inversion of the digest-equality branch made identical inputs fail
 both the domain and CLI tests; restoration returns green. The executable
 Rulefloor rises from 30 to 31.
+
+
+## [2026-09-05] release | achta-v0.4.5
+
+The source version, exact machine and human fixtures, current wiki facts,
+changelog, and release notes advance together to v0.4.5. The `mirror check`
+entries move unchanged in substance from Unreleased to the exact v0.4.5
+heading; the executable Rulefloor remains 31. The committed master, identical,
+and one-byte-changed fixtures support final proof through the Homebrew-installed
+binary after the authorized source, tag, release, and tap publication steps.
