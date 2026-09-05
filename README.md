@@ -119,6 +119,9 @@ achta --workspace /path/to/workspace floor census \
 achta --wiki-dir /path/to/workspace/wiki mirror check \
   --master AGENTS.md --mirror wiki/contracts/AGENTS.md \
   --mirror wiki/tools/AGENTS.md --json
+achta --wiki-dir /path/to/workspace/wiki mirror check \
+  --master wiki/tools/gate-witness.sh \
+  --digest wiki/contracts/gate-witness.master.sha256 --json
 
 achta --wiki-dir /path/to/workspace/wiki parts lock \
   --dir wiki/prompt/parts --lock wiki/prompt/parts.lock --bump
@@ -181,11 +184,15 @@ cited rule is armed — that is RULE-FLOOR.md's column, Rulefloor's format — a
 says so in its document.
 
 `mirror check` computes SHA-256 over one master's exact bytes and compares each
-explicit `--mirror` in caller order. It performs no newline, whitespace, or
-semantic normalization: identical bytes match and any byte change differs.
-Each result carries both digests when comparison is possible. An absent mirror
-is an evaluated mismatch (exit 1); an absent master cannot establish the
-reference digest and is `cannot_evaluate` (exit 2). Paths are read-only and
+explicit `--mirror` in caller order. Optional `--digest FILE` also compares the
+computed master digest with the unique canonical lowercase `sha256  name`
+record whose name exactly equals the master's basename; when present, mirrors
+are optional. The digest result names the file, line, basename, recorded hex,
+and computed hex. A multi-record file is accepted only when that exact match is
+unique. No newline, whitespace, case, path, content, or semantic normalization
+is performed. An absent mirror or valid digest disagreement is exit 1; an
+absent master or digest file, malformed record, missing basename, or duplicate
+applicable basename is `cannot_evaluate` (exit 2). Paths are read-only and
 workspace-confined. With `--wiki-dir WORKSPACE/wiki`, a master at the workspace
 root remains addressable because the selector retains `WORKSPACE` as its root.
 

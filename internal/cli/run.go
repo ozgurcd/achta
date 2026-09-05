@@ -443,7 +443,7 @@ Commands:
   ledger census recount a markdown ledger table against its totals and the files on disk
   ledger rows   enforce explicit state/prose marker relationships in markdown ledger rows
   floor census  recount a fenced completeness census against itself and rulefloor's covers map
-  mirror check  compare one master with mirrors using exact-byte SHA-256 digests
+  mirror check  compare one master with mirrors and/or a recorded exact-byte SHA-256 digest
   parts lock    write the canonical versioned SHA-256 lock for direct .txt parts
   parts verify  compare every locked part and reject unlocked neighboring .txt files
   toolchain check compare declared workspace versions and script digests with CI pins

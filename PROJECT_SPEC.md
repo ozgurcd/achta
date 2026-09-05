@@ -855,17 +855,30 @@ uses `achta.floor-census.v1`: bucket counts, frozen/plain split, covers stats
 ### 7.19 Mirror check
 
 ```text
-achta mirror check --master PATH --mirror PATH [--mirror PATH]... [--json]
+achta mirror check --master PATH [--digest FILE] [--mirror PATH]... [--json]
 ```
 
-`mirror check` reads one master and one or more explicitly selected mirrors
-within the resolved workspace, computes SHA-256 over each file's exact bytes,
-and evaluates mirrors in caller-supplied order. Each mirror reports `match`,
-`differs`, or `absent`; comparable files report both the master and mirror
-digests. There is no newline, whitespace, encoding, or semantic normalization.
-An absent mirror is conclusively not an identical copy and is an evaluated
-mismatch, exit 1. An absent master provides no reference bytes and is always
-`cannot_evaluate`, exit 2; there is no fail-open allowance flag.
+`mirror check` reads one master plus at least one explicitly selected mirror or
+one explicit digest file within the resolved workspace. It computes SHA-256
+over exact file bytes and evaluates mirrors in caller-supplied order. Each
+mirror reports `match`, `differs`, or `absent`; comparable files report both
+the master and mirror digests.
+
+When `--digest FILE` is present, the file uses canonical lowercase
+`sha256<two ASCII spaces>name` records. Achta selects the one record whose name
+equals the master's basename byte-for-byte and reports the digest file, line,
+name, recorded hex, computed master hex, and `match` or `differs`. Multiple
+records are permitted only when exactly one applies; no applicable record or
+duplicate applicable records are ambiguous and `cannot_evaluate`. A single
+record naming a different basename is likewise not evidence about the selected
+master and cannot evaluate it.
+
+There is no newline, whitespace, digest-case, path, encoding, content, or
+semantic normalization.
+An absent mirror or a well-formed digest disagreement is an evaluated mismatch,
+exit 1. Any absent master or digest file, malformed or ambiguous digest
+evidence, or linked or unsafe input provides no trustworthy comparison and is
+always `cannot_evaluate`, exit 2.
 
 The global `--wiki-dir WORKSPACE/wiki` selector retains `WORKSPACE` as the
 confinement root, so the master may be a workspace-root document while mirrors
@@ -1088,8 +1101,8 @@ Responsibilities:
   Rulefloor's stable machine interfaces.
 - `internal/releasenotes`: bounded version-heading validation and extraction.
 - `internal/slicecheck`: read-only landed-slice checks over Git and wiki facts.
-- `internal/mirror`: pure exact-byte SHA-256 comparison and deterministic
-  per-mirror results.
+- `internal/mirror`: pure exact-byte SHA-256 comparison, strict recorded-digest
+  selection, and deterministic per-mirror and digest results.
 - `internal/parts`: canonical prompt-part lock parsing/rendering, version
   transitions, exact-byte digests, and closed-set verification.
 - `internal/ledgerrows`: caller-shaped Markdown row parsing, exact literal
@@ -1164,7 +1177,7 @@ define arbitrary executable commands.
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition and ledger-claim checks | Implemented structurally by `achta ledger rows`; caller-owned vocabulary remains explicit and meaning inference is refused |
 | Count-claim and model-mirror checks | Candidates for explicit Achta components |
-| Byte-identical master/mirror checks | Implemented by `achta mirror check`; retain old scripts until caller parity and retirement are explicit |
+| Byte-identical master/mirror and recorded-master-digest checks | Implemented by `achta mirror check`; retain old scripts until caller parity and retirement are explicit |
 | Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
@@ -1306,8 +1319,9 @@ Add focused tests for:
 - fail-closed reachability, catch-all rejection, exact skip evidence, record-only
   witness-cycle refusal, and toolchain pin/digest parity.
 - exact master/mirror byte equality, one-byte and whitespace differences,
-  absent mirrors, absent masters, and a workspace-root master selected through
-  `--wiki-dir`.
+  absent mirrors, absent masters, a workspace-root master selected through
+  `--wiki-dir`, matching and tampered recorded digests, one-byte master drift,
+  absent digest files, exact-basename selection, and ambiguous digest records.
 - canonical part-lock parsing/rendering, initial and bumped versions, exact
   digest agreement, edited and absent locked parts, unlocked neighboring parts,
   malformed locks, unsafe files, and concurrent-change refusal.
@@ -1684,7 +1698,22 @@ The v0.3.0 release records these choices explicitly:
    truth; a configured literal is either present or absent, and a quoted string
    is either repeated byte-for-byte or it is not.
 
-## 28. Success measure
+## 28. Unreleased decisions
+
+1. A digest record is evidence about the selected master only when its filename
+   equals the master's basename byte-for-byte. A single differently named
+   record is `cannot_evaluate`, not a digest mismatch, because it claims a
+   different artifact.
+2. A multi-record file is accepted only when every line is canonical and
+   exactly one record names the master basename. Selecting that unique exact
+   match is deterministic; zero or duplicate matches are ambiguous and exit 2.
+3. Digest text is canonical lowercase hexadecimal, two ASCII spaces, then a
+   non-empty filename. Achta refuses case folding, whitespace repair, line
+   ending conversion, path normalization, and all master-content
+   normalization. A valid recorded digest unequal to the computed digest is an
+   evaluated failure, exit 1.
+
+## 29. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

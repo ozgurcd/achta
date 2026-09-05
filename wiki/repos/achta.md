@@ -3,8 +3,8 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-09-05
-verified: 2026-09-05
+updated: 2026-09-06
+verified: 2026-09-06
 co_versioned: true
 ---
 
@@ -43,9 +43,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
   against `rulefloor covers --json` (executed as an argument vector); the
   census vocabulary is the caller's, every piece a flag, nothing built in. It
   refuses to judge whether a cited rule is armed and says so in its document.
-- `mirror check` compares exact SHA-256 bytes from one
-  master to explicit mirrors, including a workspace-root master selected through
-  `--wiki-dir`; absent mirrors fail and an absent master is `cannot_evaluate`.
+- `mirror check` compares exact SHA-256 bytes from one master to explicit
+  mirrors and, optionally, to the unique canonical digest record selected by
+  exact master basename. It reports both digest hexes and the selected record;
+  disagreements fail while absent or ambiguous evidence is `cannot_evaluate`.
 - `parts lock` writes the Achta-owned `achta.parts-lock.v1` artifact for a
   direct `.txt` set, preserving or explicitly bumping `VERSION`; `parts verify`
   names edited, absent, and unlocked parts under the 0/1/2 exit contract. Live
@@ -66,8 +67,8 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 33 armed, mutation-proved invariants on the current
-  v0.5.0 line.
+- `RULE-FLOOR.md` carries 34 armed, mutation-proved invariants on the current
+  v0.5.0 source line; the digest extension remains unreleased.
 
 ## Known limitations
 
@@ -108,3 +109,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Add Achta-owned `parts lock` and exact closed-set `parts verify`, keep section-reference semantics caller-owned, and raise the mutation-proved floor from 31 to 32 without releasing. |
 | 2026-09-05 | `co-versioned` | Add caller-shaped `ledger rows`, enforce exact completion and closure-quote structure while refusing prose meaning, and raise the mutation-proved floor from 32 to 33 without releasing. |
 | 2026-09-05 | `co-versioned` | Release the complete conversion batch as v0.5.0, advancing source and exact fixtures while retaining the 33-rule floor for caller migration. |
+| 2026-09-06 | `co-versioned` | Add exact recorded-master-digest verification to `mirror check`, refuse absent or ambiguous evidence, and raise the mutation-proved floor from 33 to 34 without releasing. |

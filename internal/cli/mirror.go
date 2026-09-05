@@ -17,6 +17,7 @@ func runMirror(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 	}
 	set := flagSet("mirror check")
 	masterValue := set.String("master", "", "master path (inside the workspace)")
+	digestValue := set.String("digest", "", "recorded digest file (inside the workspace)")
 	var mirrorValues repeatedValue
 	set.Var(&mirrorValues, "mirror", "repeatable mirror path (inside the workspace)")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
@@ -25,8 +26,8 @@ func runMirror(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 		return renderError(stdout, stderr, opts.json, mirror.Schema, err)
 	}
 	opts.json = *jsonMode
-	if *masterValue == "" || len(mirrorValues) == 0 {
-		return renderError(stdout, stderr, opts.json, mirror.Schema, invalid("--master and at least one --mirror are required"))
+	if *masterValue == "" || (len(mirrorValues) == 0 && *digestValue == "") {
+		return renderError(stdout, stderr, opts.json, mirror.Schema, invalid("--master and at least one --mirror or --digest are required"))
 	}
 
 	ws, err := resolveWorkspace(opts)
@@ -62,7 +63,23 @@ func runMirror(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 		inputs = append(inputs, mirror.Input{Path: value, Data: snapshot.Data})
 	}
 
-	result, err := mirror.Check(*masterValue, master.Data, inputs)
+	var result mirror.Result
+	if *digestValue != "" {
+		digestPath, pathErr := confinedPath(ws, *digestValue)
+		if pathErr != nil {
+			return renderError(stdout, stderr, opts.json, mirror.Schema, pathErr)
+		}
+		snapshot, readErr := safefile.Read(ws.Root, digestPath, mirror.MaxFile)
+		if errors.Is(readErr, os.ErrNotExist) {
+			return renderError(stdout, stderr, opts.json, mirror.Schema, invalid("digest %q is absent", *digestValue))
+		}
+		if readErr != nil {
+			return renderError(stdout, stderr, opts.json, mirror.Schema, invalid("read digest %q: %v", *digestValue, readErr))
+		}
+		result, err = mirror.CheckWithDigest(*masterValue, master.Data, inputs, mirror.DigestInput{Path: *digestValue, Data: snapshot.Data})
+	} else {
+		result, err = mirror.Check(*masterValue, master.Data, inputs)
+	}
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, mirror.Schema, invalid("mirror check: %v", err))
 	}
@@ -83,6 +100,9 @@ func runMirror(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 		default:
 			fmt.Fprintf(stdout, "mirror %s: %s; master_sha256=%s mirror_sha256=%s\n", item.Path, item.Status, item.MasterSHA256, item.MirrorSHA256)
 		}
+	}
+	if result.Digest != nil {
+		fmt.Fprintf(stdout, "digest %s:%d %s: %s; recorded_sha256=%s master_sha256=%s\n", result.Digest.File, result.Digest.Line, result.Digest.Name, result.Digest.Status, result.Digest.RecordedSHA256, result.Digest.MasterSHA256)
 	}
 	fmt.Fprintf(stdout, "mirror check: %s; %d mirror(s)\n", result.Status, len(result.Mirrors))
 	return code

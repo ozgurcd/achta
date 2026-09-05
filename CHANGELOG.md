@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- Added optional `mirror check --digest FILE` verification. Achta reads
+  canonical lowercase `sha256  basename` records, selects exactly one record
+  by the master's exact basename, and compares the recorded digest with the
+  SHA-256 of the master's unnormalized bytes. Mirrors remain optional when a
+  digest is supplied.
+- Digest agreement reports the selected file, line, basename, recorded digest,
+  and computed master digest. Disagreement is exit 1; an absent digest file,
+  malformed record, missing basename, or duplicate applicable basename is
+  `cannot_evaluate`, exit 2.
+- Raised the executable Rulefloor from 33 to 34 with a mutation proof for
+  recorded-digest selection and exact comparison.
+
 ## v0.5.0 — 2026-09-05
 
 - Established the complete conversion-batch baseline with `recipe check`,

@@ -275,3 +275,24 @@ Malformed, ambiguous, unsafe, or vocabulary-free input is
 `cannot_evaluate`, exit 2, never a pass. The verb reads one confined regular
 file, invokes no shell or Git process, mutates nothing, and names its semantic
 refusals in `achta.ledger-rows.v1`.
+
+### P-069 — Recorded mirror digests bind to one exact basename
+
+`mirror check --digest FILE` reads canonical lowercase
+`sha256<two ASCII spaces>name` records and selects a record only when `name`
+equals the master's basename byte-for-byte. A differently named record is not
+evidence about the selected master, so a file with no applicable record is
+`cannot_evaluate`, exit 2, rather than an evaluated digest mismatch.
+
+A multi-record file is accepted only when every record is canonical and exactly
+one record names that basename. This makes the selection unambiguous without
+silently discarding malformed evidence; duplicate applicable names and absent
+applicable names are exit 2. Achta reports the digest file, selected line and
+name, recorded digest, and computed master digest.
+
+A valid recorded digest that differs from the SHA-256 of the master's exact
+bytes is an evaluated failure, exit 1. Achta refuses case folding, whitespace
+repair, line-ending conversion, path normalization, and master-content
+normalization. An absent digest file is `cannot_evaluate`, matching the absent
+master ruling in P-066. The command remains read-only, workspace-confined, and
+invokes neither shell nor Git.

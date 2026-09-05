@@ -292,6 +292,14 @@ func assertStableMachineContracts(t *testing.T) {
 					{Path: "wiki/tools/gate.sh", Status: "differs", MasterSHA256: "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0", MirrorSHA256: "23af1b2f80f3c9377f3a86e3a14f4fe146d6c2640aff50d8380fc7345dcf9b93"},
 					{Path: "wiki/tools/absent.sh", Status: "absent", MasterSHA256: "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0"},
 				},
+				Digest: &mirror.DigestResult{
+					File:           "contracts/AGENTS.master.sha256",
+					Line:           1,
+					Name:           "AGENTS.md",
+					Status:         "match",
+					RecordedSHA256: "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0",
+					MasterSHA256:   "9b3162498c21d7f960877099174ecea13410bd21d12440b2ea8868117fc08ae0",
+				},
 			},
 		},
 		{

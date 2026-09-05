@@ -346,3 +346,22 @@ conversion entries move unchanged in substance under the exact v0.5.0 heading,
 and the complete caller-migration baseline names `recipe check`, `ledger
 census`, `floor census`, `mirror check`, `parts lock`, `parts verify`, and
 `ledger rows`. The executable Rulefloor remains 33.
+
+
+## [2026-09-06] feature | mirror-recorded-digest
+
+`mirror check --digest FILE` compares the SHA-256 of the master's exact bytes
+with a canonical lowercase `sha256  name` record. It reports the digest file,
+selected line and exact basename, recorded hex, and computed master hex. A
+valid disagreement is exit 1; absent, malformed, or ambiguous digest evidence
+is `cannot_evaluate`, exit 2. Mirrors are optional when the digest is present,
+and the command remains workspace-confined, read-only, and free of shell or Git
+invocation.
+
+P-069 binds the record to the master's exact basename. Multi-record files are
+accepted only when every line is canonical and exactly one record applies;
+differently named or duplicate applicable records cannot evaluate. Achta
+refuses case, whitespace, line-ending, path, and content normalization. The
+new MIRROR-RECORDED-DIGEST-1 invariant is mutation-proved and raises the
+executable Rulefloor from 33 to 34. The source remains v0.5.0, the release notes
+stay under Unreleased, and no remote or release action belongs to this slice.

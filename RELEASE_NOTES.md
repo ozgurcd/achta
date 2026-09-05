@@ -2,6 +2,23 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Added
+
+- `mirror check --master PATH --digest FILE [--mirror PATH]...` verifies that
+  the SHA-256 recorded for the master's exact basename equals the digest of
+  the master's exact bytes. Its additive `achta.mirror-check.v1` digest result
+  names the digest file, selected line and basename, recorded digest, computed
+  master digest, and `match` or `differs` status.
+- Achta accepts a multi-record digest file only when exactly one canonical
+  lowercase `sha256  name` record names the master's basename byte-for-byte.
+  It refuses whitespace, line-ending, case, path, or content normalization.
+  Digest disagreement is exit 1; absent, malformed, or ambiguous evidence is
+  `cannot_evaluate`, exit 2.
+- A mutation-proved Rulefloor invariant raises the executable floor from 33 to
+  34. This remains unreleased on the v0.5.0 source line.
+
 ## v0.5.0 — 2026-09-05
 
 ### Added
