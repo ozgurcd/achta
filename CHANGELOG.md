@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.4.2 — 2026-09-05
 
 - Added `recipe check`: a Makefile target's recipe is read as text and
   neutralizers are refused — a `-` prefix, a pipe, a trailing `&`, a swallowed

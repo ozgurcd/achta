@@ -186,3 +186,13 @@ identuum Makefile convention) — `--expect-file` covers the latter byte-exactly
 RECIPE-CHECK-1 and LEDGER-CENSUS-1 are armed with mutation proofs; the
 executable Rulefloor rises from 26 to 28. Both machine interfaces have exact
 fixtures and the capabilities documents advertise them.
+
+
+## [2026-09-05] release | achta-v0.4.2
+
+The source version, exact machine contracts, human goldens, current release
+facts, changelog, and release notes advance together to v0.4.2. The `recipe
+check` and `ledger census` entries move unchanged in substance from Unreleased
+to the exact v0.4.2 heading. The release workflow will publish the matching
+Homebrew cask after the tag passes its independent verification job. The
+executable Rulefloor remains 28.

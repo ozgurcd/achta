@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.4.1.
+- Current release line: v0.4.2.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -45,7 +45,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
 - `RULE-FLOOR.md` carries 28 armed, mutation-proved invariants on the current
-  v0.4.1 line.
+  v0.4.2 line.
 
 ## Known limitations
 
@@ -76,3 +76,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Advance the release surfaces to v0.4.1 and move the wiki-check selection notes under their exact release heading without changing the 25-rule floor. |
 | 2026-09-05 | `co-versioned` | Publish only structured Homebrew postflight steps while preserving authenticated private-asset rewriting and macOS quarantine handling. |
 | 2026-09-05 | `co-versioned` | Add `recipe check` (byte-exact recipe expectations, neutralizer refusal) and `ledger census` (a ledger table recounted against its totals and disk), both mutation-proved, raising the executable floor from 26 to 28. |
+| 2026-09-05 | `co-versioned` | Advance source, exact version fixtures, release notes, current wiki facts, and Homebrew publication metadata together for v0.4.2 without changing the 28-rule floor. |
