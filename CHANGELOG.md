@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.4.1 — 2026-09-05
 
 - Added `wiki check --only NAME[,NAME...]` to evaluate and report exactly the
   selected checks under the unchanged exit contract; empty, unknown, or

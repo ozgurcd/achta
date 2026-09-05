@@ -146,3 +146,11 @@ behaviors are armed with mutation proofs (WIKI-CHECK-SELECTION-1,
 WIKI-CHECK-WIKI-DIR-1), raising the executable floor from 23 to 25. The
 decisions register gained its missing `## Decisions` section because `decision
 add` refused the page without one.
+
+
+## [2026-09-05] release | achta-v0.4.1
+
+The source version, exact machine contracts, human goldens, current release
+facts, changelog, and release notes advance together to v0.4.1. The wiki-check
+selection and resolved-wiki reporting entries move unchanged in substance from
+Unreleased to the exact v0.4.1 heading. The executable Rulefloor remains 25.
