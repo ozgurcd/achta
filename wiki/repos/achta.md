@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.1.
+- Current release line: v0.5.2.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -45,8 +45,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
   refuses to judge whether a cited rule is armed and says so in its document.
 - `mirror check` compares exact SHA-256 bytes from one master to explicit
   mirrors and, optionally, to the unique canonical digest record selected by
-  exact master basename. It reports both digest hexes and the selected record;
-  disagreements fail while absent or ambiguous evidence is `cannot_evaluate`.
+  exact master basename or explicit `--digest-name`. It reports both digest
+  hexes and the selected record; disagreements fail while absent or ambiguous
+  evidence is `cannot_evaluate`.
 - `parts lock` writes the Achta-owned `achta.parts-lock.v1` artifact for a
   direct `.txt` set, preserving or explicitly bumping `VERSION`; `parts verify`
   names edited, absent, and unlocked parts under the 0/1/2 exit contract. Live
@@ -56,15 +57,14 @@ infer prose, execute generic gates, fetch, or mutate Git.
   with explicit completion literals and closed conditional rows without a
   verbatim repeated quote, while refusing prose-meaning and satisfaction
   judgements.
-- `count check` reconciles caller-patterned breakdown sums and paragraph-scoped
-  distinct citation counts across explicit files and direct Markdown
-  directories. Achta owns exact mechanics and refuses prose-claim and proof
-  meaning.
-- `declared-route check` parses explicit workflow YAML, requires exactly one
-  caller-patterned route, rejects caller-patterned bans, and counts a required
-  key only for the caller-designated route and only in an explicit JSON-Pointer
-  mapping scope. It refuses line-level scope inference and all built-in install
-  vocabulary.
+- `count check` reconciles caller-patterned breakdown sums, repeatable claim
+  and citation counts, caller-selected last-section scope and exemptions, and
+  bounded claim/proof counts. Achta owns exact mechanics and refuses prose-claim
+  and proof meaning.
+- `declared-route check` parses explicit files and deterministic direct workflow
+  directories. Its compatibility default requires one route per file; opt-in
+  per-file-any permits zero or many while every file remains ban-scanned and
+  every designated-route user needs one caller-scoped key.
 
 ## Verification surface
 
@@ -76,9 +76,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 36 armed, mutation-proved invariants on the current
-  v0.5.1 source line, including the digest, count-check, and declared-route
-  extensions.
+- `RULE-FLOOR.md` carries 39 armed, mutation-proved invariants on the current
+  v0.5.2 source line, including count-retirement parity, per-file route
+  cardinality, and exact named digest records.
 
 ## Known limitations
 
@@ -123,3 +123,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Add caller-patterned breakdown and citation-count reconciliation, refuse implicit prose and proof meaning, and raise the mutation-proved floor from 34 to 35 without releasing. |
 | 2026-09-06 | `co-versioned` | Add true-YAML `declared-route check` with caller-owned route, ban, key, and scope flags, and raise the mutation-proved floor from 35 to 36 without releasing. |
 | 2026-09-06 | `co-versioned` | Release the second additive conversion batch as v0.5.1, advance exact version fixtures, record Achta's first external Go module dependency, and retain the 36-rule floor. |
+| 2026-09-06 | `co-versioned` | Close the three measured script-retirement gaps, add exact caller-shaped count, route-cardinality, and digest-record controls, release v0.5.2, and raise the mutation-proved floor from 36 to 39. |

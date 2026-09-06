@@ -2,6 +2,30 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.2 — 2026-09-06
+
+### Added
+
+- `count check` now accepts repeatable `--claim-pattern`, repeatable
+  `--proof-claim-pattern` and `--proof-pattern` with
+  `--proof-within-lines`, optional `--claim-section-pattern`, and repeatable
+  `--exempt-pattern`. These reproduce caller-classified CLAIM-vs-PROOF,
+  last-matching-`## `-section, and next-nonblank-paragraph exemption mechanics
+  without giving Achta ownership of the caller's prose vocabulary or proof
+  meaning.
+- `declared-route check` now accepts repeatable `--dir` and
+  `--route-cardinality per-file-any`. Direct lowercase `.yml` and `.yaml`
+  files are bytewise ordered. Under `per-file-any`, each workflow may contain
+  zero or many configured routes, every workflow is still ban-scanned, and
+  every file using the designated route must declare its required key exactly
+  once at the selected YAML scope.
+- `mirror check --digest-name NAME` selects one canonical digest record by its
+  exact caller-supplied name, so records such as
+  `tools/rulefloor-install-gate.sh` are supported. Omitting the flag preserves
+  exact-basename selection. Record names and master bytes are never normalized.
+- Three independent mutation proofs raise the executable Rulefloor from 36 to
+  39. The stable machine schemas and 0/1/2 exit contracts are unchanged.
+
 ## v0.5.1 — 2026-09-06
 
 ### Added

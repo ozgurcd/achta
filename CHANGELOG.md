@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.5.2 — 2026-09-06
+
+- Closed the `count check` retirement gaps with additive repeatable claim
+  patterns, caller-patterned claim/proof comparison, last-matching-section
+  scope, and next-paragraph exemptions. Achta still refuses to infer claims or
+  proof meaning; all vocabulary has no default.
+- Extended `declared-route check` with deterministic direct workflow
+  directories and opt-in `--route-cardinality per-file-any`. Zero or many
+  routes are allowed independently per file while bans remain mandatory for
+  every selected workflow and every route-using file still needs one scoped
+  declaration.
+- Added `mirror check --digest-name NAME` to select an exact digest record,
+  including caller-owned path-shaped names. Basename selection remains the
+  compatibility default and no normalization is introduced.
+- Raised the executable Rulefloor from 36 to 39 with separate mutation proofs
+  for count retirement parity, per-file route cardinality, and named digest
+  record selection.
+
 ## v0.5.1 — 2026-09-06
 
 - Added `declared-route check --file YAML... --route-pattern REGEX...

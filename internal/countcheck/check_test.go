@@ -6,7 +6,7 @@ import "testing"
 var testOptions = Options{
 	TotalPattern:    `TOTAL[[:space:]]+(?P<count>[0-9]+)[[:space:]]*[|]`,
 	PartPattern:     `(VACUOUS|HAS-CONTROL|SOUND)[[:space:]]+(?P<count>[0-9]+)`,
-	ClaimPattern:    `claims[[:space:]]+(?P<count>[0-9]+)[[:space:]]+fixed`,
+	ClaimPatterns:   []string{`claims[[:space:]]+(?P<count>[0-9]+)[[:space:]]+fixed`},
 	CitationPattern: `[[:alnum:]_./-]+[.](go|md):[0-9]+`,
 }
 
@@ -28,7 +28,7 @@ func TestCheckReconcilesBreakdownsAndDistinctCitations(t *testing.T) {
 
 func TestCheckPassesCorrectRelationshipsAndUsesExplicitAliases(t *testing.T) {
 	opts := testOptions
-	opts.ClaimPattern = `claims[[:space:]]+(?P<count>[[:alpha:]]+)[[:space:]]+fixed`
+	opts.ClaimPatterns = []string{`claims[[:space:]]+(?P<count>[[:alpha:]]+)[[:space:]]+fixed`}
 	opts.CountAliases = []string{"Two=2"}
 	result, err := Check([]Document{{Path: "log/entry.md", Data: []byte("TOTAL 12 | VACUOUS 4 HAS-CONTROL 6 SOUND 2\n\nclaims Two fixed: internal/a.go:12, internal/b.go:34\n")}}, opts)
 	if err != nil {
@@ -54,10 +54,10 @@ func TestCheckCannotEvaluateIncompleteOrAmbiguousVocabulary(t *testing.T) {
 	for name, opts := range map[string]Options{
 		"no patterns":       {},
 		"half breakdown":    {TotalPattern: `(?P<count>[0-9]+)`},
-		"half claim":        {ClaimPattern: `(?P<count>[0-9]+)`},
+		"half claim":        {ClaimPatterns: []string{`(?P<count>[0-9]+)`}},
 		"unnamed count":     {TotalPattern: `([0-9]+)`, PartPattern: `(?P<count>[0-9]+)`},
-		"empty citation":    {ClaimPattern: `(?P<count>[0-9]+)`, CitationPattern: `.*`},
-		"duplicate aliases": {ClaimPattern: `(?P<count>[[:alpha:]]+)`, CitationPattern: `x`, CountAliases: []string{"Two=2", "Two=2"}},
+		"empty citation":    {ClaimPatterns: []string{`(?P<count>[0-9]+)`}, CitationPattern: `.*`},
+		"duplicate aliases": {ClaimPatterns: []string{`(?P<count>[[:alpha:]]+)`}, CitationPattern: `x`, CountAliases: []string{"Two=2", "Two=2"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := Check([]Document{{Path: "log.md", Data: []byte("plain\n")}}, opts); err == nil {

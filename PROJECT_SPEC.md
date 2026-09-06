@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.1 release specification
+Status: v0.5.2 release specification
 
 Project name: Achta
 
@@ -855,7 +855,8 @@ uses `achta.floor-census.v1`: bucket counts, frozen/plain split, covers stats
 ### 7.19 Mirror check
 
 ```text
-achta mirror check --master PATH [--digest FILE] [--mirror PATH]... [--json]
+achta mirror check --master PATH [--digest FILE [--digest-name NAME]]
+  [--mirror PATH]... [--json]
 ```
 
 `mirror check` reads one master plus at least one explicitly selected mirror or
@@ -865,13 +866,14 @@ mirror reports `match`, `differs`, or `absent`; comparable files report both
 the master and mirror digests.
 
 When `--digest FILE` is present, the file uses canonical lowercase
-`sha256<two ASCII spaces>name` records. Achta selects the one record whose name
-equals the master's basename byte-for-byte and reports the digest file, line,
-name, recorded hex, computed master hex, and `match` or `differs`. Multiple
-records are permitted only when exactly one applies; no applicable record or
-duplicate applicable records are ambiguous and `cannot_evaluate`. A single
-record naming a different basename is likewise not evidence about the selected
-master and cannot evaluate it.
+`sha256<two ASCII spaces>name` records. By default Achta selects the one record
+whose name equals the master's basename byte-for-byte. `--digest-name NAME`
+instead selects that exact record name, including a caller-owned path-shaped
+name such as `tools/gate.sh`; it neither resolves nor normalizes the name.
+Achta reports the digest file, line, name, recorded hex, computed master hex,
+and `match` or `differs`. Multiple records are permitted only when exactly one
+matches the selected name; zero or duplicate matches are ambiguous and
+`cannot_evaluate`.
 
 There is no newline, whitespace, digest-case, path, encoding, content, or
 semantic normalization.
@@ -957,26 +959,39 @@ nothing.
 ```text
 achta count check --file MD [--file MD]... [--dir DIR]...
   [--total-pattern REGEX --part-pattern REGEX]
-  [--claim-pattern REGEX --citation-pattern REGEX]
+  [--claim-pattern REGEX]... [--citation-pattern REGEX]
+  [--claim-section-pattern REGEX] [--exempt-pattern REGEX]...
+  [--proof-claim-pattern REGEX]... [--proof-pattern REGEX]...
+  [--proof-within-lines N]
   [--count-alias TOKEN=N]... [--json]
 ```
 
-`count check` evaluates two optional structural relationships over an explicit
-Markdown document set. At least one complete pattern pair is required. Every
-total, part, and claim pattern has exactly one named `count` capture; other
-captures are permitted. Unsigned decimal tokens are intrinsic. Every
-non-decimal count token must be declared byte-for-byte by a repeatable
-`--count-alias TOKEN=N`; no claim, citation, or breakdown vocabulary has a
-default.
+`count check` evaluates caller-classified structural relationships over an
+explicit Markdown document set. At least one complete relationship is
+required. Every total, part, claim, proof-claim, and proof pattern has exactly
+one named `count` capture; other captures are permitted. Claim and proof
+patterns are repeatable and additive. Unsigned decimal tokens are intrinsic.
+Every non-decimal count token must be declared byte-for-byte by a repeatable
+`--count-alias TOKEN=N`; no claim, proof, citation, section, exemption, or
+breakdown vocabulary has a default.
 
 For the breakdown pair, each line with exactly one total match and at least one
 part match is a breakdown. The part counts must sum without overflow to the
 stated total. More than one total on a line cannot evaluate. For the citation
-pair, Markdown blank lines delimit paragraphs. Every configured claim match in
-a paragraph must have at least its count of distinct exact full matches of the
-citation expression in that paragraph. Citation text is masked before claim
-matching so digits inside citations do not create claims. No case, whitespace,
-punctuation, Unicode, path, citation, or document-content normalization occurs.
+relationship, Markdown blank lines delimit paragraphs. Every configured claim
+match in a paragraph must have at least its count of distinct exact full
+matches of the citation expression in that paragraph. Citation text is masked
+before claim matching so digits inside citations do not create claims.
+
+`--claim-section-pattern` restricts citation claims to the last `## ` section
+whose heading matches that caller expression; no matching section yields zero
+citation claims. Each `--exempt-pattern` classifies one marker line and exempts
+the next nonblank paragraph from citation and proof-claim checks. The proof
+relationship compares each caller-classified proof claim with the nearest
+caller-classified proof count within the positive `--proof-within-lines`
+distance; a tie keeps the earlier proof, and no nearby proof leaves the claim
+unevaluated rather than inventing evidence. No case, whitespace, punctuation,
+Unicode, path, citation, proof, or document-content normalization occurs.
 
 Repeatable `--file` inputs are evaluated first in caller order. Repeatable
 `--dir` inputs then contribute their direct `.md` or `.MD` regular files in
@@ -987,33 +1002,40 @@ structural disagreement is exit 1 and a clean evaluation is exit 0. The stable
 `achta.count-check.v1` result reports file and aggregate counts, then every
 violation's file, line, rule, claimed value, observed value, and bounded text.
 
-Accepted: decimal arithmetic, exact configured matching, paragraph scope, and
-distinct citation counting. Refused and reported: deciding whether
-unconfigured prose makes a count claim, and deciding whether a matched citation
-proves a disposition. The command reads only confined regular files, invokes no
-external process or shell, performs no Git operation, and writes nothing.
+Accepted: decimal arithmetic, exact configured matching, caller-selected last
+section scope, caller-classified exemption, nearest bounded proof comparison,
+paragraph scope, and distinct citation counting. Refused and reported:
+deciding whether unconfigured prose makes a count claim, whether a matched
+citation proves a disposition, or whether matched proof prose actually proves
+a claim. The command reads only confined regular files, invokes no external
+process or shell, performs no Git operation, and writes nothing.
 
 ### 7.23 Declared-route check
 
 ```text
-achta declared-route check --file WORKFLOW [--file WORKFLOW]...
+achta declared-route check [--file WORKFLOW]... [--dir DIR]...
   --route-pattern REGEX [--route-pattern REGEX]...
   --ban-pattern REGEX [--ban-pattern REGEX]...
   --required-route-pattern REGEX --required-key KEY
-  --required-scope JSON_POINTER [--json]
+  --required-scope JSON_POINTER
+  [--route-cardinality per-file-one|per-file-any] [--json]
 ```
 
 `declared-route check` evaluates an explicit set of single-document YAML
-workflow files. Each file must contain exactly one match occurrence across all
-caller-supplied route alternatives and zero matches for every caller-supplied
-banned pattern. Matching is performed on parsed scalar values; YAML comments
-and scalar lines whose first non-space byte is `#` are excluded. Patterns
+workflow files. Repeatable files retain caller order; repeatable directories
+contribute their direct lowercase `.yml` and `.yaml` regular files in bytewise
+filename order. By default, each file must contain exactly one match occurrence
+across all caller-supplied route alternatives. Opt-in `--route-cardinality
+per-file-any` permits zero or more route occurrences independently in each
+file, while every selected file is still scanned for every banned pattern.
+Matching is performed on parsed scalar values; YAML comments and scalar lines
+whose first non-space byte is `#` are excluded. Patterns
 must not be empty, repeated, invalid, capable of matching empty text, or longer
 than 4 KiB; each pattern family is capped at 64 expressions and 4,096 matches
 per document. No route or banned-command vocabulary is built in.
 
 `--required-route-pattern` must equal exactly one configured route alternative.
-When that alternative is the selected match, `--required-scope` is an RFC 6901
+When that alternative occurs at least once, `--required-scope` is an RFC 6901
 JSON Pointer to a YAML mapping and `--required-key` is the exact caller-owned
 key that must appear once in that mapping. Other route alternatives do not
 require the key. Scope is resolved from YAML mapping nodes, never indentation
@@ -1031,7 +1053,8 @@ and exit 1 means at least one evaluated disagreement. The command reads only
 workspace-confined regular files, invokes no external process or shell,
 performs no Git operation, and writes nothing.
 
-Accepted: YAML syntax and mapping scope, exact caller-pattern counting, and
+Accepted: YAML syntax and mapping scope, deterministic direct-directory
+selection, exact caller-pattern counting, explicit per-file cardinality, and
 comment exclusion. Refused and reported: default route, banned-command, token,
 or scope vocabulary and line-level inference of YAML scope.
 
@@ -1194,10 +1217,11 @@ Responsibilities:
   transitions, exact-byte digests, and closed-set verification.
 - `internal/ledgerrows`: caller-shaped Markdown row parsing, exact literal
   state/prose relationships, and verbatim closure-quote verification.
-- `internal/countcheck`: caller-shaped count patterns, exact decimal and alias
-  parsing, breakdown arithmetic, and paragraph-scoped distinct-citation counts.
+- `internal/countcheck`: caller-shaped count and proof patterns, exact decimal
+  and alias parsing, breakdown arithmetic, caller-selected last-section scope,
+  exemptions, bounded proof comparison, and paragraph-scoped citation counts.
 - `internal/declaredroute`: real YAML mapping-scope resolution plus exact
-  caller-pattern route, ban, and required-key counts.
+  caller-pattern route, ban, per-file cardinality, and required-key counts.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
@@ -1271,13 +1295,13 @@ define arbitrary executable commands.
 | Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition and ledger-claim checks | Implemented structurally by `achta ledger rows`; caller-owned vocabulary remains explicit and meaning inference is refused |
-| Count-claim and breakdown-sum checks | Implemented structurally by `achta count check`; caller patterns define claims, citations, and parts while meaning inference remains refused |
-| Byte-identical master/mirror and recorded-master-digest checks | Implemented by `achta mirror check`; retain old scripts until caller parity and retirement are explicit |
+| Count-claim and breakdown-sum checks | Implemented structurally by `achta count check`; repeatable caller patterns define claims, proof lines, citations, sections, exemptions, and parts while meaning inference remains refused |
+| Byte-identical master/mirror and recorded-master-digest checks | Implemented by `achta mirror check`; caller may select an exact path-shaped digest record name, and old scripts remain until caller parity and retirement are explicit |
 | Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
 | Ledger census versus source graph | Keep as a composition gate; Rulefloor and Gograph retain ownership |
-| Rulefloor installation-route gate | Implemented mechanically by `achta declared-route check`; caller flags retain all route, ban, token, and scope vocabulary, and old scripts remain during measured shadow parity |
+| Rulefloor installation-route gate | Implemented mechanically by `achta declared-route check`; per-file-any cardinality permits zero or many derived uses under one declaration while every selected workflow remains ban-scanned; caller flags retain all route, ban, token, and scope vocabulary |
 | Vulnerability fix-availability policy | Keep in a dedicated vulnerability analyzer; Achta does not own advisory or fix semantics |
 | Route, link, inert-parameter, clock, and wire analyzers | Keep dedicated |
 | Prompt inclusion, canonical-section reference checking, commit hook, and source-navigation hook | Keep in the agent harness; the caller owns heading vocabulary and hook wiring |
@@ -1421,7 +1445,8 @@ Add focused tests for:
 - exact master/mirror byte equality, one-byte and whitespace differences,
   absent mirrors, absent masters, a workspace-root master selected through
   `--wiki-dir`, matching and tampered recorded digests, one-byte master drift,
-  absent digest files, exact-basename selection, and ambiguous digest records.
+  absent digest files, exact-basename and explicit exact-name selection, and
+  ambiguous digest records.
 - canonical part-lock parsing/rendering, initial and bumped versions, exact
   digest agreement, edited and absent locked parts, unlocked neighboring parts,
   malformed locks, unsafe files, and concurrent-change refusal.
@@ -1430,7 +1455,13 @@ Add focused tests for:
   closure quotes must repeat exact bytes.
 - caller-shaped count documents where an incorrect breakdown and insufficient
   distinct citations each fire, a correct breakdown and cited claim stay
-  clean, and incomplete vocabulary cannot evaluate.
+  clean, repeated claim patterns remain additive, last matching section scope
+  and caller exemptions are honored, a nearby proof mismatch fires, and
+  incomplete vocabulary cannot evaluate.
+- declared-route workflow sets where default exact-one and opt-in per-file-any
+  cardinality are distinct, every route-free file is still ban-scanned, each
+  route-using file requires its scoped key, direct directories are bytewise
+  ordered, and job-level keys cannot satisfy workflow-level scope.
 
 ### 15.2 Integration tests
 
@@ -1829,7 +1860,29 @@ The v0.3.0 release records these choices explicitly:
    directories contribute direct Markdown files in deterministic filename
    order. No conventional log path is auto-detected.
 
-## 29. Success measure
+## 29. v0.5.2 decisions
+
+1. Claim/proof parity remains structural only after caller classification.
+   Repeatable proof-claim and proof patterns, an explicit line distance, a
+   caller-selected last-section pattern, and caller-patterned exemptions have
+   no defaults. Achta compares counts and locations but still refuses to decide
+   that prose makes a claim or that proof text is true or relevant.
+2. Route cardinality is a per-workflow decision. The compatibility default
+   stays exactly one route per file; explicit `per-file-any` permits zero or
+   many route uses in each file. A required key is still exactly once in every
+   file using the designated route, and bans are evaluated in every selected
+   file regardless of route count. Direct directory selection is deterministic
+   and does not auto-detect workflow layout.
+3. A digest record name is opaque caller vocabulary, not a filesystem path.
+   Basename selection remains the default for compatibility; `--digest-name`
+   selects one exact record including path-shaped names without path, case,
+   whitespace, or content normalization. Zero or duplicate exact records
+   cannot evaluate.
+4. v0.5.2 is a patch because it adds compatibility flags and closes parity
+   gaps in three existing stable verbs without removing commands, changing
+   defaults, or changing their 0/1/2 and schema contracts.
+
+## 30. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

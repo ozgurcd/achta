@@ -411,3 +411,22 @@ unchanged in substance from Unreleased to the exact v0.5.1 heading. The
 specification records `go.yaml.in/yaml/v3 v3.0.5` as Achta's first external Go
 module dependency and the measured correctness exception for true YAML scope.
 The executable Rulefloor remains 36.
+
+## [2026-09-06] release | achta-v0.5.2-retirement-gaps
+
+Three measured script-retirement failures are covered without importing caller
+meaning. `count check` gains additive claim patterns, explicit claim/proof
+comparison, last-matching-section scope, and caller-patterned next-paragraph
+exemptions. `declared-route check` gains deterministic direct workflow
+directories and opt-in per-file-any cardinality while retaining all-file ban
+scanning and one scoped declaration in every route-using file. `mirror check
+--digest-name` selects one exact opaque record name, including path-shaped
+names, without normalization.
+
+P-072 through P-074 record the boundaries. Achta still refuses to infer prose
+claims, proof truth or relevance, route vocabulary, and normalized mirror
+identity. Separate mutations made each new rule's focused test red; byte-exact
+restoration returned the focused suite green. COUNT-RETIREMENT-PARITY-1,
+DECLARED-ROUTE-PER-FILE-ANY-1, and MIRROR-DIGEST-NAMED-RECORD-1 raise the
+executable Rulefloor from 36 to 39. Source, exact fixtures, changelog, release
+notes, current wiki facts, and the release line advance together to v0.5.2.

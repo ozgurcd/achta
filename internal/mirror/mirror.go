@@ -26,6 +26,7 @@ type Input struct {
 // DigestInput is one recorded digest file to compare with the master.
 type DigestInput struct {
 	Path string
+	Name string
 	Data []byte
 }
 
@@ -137,7 +138,7 @@ func CheckWithDigest(masterPath string, master []byte, inputs []Input, input Dig
 		return result, errors.New("digest file exceeds the size limit")
 	}
 
-	record, err := selectDigestRecord(masterPath, input.Data)
+	record, err := selectDigestRecord(masterPath, input.Name, input.Data)
 	if err != nil {
 		return result, err
 	}
@@ -163,7 +164,7 @@ type digestRecord struct {
 	sha256 string
 }
 
-func selectDigestRecord(masterPath string, data []byte) (digestRecord, error) {
+func selectDigestRecord(masterPath, selectedName string, data []byte) (digestRecord, error) {
 	lines := bytes.Split(data, []byte{'\n'})
 	if len(lines) > 0 && len(lines[len(lines)-1]) == 0 {
 		lines = lines[:len(lines)-1]
@@ -172,7 +173,16 @@ func selectDigestRecord(masterPath string, data []byte) (digestRecord, error) {
 		return digestRecord{}, errors.New("digest file has no records")
 	}
 
-	wantName := filepath.Base(masterPath)
+	wantName := selectedName
+	if wantName == "" {
+		wantName = filepath.Base(masterPath)
+	}
+	if len(wantName) > 4096 {
+		return digestRecord{}, errors.New("digest record name exceeds 4096 bytes")
+	}
+	if bytes.ContainsAny([]byte(wantName), "\r\n") {
+		return digestRecord{}, errors.New("digest record name contains a line ending")
+	}
 	var selected digestRecord
 	matches := 0
 	for index, line := range lines {

@@ -23,12 +23,21 @@ func runCount(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	var files repeatedValue
 	var directories repeatedValue
 	var aliases repeatedValue
+	var claimPatterns repeatedValue
+	var proofClaimPatterns repeatedValue
+	var proofPatterns repeatedValue
+	var exemptPatterns repeatedValue
 	set.Var(&files, "file", "repeatable Markdown path (inside the workspace)")
 	set.Var(&directories, "dir", "repeatable directory of direct Markdown files (inside the workspace)")
 	totalPattern := set.String("total-pattern", "", "caller regexp with named count capture for a stated total")
 	partPattern := set.String("part-pattern", "", "caller regexp with named count capture for breakdown parts")
-	claimPattern := set.String("claim-pattern", "", "caller regexp with named count capture for a prose claim")
+	set.Var(&claimPatterns, "claim-pattern", "repeatable caller regexp with named count capture for a citation-backed claim")
 	citationPattern := set.String("citation-pattern", "", "caller regexp whose full matches are distinct citations")
+	set.Var(&proofClaimPatterns, "proof-claim-pattern", "repeatable caller regexp with named count capture for a proof-backed claim")
+	set.Var(&proofPatterns, "proof-pattern", "repeatable caller regexp with named count capture for a proof count")
+	proofWithinLines := set.Int("proof-within-lines", 0, "maximum line distance between a proof-backed claim and its nearest proof")
+	claimSectionPattern := set.String("claim-section-pattern", "", "caller regexp selecting the last matching section for citation claims")
+	set.Var(&exemptPatterns, "exempt-pattern", "repeatable caller regexp whose match exempts the next non-blank paragraph")
 	set.Var(&aliases, "count-alias", "repeatable exact TOKEN=N alias for a non-decimal count")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
 	if err := parseFlags(set, rest); err != nil {
@@ -71,11 +80,16 @@ func runCount(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 		}
 	}
 	result, err := countcheck.Check(documents, countcheck.Options{
-		TotalPattern:    *totalPattern,
-		PartPattern:     *partPattern,
-		ClaimPattern:    *claimPattern,
-		CitationPattern: *citationPattern,
-		CountAliases:    aliases,
+		TotalPattern:        *totalPattern,
+		PartPattern:         *partPattern,
+		ClaimPatterns:       claimPatterns,
+		CitationPattern:     *citationPattern,
+		ProofClaimPatterns:  proofClaimPatterns,
+		ProofPatterns:       proofPatterns,
+		ProofWithinLines:    *proofWithinLines,
+		ClaimSectionPattern: *claimSectionPattern,
+		ExemptPatterns:      exemptPatterns,
+		CountAliases:        aliases,
 	})
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, countcheck.Schema, invalid("count check: %v", err))
@@ -93,7 +107,11 @@ func runCount(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	for _, violation := range result.Violations {
 		fmt.Fprintf(stdout, "count check: %s:%d %s claimed=%d observed=%d — %s\n", violation.File, violation.Line, violation.Rule, violation.Claimed, violation.Observed, violation.Text)
 	}
-	fmt.Fprintf(stdout, "count check: %s; %d file(s), %d breakdown(s), %d claim(s), %d violation(s)\n", result.Status, result.Files, result.Breakdowns, result.Claims, len(result.Violations))
+	if len(proofPatterns) > 0 {
+		fmt.Fprintf(stdout, "count check: %s; %d file(s), %d breakdown(s), %d citation claim(s), %d proof claim(s), %d violation(s)\n", result.Status, result.Files, result.Breakdowns, result.Claims, result.ProofClaims, len(result.Violations))
+	} else {
+		fmt.Fprintf(stdout, "count check: %s; %d file(s), %d breakdown(s), %d claim(s), %d violation(s)\n", result.Status, result.Files, result.Breakdowns, result.Claims, len(result.Violations))
+	}
 	for _, refused := range result.Refused {
 		fmt.Fprintf(stdout, "count check: refused — %s\n", refused)
 	}

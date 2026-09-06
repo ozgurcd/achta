@@ -18,6 +18,7 @@ func runMirror(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 	set := flagSet("mirror check")
 	masterValue := set.String("master", "", "master path (inside the workspace)")
 	digestValue := set.String("digest", "", "recorded digest file (inside the workspace)")
+	digestName := set.String("digest-name", "", "exact digest record name (defaults to the master basename)")
 	var mirrorValues repeatedValue
 	set.Var(&mirrorValues, "mirror", "repeatable mirror path (inside the workspace)")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
@@ -28,6 +29,9 @@ func runMirror(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 	opts.json = *jsonMode
 	if *masterValue == "" || (len(mirrorValues) == 0 && *digestValue == "") {
 		return renderError(stdout, stderr, opts.json, mirror.Schema, invalid("--master and at least one --mirror or --digest are required"))
+	}
+	if *digestName != "" && *digestValue == "" {
+		return renderError(stdout, stderr, opts.json, mirror.Schema, invalid("--digest-name requires --digest"))
 	}
 
 	ws, err := resolveWorkspace(opts)
@@ -76,7 +80,7 @@ func runMirror(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 		if readErr != nil {
 			return renderError(stdout, stderr, opts.json, mirror.Schema, invalid("read digest %q: %v", *digestValue, readErr))
 		}
-		result, err = mirror.CheckWithDigest(*masterValue, master.Data, inputs, mirror.DigestInput{Path: *digestValue, Data: snapshot.Data})
+		result, err = mirror.CheckWithDigest(*masterValue, master.Data, inputs, mirror.DigestInput{Path: *digestValue, Name: *digestName, Data: snapshot.Data})
 	} else {
 		result, err = mirror.Check(*masterValue, master.Data, inputs)
 	}

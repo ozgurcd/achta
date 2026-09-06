@@ -340,3 +340,43 @@ comment exclusion. It refuses
 line-level scope approximation, shell interpretation, route-name defaults, and
 any claim that an install route is operationally correct. Malformed or
 ambiguous YAML cannot evaluate; it never passes.
+
+### P-072 — Count retirement parity is caller-classified structure
+
+Achta covers CLAIM-vs-PROOF, last-section scope, exemptions, and multiple claim
+forms only after the caller supplies every classifier. Repeatable claim,
+proof-claim, proof, and exemption patterns, a section pattern, and a positive
+proof distance have no defaults. The mechanics are deterministic: citation
+claims are limited to the last matching `## ` section, an exemption marker
+applies to the next nonblank paragraph, and a proof claim is compared with the
+nearest proof count inside the caller's line distance.
+
+This extends P-070 without crossing its boundary. Achta can compare explicit
+counts and locations; it still refuses to decide that prose makes a claim or
+that a nearby proof line is true, relevant, or sufficient. Repeated patterns
+are additive and never silently overwrite one another.
+
+### P-073 — Route cardinality belongs to each workflow file
+
+The compatibility default remains exactly one configured route per workflow.
+Explicit `--route-cardinality per-file-any` permits zero or many route uses in
+each file independently, matching repositories where CI has multiple derived
+installs and another workflow has none. Every selected workflow is still
+scanned for every caller-supplied ban, and each file using the designated route
+must contain exactly one required key at the selected YAML mapping scope.
+
+Repeatable explicit directories add only their direct lowercase `.yml` and
+`.yaml` regular files in bytewise filename order. Achta owns that selection and
+cardinality mechanic, not directory conventions, route names, bans, keys, or
+scope vocabulary. No route-free file may escape the ban scan.
+
+### P-074 — Digest record names are exact opaque caller vocabulary
+
+`mirror check --digest-name NAME` selects the unique canonical digest record
+whose name equals `NAME` byte-for-byte. This covers path-shaped records such as
+`tools/rulefloor-install-gate.sh` without interpreting the name as a path.
+Omitting the flag preserves exact master-basename selection for compatibility.
+
+Zero or duplicate exact matches cannot evaluate. Achta refuses basename
+fallback after an explicit name, path cleanup, separator conversion, case or
+whitespace repair, and every form of master-content normalization.

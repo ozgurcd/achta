@@ -12,16 +12,20 @@ import (
 )
 
 const (
-	Schema       = "achta.declared-route-check.v1"
-	MaxDocument  = 8 << 20
-	MaxDocuments = 256
-	MaxPattern   = 4096
-	MaxPatterns  = 64
-	MaxMatches   = 4096
+	Schema              = "achta.declared-route-check.v1"
+	MaxDocument         = 8 << 20
+	MaxDocuments        = 256
+	MaxDirectoryEntries = 1024
+	MaxPattern          = 4096
+	MaxPatterns         = 64
+	MaxMatches          = 4096
 
 	RuleRouteCount  = "route-count"
 	RuleBanned      = "banned-pattern"
 	RuleRequiredKey = "required-key-scope"
+
+	CardinalityPerFileOne = "per-file-one"
+	CardinalityPerFileAny = "per-file-any"
 
 	RefusedLineScope  = "line-level scope inference; required scope is resolved from YAML mapping nodes"
 	RefusedVocabulary = "default route, banned-pattern, required-key, and scope vocabulary"
@@ -38,6 +42,7 @@ type Options struct {
 	RequiredRoutePattern string
 	RequiredKey          string
 	RequiredScope        string
+	RouteCardinality     string
 }
 
 type PatternCount struct {
@@ -75,6 +80,7 @@ type Violation struct {
 type Result struct {
 	SchemaVersion string           `json:"schema_version"`
 	Status        string           `json:"status"`
+	Cardinality   string           `json:"route_cardinality,omitempty"`
 	Documents     []DocumentResult `json:"documents"`
 	Violations    []Violation      `json:"violations"`
 	Refused       []string         `json:"refused"`
@@ -103,6 +109,16 @@ func Check(documents []Document, opts Options) (Result, error) {
 	}
 	if len(documents) > MaxDocuments {
 		return result, fmt.Errorf("document count exceeds %d", MaxDocuments)
+	}
+	cardinality := opts.RouteCardinality
+	if cardinality == "" {
+		cardinality = CardinalityPerFileOne
+	}
+	if cardinality != CardinalityPerFileOne && cardinality != CardinalityPerFileAny {
+		return result, fmt.Errorf("--route-cardinality must be %q or %q", CardinalityPerFileOne, CardinalityPerFileAny)
+	}
+	if cardinality != CardinalityPerFileOne {
+		result.Cardinality = cardinality
 	}
 	routes, err := compilePatterns("route", opts.RoutePatterns)
 	if err != nil {
@@ -186,8 +202,11 @@ func Check(documents []Document, opts Options) (Result, error) {
 			if len(count.Lines) > 0 {
 				routeLine = count.Lines[0]
 			}
+			if count.Pattern == opts.RequiredRoutePattern && count.Count > 0 {
+				documentResult.RequiredKey.Required = true
+			}
 		}
-		if routeCount != 1 {
+		if cardinality == CardinalityPerFileOne && routeCount != 1 {
 			documentResult.Status = "fail"
 			result.Violations = append(result.Violations, Violation{
 				File: document.Path, Line: routeLine, Rule: RuleRouteCount,
@@ -206,11 +225,6 @@ func Check(documents []Document, opts Options) (Result, error) {
 			}
 		}
 
-		for _, count := range documentResult.Routes {
-			if count.Pattern == opts.RequiredRoutePattern && count.Count > 0 {
-				documentResult.RequiredKey.Required = true
-			}
-		}
 		if documentResult.RequiredKey.Required {
 			scopeNode, scopeLine, err := mappingAt(root, scope)
 			if err != nil {

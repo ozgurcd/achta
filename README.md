@@ -121,7 +121,8 @@ achta --wiki-dir /path/to/workspace/wiki mirror check \
   --mirror wiki/tools/AGENTS.md --json
 achta --wiki-dir /path/to/workspace/wiki mirror check \
   --master wiki/tools/gate-witness.sh \
-  --digest wiki/contracts/gate-witness.master.sha256 --json
+  --digest wiki/contracts/gate-witness.master.sha256 \
+  --digest-name tools/gate-witness.sh --json
 
 achta --wiki-dir /path/to/workspace/wiki parts lock \
   --dir wiki/prompt/parts --lock wiki/prompt/parts.lock --bump
@@ -133,11 +134,15 @@ achta --wiki-dir /path/to/workspace/wiki count check \
   --total-pattern 'TOTAL[[:space:]]+(?P<count>[0-9]+)[[:space:]]*[|]' \
   --part-pattern '(VACUOUS|HAS-CONTROL|SOUND)[[:space:]]+(?P<count>[0-9]+)' \
   --claim-pattern 'claims[[:space:]]+(?P<count>[0-9]+)[[:space:]]+fixed' \
+  --claim-pattern '(?P<count>[0-9]+)[[:space:]]+sites fixed' \
+  --claim-section-pattern '^[[]20[0-9]{2}-[0-9]{2}-[0-9]{2}[]]' \
+  --exempt-pattern 'count-claim-exempt:' \
   --citation-pattern '[[:alnum:]_./-]+[.](go|md):[0-9]+' --json
 
 achta --workspace /path/to/workspace declared-route check \
-  --file identuum-idp-oss/.github/workflows/ci.yml \
-  --file identuum-ui/.github/workflows/ci.yml \
+  --dir identuum-idp-oss/.github/workflows \
+  --dir identuum-ui/.github/workflows \
+  --route-cardinality per-file-any \
   --route-pattern 'rulefloor/archive/refs/tags/[$][{]RULEFLOOR_VERSION[}]' \
   --required-route-pattern 'rulefloor/archive/refs/tags/[$][{]RULEFLOOR_VERSION[}]' \
   --ban-pattern 'brew install[^#]*rulefloor' \
@@ -201,16 +206,17 @@ says so in its document.
 
 `mirror check` computes SHA-256 over one master's exact bytes and compares each
 explicit `--mirror` in caller order. Optional `--digest FILE` also compares the
-computed master digest with the unique canonical lowercase `sha256  name`
-record whose name exactly equals the master's basename; when present, mirrors
-are optional. The digest result names the file, line, basename, recorded hex,
-and computed hex. A multi-record file is accepted only when that exact match is
-unique. No newline, whitespace, case, path, content, or semantic normalization
-is performed. An absent mirror or valid digest disagreement is exit 1; an
-absent master or digest file, malformed record, missing basename, or duplicate
-applicable basename is `cannot_evaluate` (exit 2). Paths are read-only and
-workspace-confined. With `--wiki-dir WORKSPACE/wiki`, a master at the workspace
-root remains addressable because the selector retains `WORKSPACE` as its root.
+computed master digest with one canonical lowercase `sha256  name` record.
+Selection defaults to the master's exact basename; `--digest-name NAME`
+selects an exact caller-owned record such as `tools/gate-witness.sh` without
+normalizing it. The digest result names the file, line, record, recorded hex,
+and computed hex. Zero or duplicate selected records cannot evaluate. No
+newline, whitespace, case, path, content, or semantic normalization is
+performed. An absent mirror or valid digest disagreement is exit 1; an absent
+master or digest file and malformed or ambiguous evidence is exit 2. Paths are
+read-only and workspace-confined. With `--wiki-dir WORKSPACE/wiki`, a master at
+the workspace root remains addressable because the selector retains
+`WORKSPACE` as its root.
 
 `parts lock` writes Achta's strict `achta.parts-lock.v1` artifact for every
 direct `.txt` file under `--dir`, in bytewise filename order. A new lock starts
@@ -228,24 +234,27 @@ heading vocabulary and document meaning are not properties of a byte lock.
 `--file` inputs and the direct Markdown files in repeatable `--dir` inputs.
 Explicit files come first; directories retain caller order and contribute files
 in bytewise filename order. `--total-pattern` and `--part-pattern` form the
-breakdown pair; `--claim-pattern` and `--citation-pattern` form the citation
-pair. At least one complete pair is required and every count-bearing regular
-expression has exactly one named `count` capture. Decimal tokens are built in;
-other exact tokens require repeatable `--count-alias TOKEN=N` declarations.
-Breakdowns are line-scoped. Claims and distinct exact citation matches are
-scoped to one blank-line-delimited paragraph. Achta does not infer English
-claim vocabulary, fix verbs, dates, exemptions, proof relevance, or semantic
-equivalence. The stable `achta.count-check.v1` result records each file, line,
-rule, claimed count, and observed count; disagreement is exit 1 and unavailable,
-unsafe, malformed, or incomplete evidence is exit 2. The command reads only,
-invokes neither a shell nor Git, and performs no content normalization.
+breakdown pair; repeatable `--claim-pattern` plus `--citation-pattern` form the
+citation relationship. `--claim-section-pattern` limits it to the last matching
+`## ` section and repeatable `--exempt-pattern` markers exempt the next nonblank
+paragraph. Repeatable `--proof-claim-pattern` and `--proof-pattern`, with
+`--proof-within-lines`, compare a claim count with the nearest bounded proof
+count. Every count-bearing expression has one named `count` capture. Decimal
+tokens are built in; aliases are explicit. Achta owns only those exact
+mechanics: it does not infer English claims or decide that proof prose or a
+citation is true or relevant. Disagreement is exit 1 and unavailable, unsafe,
+malformed, or incomplete evidence is exit 2. The command reads only, invokes
+neither a shell nor Git, and performs no content normalization.
 
-`declared-route check` parses every explicit workflow as one YAML document.
-Across live scalar text, the configured route alternatives must match exactly
-once per file and every configured banned expression must match zero times.
+`declared-route check` parses every explicit file, plus direct `.yml` and
+`.yaml` files from explicit directories, as one YAML document. The default
+requires exactly one configured route per file; `--route-cardinality
+per-file-any` permits zero or more per file while still scanning every file for
+every configured ban.
 The caller designates one route pattern that needs a scoped key, then names
 that exact key and its YAML mapping with a JSON Pointer such as `/env`. The
-key is required only when that route is selected. This is syntax-tree scope, so
+key is required exactly once in every file where that route occurs. This is
+syntax-tree scope, so
 a job-level `/jobs/verify/env` declaration cannot stand in for workflow-level
 `/env`.
 YAML comments and comment-only lines within scalar command blocks do not count.

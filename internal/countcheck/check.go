@@ -23,9 +23,11 @@ const (
 
 	RuleBreakdownSum  = "breakdown-sum"
 	RuleClaimCitation = "claim-citation-count"
+	RuleClaimProof    = "claim-proof-count"
 
 	RefusedClaimMeaning    = "whether unconfigured prose makes a count claim"
 	RefusedCitationMeaning = "whether a matched citation proves a disposition"
+	RefusedProofMeaning    = "whether a matched proof count proves a claim"
 )
 
 // Document is one explicitly selected Markdown input.
@@ -37,11 +39,16 @@ type Document struct {
 // Options contains caller-owned vocabulary. Count patterns identify their
 // numeric token through one named capture group called "count".
 type Options struct {
-	TotalPattern    string
-	PartPattern     string
-	ClaimPattern    string
-	CitationPattern string
-	CountAliases    []string
+	TotalPattern        string
+	PartPattern         string
+	ClaimPatterns       []string
+	CitationPattern     string
+	ProofClaimPatterns  []string
+	ProofPatterns       []string
+	ProofWithinLines    int
+	ClaimSectionPattern string
+	ExemptPatterns      []string
+	CountAliases        []string
 }
 
 // Violation records one evaluated arithmetic disagreement.
@@ -61,6 +68,7 @@ type Result struct {
 	Files         int         `json:"files"`
 	Breakdowns    int         `json:"breakdowns"`
 	Claims        int         `json:"claims"`
+	ProofClaims   int         `json:"proof_claims,omitempty"`
 	Violations    []Violation `json:"violations"`
 	Refused       []string    `json:"refused"`
 }
@@ -88,23 +96,39 @@ func Check(documents []Document, opts Options) (Result, error) {
 	}
 
 	breakdownEnabled := opts.TotalPattern != "" || opts.PartPattern != ""
-	claimEnabled := opts.ClaimPattern != "" || opts.CitationPattern != ""
-	if !breakdownEnabled && !claimEnabled {
+	claimEnabled := len(opts.ClaimPatterns) > 0 || opts.CitationPattern != ""
+	proofEnabled := len(opts.ProofClaimPatterns) > 0 || len(opts.ProofPatterns) > 0 || opts.ProofWithinLines != 0
+	if proofEnabled {
+		result.Refused = append(result.Refused, RefusedProofMeaning)
+	}
+	if !breakdownEnabled && !claimEnabled && !proofEnabled {
 		return result, errors.New("at least one pattern pair is required")
 	}
 	if (opts.TotalPattern == "") != (opts.PartPattern == "") {
 		return result, errors.New("--total-pattern and --part-pattern must be supplied together")
 	}
-	if (opts.ClaimPattern == "") != (opts.CitationPattern == "") {
+	if (len(opts.ClaimPatterns) == 0) != (opts.CitationPattern == "") {
 		return result, errors.New("--claim-pattern and --citation-pattern must be supplied together")
+	}
+	if proofEnabled && (len(opts.ProofClaimPatterns) == 0 || len(opts.ProofPatterns) == 0 || opts.ProofWithinLines < 1) {
+		return result, errors.New("--proof-claim-pattern, --proof-pattern, and a positive --proof-within-lines must be supplied together")
+	}
+	if opts.ClaimSectionPattern != "" && !claimEnabled {
+		return result, errors.New("--claim-section-pattern requires --claim-pattern and --citation-pattern")
+	}
+	if len(opts.ExemptPatterns) > 0 && !claimEnabled && !proofEnabled {
+		return result, errors.New("--exempt-pattern requires a claim or proof relationship")
 	}
 
 	aliases, err := parseAliases(opts.CountAliases)
 	if err != nil {
 		return result, err
 	}
-	var total, part, claim *countPattern
+	var total, part *countPattern
+	var claims, proofClaims, proofs []*countPattern
 	var citation *regexp.Regexp
+	var claimSection *regexp.Regexp
+	var exemptions []*regexp.Regexp
 	if breakdownEnabled {
 		if total, err = compileCountPattern("total", opts.TotalPattern); err != nil {
 			return result, err
@@ -114,7 +138,7 @@ func Check(documents []Document, opts Options) (Result, error) {
 		}
 	}
 	if claimEnabled {
-		if claim, err = compileCountPattern("claim", opts.ClaimPattern); err != nil {
+		if claims, err = compileCountPatterns("claim", opts.ClaimPatterns); err != nil {
 			return result, err
 		}
 		if citation, err = regexp.Compile(opts.CitationPattern); err != nil {
@@ -122,6 +146,24 @@ func Check(documents []Document, opts Options) (Result, error) {
 		}
 		if citation.MatchString("") {
 			return result, errors.New("citation pattern must not match empty text")
+		}
+		if opts.ClaimSectionPattern != "" {
+			if claimSection, err = compileTextPattern("claim section", opts.ClaimSectionPattern); err != nil {
+				return result, err
+			}
+		}
+	}
+	if proofEnabled {
+		if proofClaims, err = compileCountPatterns("proof claim", opts.ProofClaimPatterns); err != nil {
+			return result, err
+		}
+		if proofs, err = compileCountPatterns("proof", opts.ProofPatterns); err != nil {
+			return result, err
+		}
+	}
+	if len(opts.ExemptPatterns) > 0 {
+		if exemptions, err = compileTextPatterns("exempt", opts.ExemptPatterns); err != nil {
+			return result, err
 		}
 	}
 
@@ -142,6 +184,7 @@ func Check(documents []Document, opts Options) (Result, error) {
 		}
 		result.Files++
 		lines := strings.Split(strings.ReplaceAll(string(document.Data), "\r\n", "\n"), "\n")
+		exempt := exemptedLines(lines, exemptions)
 		var documentViolations []Violation
 		if breakdownEnabled {
 			count, violations, checkErr := checkBreakdowns(document.Path, lines, total, part, aliases)
@@ -152,11 +195,19 @@ func Check(documents []Document, opts Options) (Result, error) {
 			documentViolations = append(documentViolations, violations...)
 		}
 		if claimEnabled {
-			count, violations, checkErr := checkClaims(document.Path, lines, claim, citation, aliases)
+			count, violations, checkErr := checkClaims(document.Path, lines, claims, citation, claimSection, exempt, aliases)
 			if checkErr != nil {
 				return result, checkErr
 			}
 			result.Claims += count
+			documentViolations = append(documentViolations, violations...)
+		}
+		if proofEnabled {
+			count, violations, checkErr := checkProofClaims(document.Path, lines, proofClaims, proofs, opts.ProofWithinLines, exempt, aliases)
+			if checkErr != nil {
+				return result, checkErr
+			}
+			result.ProofClaims += count
 			documentViolations = append(documentViolations, violations...)
 		}
 		sort.SliceStable(documentViolations, func(i, j int) bool {
@@ -192,6 +243,57 @@ func compileCountPattern(name, value string) (*countPattern, error) {
 		return nil, fmt.Errorf("%s pattern needs exactly one named count capture", name)
 	}
 	return &countPattern{re: re, countIndex: index}, nil
+}
+
+func compileCountPatterns(name string, values []string) ([]*countPattern, error) {
+	seen := map[string]bool{}
+	patterns := make([]*countPattern, 0, len(values))
+	for _, value := range values {
+		if value == "" {
+			return nil, fmt.Errorf("%s pattern must not be empty", name)
+		}
+		if seen[value] {
+			return nil, fmt.Errorf("%s pattern %q is repeated", name, value)
+		}
+		seen[value] = true
+		pattern, err := compileCountPattern(name, value)
+		if err != nil {
+			return nil, err
+		}
+		patterns = append(patterns, pattern)
+	}
+	return patterns, nil
+}
+
+func compileTextPattern(name, value string) (*regexp.Regexp, error) {
+	if len(value) > 4096 {
+		return nil, fmt.Errorf("%s pattern exceeds 4096 bytes", name)
+	}
+	re, err := regexp.Compile(value)
+	if err != nil {
+		return nil, fmt.Errorf("%s pattern: %w", name, err)
+	}
+	if re.MatchString("") {
+		return nil, fmt.Errorf("%s pattern must not match empty text", name)
+	}
+	return re, nil
+}
+
+func compileTextPatterns(name string, values []string) ([]*regexp.Regexp, error) {
+	seen := map[string]bool{}
+	patterns := make([]*regexp.Regexp, 0, len(values))
+	for _, value := range values {
+		if seen[value] {
+			return nil, fmt.Errorf("%s pattern %q is repeated", name, value)
+		}
+		seen[value] = true
+		pattern, err := compileTextPattern(name, value)
+		if err != nil {
+			return nil, err
+		}
+		patterns = append(patterns, pattern)
+	}
+	return patterns, nil
 }
 
 func parseAliases(values []string) (map[string]int, error) {
@@ -252,10 +354,22 @@ func checkBreakdowns(path string, lines []string, total, part *countPattern, ali
 	return breakdowns, violations, nil
 }
 
-func checkClaims(path string, lines []string, claim *countPattern, citation *regexp.Regexp, aliases map[string]int) (int, []Violation, error) {
+func checkClaims(path string, lines []string, claims []*countPattern, citation, section *regexp.Regexp, exempt map[int]bool, aliases map[string]int) (int, []Violation, error) {
 	var violations []Violation
-	claims := 0
-	for start := 0; start < len(lines); {
+	claimCount := 0
+	scopeStart := 0
+	if section != nil {
+		scopeStart = -1
+		for index, line := range lines {
+			if strings.HasPrefix(line, "## ") && section.MatchString(line) {
+				scopeStart = index
+			}
+		}
+		if scopeStart < 0 {
+			return 0, violations, nil
+		}
+	}
+	for start := scopeStart; start < len(lines); {
 		for start < len(lines) && strings.TrimSpace(lines[start]) == "" {
 			start++
 		}
@@ -271,20 +385,137 @@ func checkClaims(path string, lines []string, claim *countPattern, citation *reg
 		if err != nil {
 			return 0, nil, fmt.Errorf("document %q paragraph at line %d: %w", path, start+1, err)
 		}
-		for _, match := range claim.re.FindAllStringSubmatchIndex(masked, -1) {
-			line := start + 1 + strings.Count(masked[:match[0]], "\n")
-			claimed, parseErr := countFromIndexes(masked, match, claim.countIndex, aliases)
-			if parseErr != nil {
-				return 0, nil, fmt.Errorf("document %q line %d claim: %w", path, line, parseErr)
+		for _, match := range countMatches(masked, claims) {
+			lineIndex := start + strings.Count(masked[:match.indexes[0]], "\n")
+			if paragraphIsExempt(start, end, exempt) {
+				continue
 			}
-			claims++
+			claimed, parseErr := countFromIndexes(masked, match.indexes, match.pattern.countIndex, aliases)
+			if parseErr != nil {
+				return 0, nil, fmt.Errorf("document %q line %d claim: %w", path, lineIndex+1, parseErr)
+			}
+			claimCount++
 			if len(citations) < claimed {
-				violations = append(violations, Violation{File: path, Line: line, Rule: RuleClaimCitation, Claimed: claimed, Observed: len(citations), Text: fmt.Sprintf("claim requires %d distinct citation(s), found %d in its paragraph", claimed, len(citations))})
+				violations = append(violations, Violation{File: path, Line: lineIndex + 1, Rule: RuleClaimCitation, Claimed: claimed, Observed: len(citations), Text: fmt.Sprintf("claim requires %d distinct citation(s), found %d in its paragraph", claimed, len(citations))})
 			}
 		}
 		start = end + 1
 	}
-	return claims, violations, nil
+	return claimCount, violations, nil
+}
+
+type locatedCountMatch struct {
+	pattern *countPattern
+	indexes []int
+}
+
+func countMatches(text string, patterns []*countPattern) []locatedCountMatch {
+	matches := []locatedCountMatch{}
+	seen := map[string]bool{}
+	for _, pattern := range patterns {
+		for _, indexes := range pattern.re.FindAllStringSubmatchIndex(text, -1) {
+			key := fmt.Sprintf("%d:%d", indexes[0], indexes[1])
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+			matches = append(matches, locatedCountMatch{pattern: pattern, indexes: indexes})
+		}
+	}
+	sort.SliceStable(matches, func(i, j int) bool {
+		if matches[i].indexes[0] != matches[j].indexes[0] {
+			return matches[i].indexes[0] < matches[j].indexes[0]
+		}
+		return matches[i].indexes[1] < matches[j].indexes[1]
+	})
+	return matches
+}
+
+func exemptedLines(lines []string, patterns []*regexp.Regexp) map[int]bool {
+	exempt := map[int]bool{}
+	for index, line := range lines {
+		matched := false
+		for _, pattern := range patterns {
+			if pattern.MatchString(line) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			continue
+		}
+		start := index + 1
+		for start < len(lines) && strings.TrimSpace(lines[start]) == "" {
+			start++
+		}
+		for start < len(lines) && strings.TrimSpace(lines[start]) != "" {
+			exempt[start] = true
+			start++
+		}
+	}
+	return exempt
+}
+
+func paragraphIsExempt(start, end int, exempt map[int]bool) bool {
+	for index := start; index < end; index++ {
+		if exempt[index] {
+			return true
+		}
+	}
+	return false
+}
+
+type proofCount struct {
+	line  int
+	value int
+}
+
+func checkProofClaims(path string, lines []string, claims, proofs []*countPattern, within int, exempt map[int]bool, aliases map[string]int) (int, []Violation, error) {
+	proofCounts := []proofCount{}
+	for index, line := range lines {
+		for _, match := range countMatches(line, proofs) {
+			value, err := countFromIndexes(line, match.indexes, match.pattern.countIndex, aliases)
+			if err != nil {
+				return 0, nil, fmt.Errorf("document %q line %d proof: %w", path, index+1, err)
+			}
+			proofCounts = append(proofCounts, proofCount{line: index, value: value})
+		}
+	}
+
+	claimCount := 0
+	violations := []Violation{}
+	for index, line := range lines {
+		if exempt[index] {
+			continue
+		}
+		for _, match := range countMatches(line, claims) {
+			claimed, err := countFromIndexes(line, match.indexes, match.pattern.countIndex, aliases)
+			if err != nil {
+				return 0, nil, fmt.Errorf("document %q line %d proof claim: %w", path, index+1, err)
+			}
+			claimCount++
+			nearest := -1
+			nearestDistance := within + 1
+			for candidate, proof := range proofCounts {
+				distance := index - proof.line
+				if distance < 0 {
+					distance = -distance
+				}
+				if distance <= within && distance < nearestDistance {
+					nearest = candidate
+					nearestDistance = distance
+				}
+			}
+			if nearest < 0 {
+				continue
+			}
+			proved := proofCounts[nearest].value
+			if claimed != proved {
+				violations = append(violations, Violation{File: path, Line: index + 1, Rule: RuleClaimProof, Claimed: claimed, Observed: proved, Text: fmt.Sprintf("claim count is %d, nearest proof count within %d line(s) is %d", claimed, within, proved)})
+			}
+		}
+	}
+	return claimCount, violations, nil
 }
 
 func maskCitations(text string, pattern *regexp.Regexp) (string, []string, error) {
