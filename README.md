@@ -149,6 +149,10 @@ achta --workspace /path/to/workspace declared-route check \
   --ban-pattern 'go install[^#]*rulefloor' \
   --required-key RULEFLOOR_VERSION --required-scope /env --json
 
+achta --wiki-dir /path/to/repository/wiki replacement check \
+  --file replacement-claims.json \
+  --claim-status replaces --claim-status retired --json
+
 go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 ```
 
@@ -263,6 +267,17 @@ multi-document, unsafe, or ambiguous input is `cannot_evaluate`, exit 2. The
 command reads only workspace-confined regular files and invokes neither shell
 nor Git.
 
+`replacement check` makes named-script parity an explicit repository gate.
+The caller supplies the exact statuses that mean replacement or retirement;
+there are no vocabulary defaults and Achta does not infer claims from prose.
+Every matching `achta.replacement-claims.v1` entry must cite the named script's
+own selftest fixtures and a recorded replay of both implementations, then list
+matching script and verb exit codes for every fixture. Missing evidence or an
+exit disagreement is exit 1; malformed or unavailable evidence is exit 2.
+Candidate entries make no replacement claim. Citations remain attestations:
+Achta validates their presence and recorded agreement but executes neither
+implementation.
+
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,
 incomplete, malformed, unsupported, and stale records remain distinguishable.
@@ -328,7 +343,8 @@ tag; the workflow verifies its tap push permission before creating the release.
 
 [`RULE-FLOOR.md`](RULE-FLOOR.md) is Achta's canonical repository-local ledger.
 Its floor contains armed, mutation-proved release invariants. `make verify`
-validates the ledger and executes its Go-test bindings on every slice:
+validates the ledger, enforces `replacement-claims.json`, and executes its
+Go-test bindings on every slice:
 
 ```sh
 rulefloor check --repo . --run-profile unit --timings

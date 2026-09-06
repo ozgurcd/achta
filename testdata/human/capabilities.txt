@@ -1,4 +1,4 @@
-Achta v0.5.2 capabilities
+Achta v0.5.3 capabilities
   amendments declare
   amendments rebase
   amendments reconcile
@@ -14,6 +14,7 @@ Achta v0.5.2 capabilities
   parts verify
   reachability classify
   recipe check
+  replacement check
   slice check
   toolchain check
   version

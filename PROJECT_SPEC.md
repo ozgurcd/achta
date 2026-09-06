@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.2 release specification
+Status: v0.5.3 release specification
 
 Project name: Achta
 
@@ -120,7 +120,10 @@ Achta must provide these guarantees:
 9. **Explicit trust boundaries.** A syntactically valid attestation or witness
    record is not proof that its author was truthful or that commands ran.
 10. **Compatibility before replacement.** An existing script is not retired
-    until golden and end-to-end fixtures prove behavioral parity.
+    until its own selftest fixtures have been replayed against both the script
+    and the proposed Achta replacement, with matching exit codes recorded for
+    every fixture. A named replacement or retirement claim without those
+    citations is an evaluated defect.
 
 ## 5. Ownership boundaries
 
@@ -268,6 +271,22 @@ The lock establishes exact bytes and closed-set membership. Whether a part
 names a live section of some canonical document is not part of this artifact:
 the document selection, heading grammar, and reference semantics belong to the
 caller.
+
+### 6.6 Replacement-claim manifest
+
+`replacement-claims.json` is the canonical place where this repository may
+claim that an Achta verb replaces or retires a named script. Achta owns its
+strict `achta.replacement-claims.v1` JSON shape: a schema marker and ordered
+`claims`, each naming a `verb`, `script`, and caller-chosen `status`.
+
+The words that assert replacement or retirement remain caller vocabulary and
+are passed to the checker as repeatable `--claim-status` values with no
+default. An entry carrying one of those statuses must also contain non-empty
+`selftest_citation` and `replay_citation` fields and at least one named fixture
+with both `script_exit` and `verb_exit`. The two exit codes must agree for
+every fixture. Citations are opaque evidence references: Achta validates their
+presence and the recorded mechanics, not whether an external replay truly ran.
+Candidate entries need no evidence and make no replacement claim.
 
 ## 7. Command-line design
 
@@ -1058,6 +1077,28 @@ selection, exact caller-pattern counting, explicit per-file cardinality, and
 comment exclusion. Refused and reported: default route, banned-command, token,
 or scope vocabulary and line-level inference of YAML scope.
 
+### 7.24 Replacement parity check
+
+```text
+achta replacement check --file MANIFEST
+  --claim-status STATUS [--claim-status STATUS]... [--json]
+```
+
+`replacement check` parses only canonical `achta.replacement-claims.v1` and
+evaluates entries whose exact status matches a caller-supplied claim status.
+For every such verb-to-named-script claim it requires a citation to that
+script's own selftest fixtures, a citation to a recorded dual replay, and
+matching script and verb exit codes for every named fixture. Missing evidence
+or an exit disagreement is exit 1. Missing flags or files, malformed or
+unsupported JSON, repeated caller statuses or fixtures, and invalid exit codes
+are `cannot_evaluate`, exit 2. Clean evidence is exit 0.
+
+Achta refuses to classify natural-language release prose as a replacement
+claim, consistent with P-063: that is meaning inference. Instead, the
+structured manifest is the only authoritative replacement/retirement claim
+surface and `make verify` checks it. The command is read-only,
+workspace-confined, invokes neither shell nor Git, and writes nothing.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -1294,17 +1335,29 @@ define arbitrary executable commands.
 | End-to-end witness freshness | Implemented by `achta witness check`, including explicit no-reach classification |
 | Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
-| Close-condition and ledger-claim checks | Implemented structurally by `achta ledger rows`; caller-owned vocabulary remains explicit and meaning inference is refused |
-| Count-claim and breakdown-sum checks | Implemented structurally by `achta count check`; repeatable caller patterns define claims, proof lines, citations, sections, exemptions, and parts while meaning inference remains refused |
-| Byte-identical master/mirror and recorded-master-digest checks | Implemented by `achta mirror check`; caller may select an exact path-shaped digest record name, and old scripts remain until caller parity and retirement are explicit |
+| Close-condition and ledger-claim checks | Candidate implementation: `achta ledger rows`; no named-script replacement or retirement claim is recorded |
+| Count-claim and breakdown-sum checks | Candidate implementation: `achta count check`; `replacement-claims.json` records no replacement claim until script-side parity evidence exists |
+| Byte-identical master/mirror and recorded-master-digest checks | Candidate implementation: `achta mirror check`; `replacement-claims.json` records no replacement claim until script-side parity evidence exists |
 | Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
 | Ledger census versus source graph | Keep as a composition gate; Rulefloor and Gograph retain ownership |
-| Rulefloor installation-route gate | Implemented mechanically by `achta declared-route check`; per-file-any cardinality permits zero or many derived uses under one declaration while every selected workflow remains ban-scanned; caller flags retain all route, ban, token, and scope vocabulary |
+| Rulefloor installation-route gate | Candidate implementation: `achta declared-route check`; `replacement-claims.json` records no replacement claim until script-side parity evidence exists |
 | Vulnerability fix-availability policy | Keep in a dedicated vulnerability analyzer; Achta does not own advisory or fix semantics |
 | Route, link, inert-parameter, clock, and wire analyzers | Keep dedicated |
 | Prompt inclusion, canonical-section reference checking, commit hook, and source-navigation hook | Keep in the agent harness; the caller owns heading vocabulary and hook wiring |
+
+Replacement language can be written in `PROJECT_SPEC.md` (principle 10 and
+this disposition table), `CHANGELOG.md`, `RELEASE_NOTES.md` and its generated
+GitHub release body, `README.md`, and the repository wiki's current facts,
+decisions, and append-only log. Those prose surfaces are explanatory and may
+describe features or migration candidates, but they are not machine-classified
+because doing so would infer meaning. `capabilities` advertises command and
+schema existence only and has no replacement/parity field, so it is not a
+replacement-claim surface. Only a matching-status record in
+`replacement-claims.json` is an authoritative named-script replacement or
+retirement claim, and the repository gate rejects it without the required
+citations and exit-code replay.
 
 ### 13.3 Parity procedure
 
@@ -1320,6 +1373,10 @@ For every migrated script:
 7. Keep a temporary compatibility wrapper that calls Achta with direct
    arguments, not through a shell command string.
 8. Remove the old implementation in a later explicit slice.
+
+Before step 6 or 8 is claimed, record the script's own selftest-fixture
+citation, the dual-replay citation, and every fixture's two exit codes in
+`replacement-claims.json`; `make replacement-check` must pass.
 
 ## 14. Machine-interface requirements
 
@@ -1392,9 +1449,17 @@ Schemas added for v0.5.1:
 - `achta.count-check.v1`
 - `achta.declared-route-check.v1`
 
+Schemas added for v0.5.3:
+
+- `achta.replacement-check.v1`
+
 Canonical artifact schemas added for v0.5.0:
 
 - `achta.parts-lock.v1`
+
+Canonical artifact schemas added for v0.5.3:
+
+- `achta.replacement-claims.v1`
 
 Do not publish a schema until the corresponding implementation and conformance
 tests are complete.
@@ -1462,6 +1527,9 @@ Add focused tests for:
   cardinality are distinct, every route-free file is still ban-scanned, each
   route-using file requires its scoped key, direct directories are bytewise
   ordered, and job-level keys cannot satisfy workflow-level scope.
+- replacement manifests where candidate statuses remain non-claims, claimed
+  named scripts require both citations and replay fixtures, matching exits
+  pass, mismatched exits fail, and unknown or malformed fields cannot evaluate.
 
 ### 15.2 Integration tests
 
@@ -1487,6 +1555,8 @@ Cover complete workflows:
    closure-quote fixtures through the public 0/1/2 command contract.
 9. Count-check clean, bad breakdown, citation undercount, missing input, and
    direct Markdown-directory selection.
+10. The frozen v0.5.1 count, declared-route, and mirror replacement claims all
+    fail because they have no script-side selftest or dual-replay evidence.
 
 Use fake executables for Git and Rulefloor argument-vector tests where
 appropriate, while retaining a small end-to-end suite against installed
@@ -1542,6 +1612,7 @@ staticcheck ./...
 govulncheck ./...
 go mod tidy -diff
 gograph build . --precise
+make replacement-check
 rulefloor check --repo . --run-profile unit --timings
 ```
 
@@ -1882,7 +1953,25 @@ The v0.3.0 release records these choices explicitly:
    gaps in three existing stable verbs without removing commands, changing
    defaults, or changing their 0/1/2 and schema contracts.
 
-## 30. Success measure
+## 30. v0.5.3 decisions
+
+1. Achta refuses to infer from prose that a command replaces or retires a
+   script. The classification remains caller-owned as repeatable exact
+   `--claim-status` values with no default, consistent with P-063.
+2. `achta.replacement-claims.v1` is the sole authoritative named-script claim
+   surface. Claim statuses require both citation fields plus one or more
+   per-fixture script/verb exit pairs; `make verify` runs the check so an
+   uncited canonical claim cannot pass the repository gate.
+3. Citation contents remain attestations, not independently verified facts.
+   Achta owns presence, bounded structure, and exit-code equality while
+   refusing to execute either implementation or judge the replay's truth.
+4. The v0.5.1-shaped manifest naming `count check`, `declared-route check`, and
+   `mirror check --digest` as replacements with no script-side replay is a
+   permanent red fixture.
+5. v0.5.3 is a patch: it adds one read-only command, one artifact schema, and
+   one repository gate without changing any existing command or schema.
+
+## 31. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

@@ -430,3 +430,21 @@ restoration returned the focused suite green. COUNT-RETIREMENT-PARITY-1,
 DECLARED-ROUTE-PER-FILE-ANY-1, and MIRROR-DIGEST-NAMED-RECORD-1 raise the
 executable Rulefloor from 36 to 39. Source, exact fixtures, changelog, release
 notes, current wiki facts, and the release line advance together to v0.5.2.
+
+## [2026-09-06] release | achta-v0.5.3-replacement-parity-gate
+
+Principle 10 is now executable. `replacement check` reads the canonical
+`achta.replacement-claims.v1` manifest and requires every caller-designated
+verb-to-named-script replacement or retirement claim to cite the script's own
+selftest fixtures, cite a recorded replay of both implementations, and record
+agreeing exit codes for each fixture. Achta refuses natural-language claim
+inference; exact claim statuses are caller flags with no default and candidate
+entries make no claim.
+
+The frozen v0.5.1-shaped claims for `count check`, `declared-route check`, and
+`mirror check --digest` fail with nine missing-evidence violations. Disabling
+the selftest citation branch made the focused rule test red with two violations
+instead of three; restoration returned green. P-075 records the boundary,
+REPLACEMENT-PARITY-CITATION-1 raises the executable floor from 39 to 40, and
+source, fixtures, release documents, and current wiki facts advance together
+to v0.5.3.

@@ -26,14 +26,14 @@ func TestCountCheckRetirementGapFlags(t *testing.T) {
 		"--count-alias", "Five=5", "--count-alias", "Four=4",
 	}
 	var stdout, stderr bytes.Buffer
-	if code := Run(args, &stdout, &stderr, "v0.5.2"); code != 1 || !strings.Contains(stdout.String(), `"rule":"claim-proof-count"`) || !strings.Contains(stdout.String(), `"proof_claims":1`) {
+	if code := Run(args, &stdout, &stderr, "v0.5.3"); code != 1 || !strings.Contains(stdout.String(), `"rule":"claim-proof-count"`) || !strings.Contains(stdout.String(), `"proof_claims":1`) {
 		t.Fatalf("proof code/output = %d/%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 
 	writeTestFile(t, filepath.Join(root, "wiki", "entry.md"), "## [2026-08-01] old\n\nFive fences fixed.\n\n## [2026-09-06] current\n\n<!-- count-claim-exempt: quotes a past mismatch -->\nwe fixed Five fences\ncontrols that fired: 4\n")
 	stdout.Reset()
 	stderr.Reset()
-	if code := Run(args, &stdout, &stderr, "v0.5.2"); code != 0 || !strings.Contains(stdout.String(), `"status":"pass"`) || !strings.Contains(stdout.String(), `"claims":0`) {
+	if code := Run(args, &stdout, &stderr, "v0.5.3"); code != 0 || !strings.Contains(stdout.String(), `"status":"pass"`) || !strings.Contains(stdout.String(), `"claims":0`) {
 		t.Fatalf("scope/exemption code/output = %d/%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 }
@@ -53,7 +53,7 @@ func TestDeclaredRouteCheckSupportsWorkflowDirectorySet(t *testing.T) {
 		"--required-route-pattern", "derived-route", "--required-key", "RULEFLOOR_VERSION", "--required-scope", "/env",
 	}
 	var stdout, stderr bytes.Buffer
-	if code := Run(args, &stdout, &stderr, "v0.5.2"); code != 0 || !strings.Contains(stdout.String(), `"route_cardinality":"per-file-any"`) || !strings.Contains(stdout.String(), `"file":".github/workflows/publish.yml"`) {
+	if code := Run(args, &stdout, &stderr, "v0.5.3"); code != 0 || !strings.Contains(stdout.String(), `"route_cardinality":"per-file-any"`) || !strings.Contains(stdout.String(), `"file":".github/workflows/publish.yml"`) {
 		t.Fatalf("set code/output = %d/%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	if strings.Index(stdout.String(), `"file":".github/workflows/ci.yml"`) > strings.Index(stdout.String(), `"file":".github/workflows/publish.yml"`) {
@@ -62,14 +62,14 @@ func TestDeclaredRouteCheckSupportsWorkflowDirectorySet(t *testing.T) {
 	writeTestFile(t, filepath.Join(dir, "publish.yml"), "jobs:\n  publish:\n    run: banned-install\n")
 	stdout.Reset()
 	stderr.Reset()
-	if code := Run(args, &stdout, &stderr, "v0.5.2"); code != 1 || !strings.Contains(stdout.String(), `"rule":"banned-pattern"`) {
+	if code := Run(args, &stdout, &stderr, "v0.5.3"); code != 1 || !strings.Contains(stdout.String(), `"rule":"banned-pattern"`) {
 		t.Fatalf("ban code/output = %d/%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 
 	duplicateArgs := append(append([]string{}, args...), "--file", ".github/workflows/ci.yml")
 	stdout.Reset()
 	stderr.Reset()
-	if code := Run(duplicateArgs, &stdout, &stderr, "v0.5.2"); code != 2 || !strings.Contains(stdout.String(), `"status":"cannot_evaluate"`) {
+	if code := Run(duplicateArgs, &stdout, &stderr, "v0.5.3"); code != 2 || !strings.Contains(stdout.String(), `"status":"cannot_evaluate"`) {
 		t.Fatalf("duplicate code/output = %d/%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 }
@@ -93,13 +93,13 @@ func TestMirrorCheckSupportsExplicitDigestRecordName(t *testing.T) {
 		"--digest-name", "tools/rulefloor-install-gate.sh",
 	}
 	var stdout, stderr bytes.Buffer
-	if code := Run(args, &stdout, &stderr, "v0.5.2"); code != 0 || !strings.Contains(stdout.String(), `"name":"tools/rulefloor-install-gate.sh"`) {
+	if code := Run(args, &stdout, &stderr, "v0.5.3"); code != 0 || !strings.Contains(stdout.String(), `"name":"tools/rulefloor-install-gate.sh"`) {
 		t.Fatalf("digest name code/output = %d/%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	stdout.Reset()
 	stderr.Reset()
 	withoutDigest := []string{"--json", "--workspace", root, "mirror", "check", "--master", "wiki/tools/rulefloor-install-gate.sh", "--mirror", "wiki/tools/rulefloor-install-gate.sh", "--digest-name", "tools/rulefloor-install-gate.sh"}
-	if code := Run(withoutDigest, &stdout, &stderr, "v0.5.2"); code != 2 || !strings.Contains(stdout.String(), `"status":"cannot_evaluate"`) {
+	if code := Run(withoutDigest, &stdout, &stderr, "v0.5.3"); code != 2 || !strings.Contains(stdout.String(), `"status":"cannot_evaluate"`) {
 		t.Fatalf("digest-name without digest code/output = %d/%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 }

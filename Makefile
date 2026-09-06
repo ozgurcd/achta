@@ -1,11 +1,11 @@
 SHELL := /bin/sh
 
-.PHONY: help build test test-fuzz fmt-check wiki-check verify rulefloor-static install-tools
+.PHONY: help build test test-fuzz fmt-check wiki-check replacement-check verify rulefloor-static install-tools
 
 FUZZTIME ?= 5s
 
 help:
-	@printf '%s\n' 'Targets:' '  build             build ./cmd/achta' '  test              run unit tests' '  test-fuzz         fuzz every narrow parser for FUZZTIME each' '  fmt-check         fail on unformatted Go files' '  wiki-check        validate the co-versioned repository wiki' '  verify            run the complete local verification gate' '  rulefloor-static  validate the ledger without executing bindings' '  install-tools     install pinned verification tools'
+	@printf '%s\n' 'Targets:' '  build             build ./cmd/achta' '  test              run unit tests' '  test-fuzz         fuzz every narrow parser for FUZZTIME each' '  fmt-check         fail on unformatted Go files' '  wiki-check        validate the co-versioned repository wiki' '  replacement-check require cited replay for named script replacement claims' '  verify            run the complete local verification gate' '  rulefloor-static  validate the ledger without executing bindings' '  install-tools     install pinned verification tools'
 
 build:
 	go build ./...
@@ -26,6 +26,9 @@ fmt-check:
 wiki-check:
 	go run ./cmd/achta --workspace . wiki check --json
 
+replacement-check:
+	go run ./cmd/achta --workspace . replacement check --file replacement-claims.json --claim-status replaces --claim-status retired --json
+
 verify: fmt-check
 	go version
 	go build ./...
@@ -36,6 +39,7 @@ verify: fmt-check
 	go mod tidy -diff
 	gograph build . --precise
 	$(MAKE) wiki-check
+	$(MAKE) replacement-check
 	rulefloor check --repo . --run-profile unit --timings
 
 rulefloor-static:

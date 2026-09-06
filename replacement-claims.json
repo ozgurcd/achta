@@ -1,0 +1,20 @@
+{
+  "schema_version": "achta.replacement-claims.v1",
+  "claims": [
+    {
+      "verb": "count check",
+      "script": "wiki/tools/count-claim-check.sh",
+      "status": "candidate"
+    },
+    {
+      "verb": "declared-route check",
+      "script": "wiki/tools/rulefloor-install-gate.sh",
+      "status": "candidate"
+    },
+    {
+      "verb": "mirror check --digest",
+      "script": "wiki/tools/gate-witness.sh",
+      "status": "candidate"
+    }
+  ]
+}

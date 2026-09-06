@@ -358,6 +358,19 @@ func assertStableMachineContracts(t *testing.T) {
 			},
 		},
 		{
+			name: "replacement-check.json",
+			value: struct {
+				SchemaVersion string `json:"schema_version"`
+				Status        string `json:"status"`
+				Claims        int    `json:"claims"`
+				Violations    []any  `json:"violations"`
+			}{
+				SchemaVersion: "achta.replacement-check.v1",
+				Status:        "pass",
+				Violations:    []any{},
+			},
+		},
+		{
 			name: "ledger-census.json",
 			value: census.Result{
 				SchemaVersion: census.Schema,

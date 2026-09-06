@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.5.3 — 2026-09-06
+
+- Added `replacement check` and the canonical
+  `achta.replacement-claims.v1` manifest. Caller-designated named-script
+  replacement or retirement claims now require citations to the script's own
+  selftest fixtures and a recorded dual replay, with matching script and verb
+  exit codes for every fixture.
+- Kept replacement vocabulary and prose interpretation outside Achta:
+  repeatable `--claim-status` flags have no default, candidate entries make no
+  claim, and citations remain explicit attestations rather than executed proof.
+- Made `make verify` enforce the manifest, froze the three uncited v0.5.1
+  replacement claims as a mandatory red fixture, and raised the executable
+  Rulefloor from 39 to 40 with a mutation proof.
+
 ## v0.5.2 — 2026-09-06
 
 - Closed the `count check` retirement gaps with additive repeatable claim

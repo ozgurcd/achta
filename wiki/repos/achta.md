@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.2.
+- Current release line: v0.5.3.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -65,6 +65,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
   directories. Its compatibility default requires one route per file; opt-in
   per-file-any permits zero or many while every file remains ban-scanned and
   every designated-route user needs one caller-scoped key.
+- `replacement check` validates the canonical `replacement-claims.json` gate.
+  Caller-designated named-script replacement or retirement statuses require
+  citations to the script's own selftests and a dual replay with agreeing
+  script/verb exit codes for every fixture; candidate entries make no claim.
 
 ## Verification surface
 
@@ -76,9 +80,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 39 armed, mutation-proved invariants on the current
-  v0.5.2 source line, including count-retirement parity, per-file route
-  cardinality, and exact named digest records.
+- `RULE-FLOOR.md` carries 40 armed, mutation-proved invariants on the current
+  v0.5.3 source line, including the named-script replacement-parity citation
+  gate.
 
 ## Known limitations
 
@@ -124,3 +128,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Add true-YAML `declared-route check` with caller-owned route, ban, key, and scope flags, and raise the mutation-proved floor from 35 to 36 without releasing. |
 | 2026-09-06 | `co-versioned` | Release the second additive conversion batch as v0.5.1, advance exact version fixtures, record Achta's first external Go module dependency, and retain the 36-rule floor. |
 | 2026-09-06 | `co-versioned` | Close the three measured script-retirement gaps, add exact caller-shaped count, route-cardinality, and digest-record controls, release v0.5.2, and raise the mutation-proved floor from 36 to 39. |
+| 2026-09-06 | `co-versioned` | Make principle 10 executable with a structured named-script replacement-claim gate, freeze the uncited v0.5.1 state as red, release v0.5.3, and raise the mutation-proved floor from 39 to 40. |

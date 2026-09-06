@@ -151,6 +151,8 @@ func dispatch(args []string, stdout, stderr io.Writer, releaseVersion string, op
 		return runMirror(rest, stdout, stderr, opts)
 	case "parts":
 		return runParts(rest, stdout, stderr, opts)
+	case "replacement":
+		return runReplacement(rest, stdout, stderr, opts)
 	default:
 		return renderError(stdout, stderr, opts.json, "achta.error.v1", invalid("unknown command %q", command))
 	}
@@ -327,6 +329,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "decision add", Reads: true, Writes: true, RequiresWorkspace: true},
 		{Name: "reachability classify", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "recipe check", Reads: true, RequiresWorkspace: true},
+		{Name: "replacement check", Reads: true, RequiresWorkspace: true},
 		{Name: "ledger census", Reads: true, RequiresWorkspace: true},
 		{Name: "ledger rows", Reads: true, RequiresWorkspace: true},
 		{Name: "mirror check", Reads: true, RequiresWorkspace: true},
@@ -352,10 +355,10 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 	doc := capabilitiesDocument{
 		SchemaVersion:     capabilitiesSchema,
 		Version:           normalizeVersion(releaseVersion),
-		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, ledgerrows.Schema, floorcensus.Schema, mirror.Schema, "achta.parts-operation.v1", "achta.parts-verify.v1", countcheck.Schema, declaredroute.Schema},
+		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, ledgerrows.Schema, floorcensus.Schema, mirror.Schema, "achta.parts-operation.v1", "achta.parts-verify.v1", countcheck.Schema, declaredroute.Schema, "achta.replacement-check.v1"},
 		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--wiki-dir", "--workspace"},
 		Commands:          commands,
-		ArtifactSchemas:   []string{"achta.parts-lock.v1", "achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
+		ArtifactSchemas:   []string{"achta.parts-lock.v1", "achta.replacement-claims.v1", "achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
 		RulefloorSchemas:  []string{"rulefloor.capabilities.v1", "rulefloor.covers.v1", "rulefloor.ledger-diff.v1"},
 		SupportedOS:       []string{"darwin", "linux"},
 		Limitations: []string{
@@ -450,6 +453,7 @@ Commands:
   reachability classify decide REQUIRED or SKIPPABLE from changed paths and declared no-reach patterns
   slice check   audit a landed slice from Git and wiki evidence
   recipe check  refuse neutralized make recipe lines; --expect-line is byte-exact
+  replacement check require cited script-side replay before a named replacement or retirement claim
   ledger census recount a markdown ledger table against its totals and the files on disk
   ledger rows   enforce explicit state/prose marker relationships in markdown ledger rows
   floor census  recount a fenced completeness census against itself and rulefloor's covers map

@@ -380,3 +380,25 @@ Omitting the flag preserves exact master-basename selection for compatibility.
 Zero or duplicate exact matches cannot evaluate. Achta refuses basename
 fallback after an explicit name, path cleanup, separator conversion, case or
 whitespace repair, and every form of master-content normalization.
+
+### P-075 — Named-script replacement claims are explicit artifacts
+
+Achta refuses to decide that prose in a specification, changelog, release
+note, README, capability description, or wiki means a verb replaces or retires
+a script. That classification is caller meaning, consistent with P-063.
+Capabilities continue to advertise only command and schema existence.
+
+The authoritative claim is instead a record in
+`replacement-claims.json` using the Achta-owned
+`achta.replacement-claims.v1` shape. The caller declares exact claim statuses
+through repeatable `--claim-status` flags with no default. Each matching
+verb-to-named-script entry must cite the script's own selftest fixtures, cite a
+recorded replay of both implementations, and record agreeing script and verb
+exit codes for every named fixture. Candidate entries are explicitly not
+claims.
+
+Achta owns the bounded artifact grammar, required-field presence, and numeric
+exit agreement. It does not execute the cited replay or judge whether a
+citation is truthful. `make verify` runs the manifest check, and the frozen
+uncited v0.5.1 claims remain a red fixture so the former silent pass cannot
+recur.

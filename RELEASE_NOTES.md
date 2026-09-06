@@ -2,6 +2,29 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.3 — 2026-09-06
+
+### Added
+
+- `replacement check --file MANIFEST --claim-status STATUS
+  [--claim-status STATUS]... [--json]` makes principle 10 executable. The
+  caller declares which exact statuses assert replacement or retirement; for
+  every matching verb-to-named-script entry Achta requires the script's own
+  selftest-fixture citation, a dual-replay citation, and agreeing script and
+  verb exit codes for every recorded fixture.
+- `achta.replacement-claims.v1` is the canonical replacement-claim artifact.
+  Candidate entries carry no replacement claim. Missing required evidence or
+  exit disagreement is exit 1; malformed or unavailable evidence is exit 2.
+  Achta does not run either implementation or infer replacement claims from
+  prose.
+- `make verify` now checks `replacement-claims.json`. A frozen v0.5.1 manifest
+  names `count check`, `declared-route check`, and `mirror check --digest` as
+  replacements without script-side replay; it fails with nine evidence
+  violations and prevents regression to the two-release parity gap.
+- `achta.replacement-check.v1` is advertised in capabilities, and
+  REPLACEMENT-PARITY-CITATION-1 raises the executable Rulefloor from 39 to 40
+  with a mutation proof.
+
 ## v0.5.2 — 2026-09-06
 
 ### Added
