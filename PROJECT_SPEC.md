@@ -1056,13 +1056,19 @@ per document. No route or banned-command vocabulary is built in.
 `--required-route-pattern` must equal exactly one configured route alternative.
 When that alternative occurs at least once, `--required-scope` is an RFC 6901
 JSON Pointer to a YAML mapping and `--required-key` is the exact caller-owned
-key that must appear once in that mapping. Other route alternatives do not
-require the key. Scope is resolved from YAML mapping nodes, never indentation
-or a line-level approximation. Thus `/jobs/verify/env` is structurally
-distinct from workflow-level `/env`. A missing conditionally required key is
-an evaluated violation;
-malformed or multi-document YAML, a non-mapping or ambiguously repeated scope,
-unsafe input, or incomplete vocabulary is `cannot_evaluate`, exit 2.
+key that must appear once in that mapping and exactly once across the entire
+YAML document. Other route alternatives do not require the key. Scope is
+resolved from YAML mapping nodes, never indentation or a line-level
+approximation. Thus `/jobs/verify/env` is structurally distinct from
+workflow-level `/env`, and a second job-level declaration cannot coexist with
+the required workflow-level declaration. A missing or repeated conditionally
+required key is an evaluated violation.
+
+A comment-only or whitespace-only YAML file is a valid evaluated document with
+zero live scalars. It can pass under `per-file-any`; under the default
+`per-file-one` it fails the route-count rule at exit 1. Malformed or
+multi-document YAML, a non-mapping or ambiguously repeated scope, unsafe input,
+or incomplete vocabulary is `cannot_evaluate`, exit 2.
 
 The stable `achta.declared-route-check.v1` result preserves file order and
 reports each route and banned pattern's count and source lines, the selected
@@ -1342,7 +1348,7 @@ define arbitrary executable commands.
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
 | Ledger census versus source graph | Keep as a composition gate; Rulefloor and Gograph retain ownership |
-| Rulefloor installation-route gate | Candidate implementation: `achta declared-route check`; `replacement-claims.json` records no replacement claim until script-side parity evidence exists |
+| Rulefloor installation-route gate | Replaced by `achta declared-route check`; `replacement-claims.json` cites all 10 agreeing script-selftest replay fixtures at `../wiki/contracts/replacement-replay-2026-09-06.md:117-128` |
 | Vulnerability fix-availability policy | Keep in a dedicated vulnerability analyzer; Achta does not own advisory or fix semantics |
 | Route, link, inert-parameter, clock, and wire analyzers | Keep dedicated |
 | Prompt inclusion, canonical-section reference checking, commit hook, and source-navigation hook | Keep in the agent harness; the caller owns heading vocabulary and hook wiring |
@@ -1971,7 +1977,25 @@ The v0.3.0 release records these choices explicitly:
 5. v0.5.3 is a patch: it adds one read-only command, one artifact schema, and
    one repository gate without changing any existing command or schema.
 
-## 31. Success measure
+## 31. v0.5.4 parity decisions
+
+1. A comment-only workflow is evaluated as an empty mapping, not refused.
+   Comments are expressly outside route and ban matching, so zero live scalars
+   are complete evidence rather than unavailable evidence. `per-file-any` can
+   therefore pass it; exact-one remains an evaluated route-count failure.
+2. A designated-route workflow must contain its caller-named required key
+   exactly once across the document and exactly once in the caller-selected
+   scope. YAML scope remains structural, but ignoring an identical key in a
+   second mapping would preserve THE-SECOND-INSTALL defect.
+3. Missing digest files remain `cannot_evaluate`, exit 2: without the recorded
+   fact there is no comparison to evaluate. A syntactically valid recorded
+   digest that disagrees remains exit 1. Path-form record names remain opaque
+   caller vocabulary and require exact `--digest-name`; basename fallback is
+   not path normalization. Because two vendored-copy cases were not replayed,
+   `mirror check --digest` remains a candidate regardless of the two explicit
+   exit-class decisions.
+
+## 32. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

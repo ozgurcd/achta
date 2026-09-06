@@ -9,7 +9,21 @@
     {
       "verb": "declared-route check",
       "script": "wiki/tools/rulefloor-install-gate.sh",
-      "status": "candidate"
+      "status": "replaces",
+      "selftest_citation": "../wiki/tools/rulefloor-install-gate.sh --selftest",
+      "replay_citation": "../wiki/contracts/replacement-replay-2026-09-06.md:117-128",
+      "fixtures": [
+        {"name": "01", "script_exit": 0, "verb_exit": 0},
+        {"name": "02", "script_exit": 0, "verb_exit": 0},
+        {"name": "03", "script_exit": 0, "verb_exit": 0},
+        {"name": "04", "script_exit": 0, "verb_exit": 0},
+        {"name": "05", "script_exit": 1, "verb_exit": 1},
+        {"name": "06", "script_exit": 1, "verb_exit": 1},
+        {"name": "07", "script_exit": 1, "verb_exit": 1},
+        {"name": "08", "script_exit": 1, "verb_exit": 1},
+        {"name": "09", "script_exit": 1, "verb_exit": 1},
+        {"name": "10", "script_exit": 0, "verb_exit": 0}
+      ]
     },
     {
       "verb": "mirror check --digest",

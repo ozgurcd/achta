@@ -147,6 +147,8 @@ achta --workspace /path/to/workspace declared-route check \
   --required-route-pattern 'rulefloor/archive/refs/tags/[$][{]RULEFLOOR_VERSION[}]' \
   --ban-pattern 'brew install[^#]*rulefloor' \
   --ban-pattern 'go install[^#]*rulefloor' \
+  --ban-pattern 'rulefloor/archive/refs/tags/v[0-9]' \
+  --ban-pattern '-X main[.]version=([$][{]RULEFLOOR_VERSION[^}]|[$][{][^R]|[$][^{]|[^$])' \
   --required-key RULEFLOOR_VERSION --required-scope /env --json
 
 achta --wiki-dir /path/to/repository/wiki replacement check \
@@ -257,15 +259,17 @@ per-file-any` permits zero or more per file while still scanning every file for
 every configured ban.
 The caller designates one route pattern that needs a scoped key, then names
 that exact key and its YAML mapping with a JSON Pointer such as `/env`. The
-key is required exactly once in every file where that route occurs. This is
-syntax-tree scope, so
+key is required exactly once in that mapping and exactly once across the whole
+document. This is syntax-tree scope, so
 a job-level `/jobs/verify/env` declaration cannot stand in for workflow-level
-`/env`.
+`/env` or coexist with it as a second version declaration.
 YAML comments and comment-only lines within scalar command blocks do not count.
-There are no route, ban, key, or scope defaults. Missing, malformed,
-multi-document, unsafe, or ambiguous input is `cannot_evaluate`, exit 2. The
-command reads only workspace-confined regular files and invokes neither shell
-nor Git.
+An otherwise comment-only or whitespace-only workflow is still an evaluated
+zero-live-scalar document: it may pass under `per-file-any`, while the default
+exact-one mode reports an evaluated route-count failure. There are no route,
+ban, key, or scope defaults. Missing, malformed, multi-document, unsafe, or
+ambiguous input is `cannot_evaluate`, exit 2. The command reads only
+workspace-confined regular files and invokes neither shell nor Git.
 
 `replacement check` makes named-script parity an explicit repository gate.
 The caller supplies the exact statuses that mean replacement or retirement;

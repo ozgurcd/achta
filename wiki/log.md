@@ -448,3 +448,27 @@ instead of three; restoration returned green. P-075 records the boundary,
 REPLACEMENT-PARITY-CITATION-1 raises the executable floor from 39 to 40, and
 source, fixtures, release documents, and current wiki facts advance together
 to v0.5.3.
+
+## [2026-09-06] feature | declared-route-full-replay-parity
+
+The frozen replay at
+`../wiki/contracts/replacement-replay-2026-09-06.md:117-128` now agrees on all
+10 `rulefloor-install-gate.sh` selftest fixtures. Comment-only workflows are
+evaluated as zero live scalars, so `per-file-any` passes them while exact-one
+reports an evaluated mismatch. A designated-route workflow must carry the
+caller-named key exactly once across its whole YAML document and exactly once
+in the selected scope, closing the job-level second-declaration gap.
+
+Both mechanics went red independently: restoring the empty-document refusal
+made `TestCheckTreatsCommentOnlyDocumentsAsEmpty` fail with `empty YAML
+document`; disabling the document-wide disagreement made
+`TestCheckRejectsDocumentKeyDuplicates` pass the two-version fixture. Exact
+restoration returned both tests green. DECLARED-ROUTE-EMPTY-DOC-1 and
+DECLARED-ROUTE-DOCUMENT-KEY-1 raise the executable floor from 40 to 42, and
+`replacement-claims.json` flips only `declared-route check` to `replaces`.
+
+Mirror remains a candidate. An absent digest is missing required evidence and
+therefore exit 2, while a valid disagreeing record is exit 1. A path-form
+record name is opaque caller vocabulary and requires exact `--digest-name`;
+there is no path normalization fallback. Two vendored-copy cases remain
+unreplayed, so no mirror replacement claim is made.

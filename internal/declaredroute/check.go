@@ -23,6 +23,7 @@ const (
 	RuleRouteCount  = "route-count"
 	RuleBanned      = "banned-pattern"
 	RuleRequiredKey = "required-key-scope"
+	RuleDocumentKey = "required-key-document"
 
 	CardinalityPerFileOne = "per-file-one"
 	CardinalityPerFileAny = "per-file-any"
@@ -226,6 +227,19 @@ func Check(documents []Document, opts Options) (Result, error) {
 		}
 
 		if documentResult.RequiredKey.Required {
+			documentKeyLines := mappingKeyLinesRecursive(root, opts.RequiredKey)
+			if len(documentKeyLines) != 1 {
+				documentResult.Status = "fail"
+				line := root.Line
+				if len(documentKeyLines) > 0 {
+					line = documentKeyLines[0]
+				}
+				result.Violations = append(result.Violations, Violation{
+					File: document.Path, Line: line, Rule: RuleDocumentKey,
+					Expected: 1, Observed: len(documentKeyLines),
+					Text: fmt.Sprintf("required key %q must appear exactly once across the YAML document for route %q", opts.RequiredKey, opts.RequiredRoutePattern),
+				})
+			}
 			scopeNode, scopeLine, err := mappingAt(root, scope)
 			if err != nil {
 				return result, fmt.Errorf("document %q required scope %q: %w", document.Path, opts.RequiredScope, err)
@@ -294,7 +308,7 @@ func decodeOne(data []byte) (*yaml.Node, error) {
 	var document yaml.Node
 	if err := decoder.Decode(&document); err != nil {
 		if errors.Is(err, io.EOF) {
-			return nil, errors.New("empty YAML document")
+			return &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map", Line: 1}, nil
 		}
 		return nil, fmt.Errorf("parse YAML: %w", err)
 	}
@@ -436,6 +450,25 @@ func mappingKeyLines(mapping *yaml.Node, keyValue string) []int {
 		key := mapping.Content[i]
 		if key.Kind == yaml.ScalarNode && key.Value == keyValue {
 			lines = append(lines, key.Line)
+		}
+	}
+	return lines
+}
+
+func mappingKeyLinesRecursive(node *yaml.Node, keyValue string) []int {
+	lines := []int{}
+	switch node.Kind {
+	case yaml.MappingNode:
+		for i := 0; i+1 < len(node.Content); i += 2 {
+			key := node.Content[i]
+			if key.Kind == yaml.ScalarNode && key.Value == keyValue {
+				lines = append(lines, key.Line)
+			}
+			lines = append(lines, mappingKeyLinesRecursive(node.Content[i+1], keyValue)...)
+		}
+	case yaml.SequenceNode:
+		for _, child := range node.Content {
+			lines = append(lines, mappingKeyLinesRecursive(child, keyValue)...)
 		}
 	}
 	return lines

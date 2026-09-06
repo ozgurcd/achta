@@ -51,3 +51,39 @@ func TestCheckSupportsAnyRouteCountPerWorkflowWhileScanningEveryFile(t *testing.
 		t.Fatalf("route-free set result = %+v", result)
 	}
 }
+
+func retirementParityOptions() Options {
+	return Options{
+		RoutePatterns:        []string{"derived-route"},
+		BanPatterns:          []string{"banned-install"},
+		RequiredRoutePattern: "derived-route",
+		RequiredKey:          "RULEFLOOR_VERSION",
+		RequiredScope:        "/env",
+		RouteCardinality:     CardinalityPerFileAny,
+	}
+}
+
+// RULE: DECLARED-ROUTE-EMPTY-DOC-1
+func TestCheckTreatsCommentOnlyDocumentsAsEmpty(t *testing.T) {
+	opts := retirementParityOptions()
+	commentOnly, err := Check([]Document{{Path: "comment.yml", Data: []byte("# documented banned-install and derived-route examples\n")}}, opts)
+	if err != nil {
+		t.Fatalf("comment-only document cannot evaluate: %v", err)
+	}
+	if commentOnly.Status != "pass" || len(commentOnly.Violations) != 0 {
+		t.Fatalf("comment-only document result = %+v", commentOnly)
+	}
+}
+
+// RULE: DECLARED-ROUTE-DOCUMENT-KEY-1
+func TestCheckRejectsDocumentKeyDuplicates(t *testing.T) {
+	opts := retirementParityOptions()
+	duplicate := Document{Path: "ci.yml", Data: []byte("env:\n  RULEFLOOR_VERSION: v1\njobenv:\n  RULEFLOOR_VERSION: v2\nx: derived-route\n")}
+	result, err := Check([]Document{duplicate}, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "fail" || !hasRule(result.Violations, "required-key-document") {
+		t.Fatalf("document-wide duplicate result = %+v", result)
+	}
+}

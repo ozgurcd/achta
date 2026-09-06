@@ -2,6 +2,21 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Changed
+
+- `declared-route check` now treats a comment-only or whitespace-only workflow
+  as an evaluated document with zero live scalars. With `per-file-any` it can
+  pass; with the default exact-one route cardinality it is an evaluated exit 1.
+- A workflow using the designated route must contain the exact caller-named
+  required key once across the whole YAML document and once in the selected
+  scope. A second job-level declaration can no longer hide beside a valid
+  workflow-level declaration.
+- `replacement-claims.json` records full 10-of-10 parity with
+  `wiki/tools/rulefloor-install-gate.sh`, citing the script selftest and the
+  frozen dual-replay table. Two mutation-proved rules raise the floor to 42.
+
 ## v0.5.3 — 2026-09-06
 
 ### Added

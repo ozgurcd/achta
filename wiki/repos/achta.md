@@ -64,7 +64,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `declared-route check` parses explicit files and deterministic direct workflow
   directories. Its compatibility default requires one route per file; opt-in
   per-file-any permits zero or many while every file remains ban-scanned and
-  every designated-route user needs one caller-scoped key.
+  every designated-route user needs the caller-named key exactly once in the
+  selected scope and once across the document. Comment-only files are evaluated
+  as zero live scalars. The canonical replacement manifest records 10-of-10
+  parity with `wiki/tools/rulefloor-install-gate.sh`.
 - `replacement check` validates the canonical `replacement-claims.json` gate.
   Caller-designated named-script replacement or retirement statuses require
   citations to the script's own selftests and a dual replay with agreeing
@@ -80,9 +83,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 40 armed, mutation-proved invariants on the current
-  v0.5.3 source line, including the named-script replacement-parity citation
-  gate.
+- `RULE-FLOOR.md` carries 42 armed, mutation-proved invariants on the current
+  v0.5.3 source line, including empty-workflow evaluation and document-wide
+  required-key uniqueness.
 
 ## Known limitations
 
@@ -129,3 +132,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Release the second additive conversion batch as v0.5.1, advance exact version fixtures, record Achta's first external Go module dependency, and retain the 36-rule floor. |
 | 2026-09-06 | `co-versioned` | Close the three measured script-retirement gaps, add exact caller-shaped count, route-cardinality, and digest-record controls, release v0.5.2, and raise the mutation-proved floor from 36 to 39. |
 | 2026-09-06 | `co-versioned` | Make principle 10 executable with a structured named-script replacement-claim gate, freeze the uncited v0.5.1 state as red, release v0.5.3, and raise the mutation-proved floor from 39 to 40. |
+| 2026-09-06 | `co-versioned` | Close all five measured declared-route replay differences, record 10-of-10 script parity and the mirror refusal boundary, flip declared-route to replaces, and raise the mutation-proved floor from 40 to 42. |

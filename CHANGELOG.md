@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Closed all five measured `declared-route check` replay differences: comment-
+  only workflows are evaluated as zero live scalars, and a designated-route
+  workflow must contain the caller-named required key exactly once across the
+  YAML document as well as once in the caller-selected scope.
+- Recorded `declared-route check` as replacing
+  `wiki/tools/rulefloor-install-gate.sh` after all 10 script selftest fixtures
+  agreed under the contract-complete caller vocabulary. Raised the executable
+  Rulefloor from 40 to 42 with separate mutation proofs.
+
 ## v0.5.3 — 2026-09-06
 
 - Added `replacement check` and the canonical
