@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.5.5 — 2026-09-06
+
 - Retracted the `count check` and `declared-route check` named-script
   replacement claims to `candidate`: their v0.5.4 manifest rows contradict the
   replay document they cite, so neither claim currently has checkable parity

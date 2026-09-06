@@ -519,3 +519,11 @@ fails on count `g` and declared-route `02`, `03`, `04`, `07`, and `10`. Legacy
 v1 claims are explicitly attestations, both live dispositions remain
 `candidate`, and a second armed rule makes future release workflows reject
 lightweight tags. The executable Rulefloor rises from 43 to 45.
+
+## [2026-09-06] release | achta-v0.5.5-checkable-replay
+
+Source and exact version fixtures advance to v0.5.5. The correction and
+checkable replay-evidence entries move unchanged in substance under the exact
+release headings, while both named-script dispositions remain `candidate`.
+The release workflow now requires an annotated tag, and the executable
+Rulefloor remains 45.

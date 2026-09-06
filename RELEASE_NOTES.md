@@ -4,6 +4,8 @@ Release changes are recorded under their exact version, newest first.
 
 ## Unreleased
 
+## v0.5.5 — 2026-09-06
+
 ### Corrected
 
 - Reverted `count check` and `declared-route check` from `replaces` to

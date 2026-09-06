@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.4.
+- Current release line: v0.5.5.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -143,3 +143,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Advance source and exact version fixtures, fold the two parity entries under v0.5.4, and prepare the patch release without changing the 43-rule floor. |
 | 2026-09-06 | `co-versioned` | Retract the count and declared-route named-script replacement claims to candidate because their cited replay contradicts six manifest rows. |
 | 2026-09-06 | `co-versioned` | Make replacement citations checkable through digest-pinned vendored replay evidence, reject all six v0.5.4 contradictions, require annotated release tags, and raise the floor from 43 to 45. |
+| 2026-09-06 | `co-versioned` | Release v0.5.5 with checked replay evidence, retracted replacement claims, annotated-tag enforcement, and the 45-rule floor. |
