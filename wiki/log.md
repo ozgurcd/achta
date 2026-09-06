@@ -535,3 +535,13 @@ Rulefloor remains 45.
 Unreleased section must be non-empty, the v0.5.5 tag remains untouched, source
 and exact fixtures advance to v0.5.6, and RELEASE-NOTES-LOCAL-PARITY-1 raises
 the executable Rulefloor from 45 to 46.
+
+## [2026-09-06] feature | declared-route-earned-flip
+
+`replacement check` now requires every claimed v2 row to name the exact caller
+vocabulary and match that citation against the digest-pinned replay record.
+The v0.5.6 replay is vendored and `declared-route check` becomes `replaces`
+only under declared-route-v2 at the cited source lines, where all 10 selftest
+fixtures agree and fixture 07 preserves THE-SECOND-INSTALL. Count and mirror
+remain candidates. REPLACEMENT-VOCAB-CITATION-1 raises the executable floor
+from 46 to 47.

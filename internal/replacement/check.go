@@ -24,13 +24,14 @@ type Manifest struct {
 }
 
 type Claim struct {
-	Verb             string    `json:"verb"`
-	Script           string    `json:"script"`
-	Status           string    `json:"status"`
-	SelftestCitation string    `json:"selftest_citation,omitempty"`
-	ReplayCitation   string    `json:"replay_citation,omitempty"`
-	ReplaySHA256     string    `json:"replay_sha256,omitempty"`
-	Fixtures         []Fixture `json:"fixtures,omitempty"`
+	Verb               string    `json:"verb"`
+	Script             string    `json:"script"`
+	Status             string    `json:"status"`
+	SelftestCitation   string    `json:"selftest_citation,omitempty"`
+	VocabularyCitation string    `json:"vocabulary_citation,omitempty"`
+	ReplayCitation     string    `json:"replay_citation,omitempty"`
+	ReplaySHA256       string    `json:"replay_sha256,omitempty"`
+	Fixtures           []Fixture `json:"fixtures,omitempty"`
 }
 
 type Fixture struct {
@@ -52,10 +53,11 @@ type ReplaySource struct {
 }
 
 type ReplayRecord struct {
-	Verb             string    `json:"verb"`
-	Script           string    `json:"script"`
-	SelftestCitation string    `json:"selftest_citation"`
-	Fixtures         []Fixture `json:"fixtures"`
+	Verb               string    `json:"verb"`
+	Script             string    `json:"script"`
+	SelftestCitation   string    `json:"selftest_citation"`
+	VocabularyCitation string    `json:"vocabulary_citation,omitempty"`
+	Fixtures           []Fixture `json:"fixtures"`
 }
 
 type EvidenceReader func(path string) ([]byte, error)
@@ -184,6 +186,10 @@ func Check(manifest Manifest, claimStatuses []string, readEvidence EvidenceReade
 			result.Violations = append(result.Violations, violation(index, claim, "", "selftest-citation-required", "named-script replacement claim does not cite the script's own selftest fixtures"))
 			claimInvalid = true
 		}
+		if strings.TrimSpace(claim.VocabularyCitation) == "" {
+			result.Violations = append(result.Violations, violation(index, claim, "", "vocabulary-citation-required", "named-script replacement claim does not cite the exact caller vocabulary used by the replay"))
+			claimInvalid = true
+		}
 		if strings.TrimSpace(claim.ReplayCitation) == "" {
 			result.Violations = append(result.Violations, violation(index, claim, "", "dual-replay-citation-required", "named-script replacement claim does not cite a workspace-confined replay artifact"))
 			claimInvalid = true
@@ -252,6 +258,10 @@ func Check(manifest Manifest, claimStatuses []string, readEvidence EvidenceReade
 		if claim.SelftestCitation != record.SelftestCitation {
 			text := fmt.Sprintf("manifest selftest citation %q does not match replay record %q", claim.SelftestCitation, record.SelftestCitation)
 			result.Violations = append(result.Violations, violation(index, claim, "", "selftest-citation-mismatch", text))
+		}
+		if claim.VocabularyCitation != record.VocabularyCitation {
+			text := fmt.Sprintf("manifest vocabulary citation %q does not match replay record %q", claim.VocabularyCitation, record.VocabularyCitation)
+			result.Violations = append(result.Violations, violation(index, claim, "", "vocabulary-citation-mismatch", text))
 		}
 		replayFixtures := make(map[string]Fixture, len(record.Fixtures))
 		for _, fixture := range record.Fixtures {

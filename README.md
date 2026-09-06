@@ -282,8 +282,11 @@ workspace-confined regular files and invokes neither shell nor Git.
 The caller supplies the exact statuses that mean replacement or retirement;
 there are no vocabulary defaults and Achta does not infer claims from prose.
 Every matching `achta.replacement-claims.v2` entry must cite the named script's
-own selftest fixtures, name a workspace-confined `achta.replacement-replay.v1`
-artifact, pin that artifact's exact SHA-256, and list the complete fixture set.
+own selftest fixtures, cite the exact caller vocabulary used by the replay,
+name a workspace-confined `achta.replacement-replay.v1` artifact, pin that
+artifact's exact SHA-256, and list the complete fixture set. The vocabulary
+citation must match the replay record byte-for-byte, so parity under one flag
+set cannot be presented as parity under another.
 Achta opens the cited artifact and reconciles every script/verb exit pair in
 both directions. A digest, row, citation, or closed-set disagreement is exit 1;
 malformed or unavailable evidence is exit 2. Candidate entries make no claim.

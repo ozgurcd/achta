@@ -70,14 +70,16 @@ infer prose, execute generic gates, fetch, or mutate Git.
   per-file-any permits zero or many while every file remains ban-scanned and
   every designated-route user needs the caller-named key exactly once in the
   selected scope and once across the document. Comment-only files are evaluated
-  as zero live scalars. Its named-script disposition is `candidate`: the prior
-  10-of-10 claim was retracted because the cited replay records five exit-code
-  differences.
+  as zero live scalars. It replaces `wiki/tools/rulefloor-install-gate.sh`
+  under the README's declared-route-v2 four-ban vocabulary: the digest-pinned
+  v0.5.6 replay records all 10 selftest fixtures agreeing, including the
+  document-wide duplicate in fixture 07.
 - `replacement check` validates the canonical `replacement-claims.json` gate.
   A v2 replacement or retirement status requires a selftest citation plus a
-  workspace-confined, SHA-256-pinned `achta.replacement-replay.v1` artifact;
-  verb/script identity, citation, and the complete fixture set must agree
-  row-for-row. Legacy v1 claims are attestations and candidates make no claim.
+  matching exact-vocabulary citation and a workspace-confined, SHA-256-pinned
+  `achta.replacement-replay.v1` artifact; verb/script identity, citations, and
+  the complete fixture set must agree row-for-row. Legacy v1 claims are
+  attestations and candidates make no claim.
 
 ## Verification surface
 
@@ -91,7 +93,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 46 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 47 armed, mutation-proved invariants on the current
   source line, including digest-pinned closed-set replay evidence and annotated
   release tags.
 
@@ -147,3 +149,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Make replacement citations checkable through digest-pinned vendored replay evidence, reject all six v0.5.4 contradictions, require annotated release tags, and raise the floor from 43 to 45. |
 | 2026-09-06 | `co-versioned` | Release v0.5.5 with checked replay evidence, retracted replacement claims, annotated-tag enforcement, and the 45-rule floor. |
 | 2026-09-06 | `co-versioned` | Fix forward to v0.5.6 by making local and release validation share the release-note extractor, forbidding empty Unreleased sections, and raising the floor from 45 to 46. |
+| 2026-09-06 | `co-versioned` | Require exact caller-vocabulary citations in replacement claims, vendor the v0.5.6 replay, flip only declared-route under its documented 10-of-10 vocabulary, and raise the floor from 46 to 47. |

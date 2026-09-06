@@ -449,3 +449,19 @@ that same Make target. The target invokes the checked-in `cmd/release-notes`
 entry point, which defaults to the source version; there is no copied heading
 parser or second CI-only command. The v0.5.5 annotated tag remains immutable,
 and the failed publication is corrected forward as v0.5.6.
+
+### P-079 — A replacement claim is earned on one named vocabulary
+
+Exit parity is meaningful only for the exact caller flag vocabulary used by
+the replay. Every v2 claim status therefore carries a non-empty
+`vocabulary_citation`, and the selected digest-pinned replay record must carry
+the same bytes. Missing or different vocabulary is an evaluated failure; it
+cannot borrow parity measured under another flag set.
+
+The v0.5.6 replay establishes `declared-route check` parity on all 10
+`rulefloor-install-gate.sh` selftest fixtures only under declared-route-v2, the
+README's four-ban vocabulary. The manifest cites
+`../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:124-156`; fixture 07
+is red on both sides through `required-key-document expected=1 observed=2`.
+That claim becomes `replaces`. `count check` and `mirror check --digest` remain
+candidate at this commit.

@@ -10,6 +10,7 @@
       "verb": "count check",
       "script": "wiki/tools/count-claim-check.sh",
       "selftest_citation": "wiki/tools/count-claim-check.sh --selftest",
+      "vocabulary_citation": "count-v0.5.3 — ../wiki/contracts/replacement-replay-2026-09-06.md:25-88",
       "fixtures": [
         {"name": "a", "script_exit": 0, "verb_exit": 0},
         {"name": "b", "script_exit": 1, "verb_exit": 1},
@@ -34,6 +35,7 @@
       "verb": "declared-route check",
       "script": "wiki/tools/rulefloor-install-gate.sh",
       "selftest_citation": "wiki/tools/rulefloor-install-gate.sh --selftest",
+      "vocabulary_citation": "declared-route-v2 — ../wiki/contracts/replacement-replay-2026-09-06.md:111-152",
       "fixtures": [
         {"name": "01", "script_exit": 0, "verb_exit": 0},
         {"name": "02", "script_exit": 0, "verb_exit": 2},
@@ -51,6 +53,7 @@
       "verb": "mirror check --digest",
       "script": "wiki/tools/gate-witness.sh",
       "selftest_citation": "wiki/tools/gate-witness.sh --selftest",
+      "vocabulary_citation": "wiki-live-entry — ../wiki/contracts/replacement-replay-2026-09-06.md:154-201",
       "fixtures": [
         {"name": "baseline", "script_exit": 0, "verb_exit": 0},
         {"name": "master-byte-drift", "script_exit": 1, "verb_exit": 1},

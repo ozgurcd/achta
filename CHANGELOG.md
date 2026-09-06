@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Made each v2 named-script replacement claim cite the exact caller vocabulary
+  and require that citation to match its digest-pinned replay record.
+- Vendored the v0.5.6 replay and recorded `declared-route check` as replacing
+  `wiki/tools/rulefloor-install-gate.sh` under declared-route-v2 after all 10
+  selftest fixtures agreed, including the document-wide duplicate in fixture
+  07. Raised the mutation-proved Rulefloor from 46 to 47.
+
 ## v0.5.6 — 2026-09-06
 
 - Added `release-notes-check` to `make verify` and made both release workflow

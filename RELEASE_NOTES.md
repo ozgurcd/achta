@@ -2,6 +2,20 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Changed
+
+- Every v2 named-script replacement claim now cites the exact caller
+  vocabulary used by its replay. `replacement check` requires that citation to
+  match the digest-pinned replay record byte-for-byte.
+- The new v0.5.6 replay evidence is vendored with its source-page SHA-256.
+  `declared-route check` replaces `wiki/tools/rulefloor-install-gate.sh` only
+  under declared-route-v2, cited at
+  `../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:124-156`. All 10
+  exits agree, including fixture 07's document-wide second declaration.
+- REPLACEMENT-VOCAB-CITATION-1 raises the executable Rulefloor from 46 to 47.
+
 ## v0.5.6 — 2026-09-06
 
 ### Fixed

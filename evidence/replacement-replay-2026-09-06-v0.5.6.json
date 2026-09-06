@@ -1,14 +1,16 @@
 {
-  "schema_version": "achta.replacement-claims.v2",
-  "claims": [
+  "schema_version": "achta.replacement-replay.v1",
+  "source": {
+    "citation": "../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md",
+    "commit": "b80f0f394cc8087dc207ab19f2a4e10ff99a512c",
+    "sha256": "607b3bddf8442c9b42be633403dffe2d9fccc04e894db7ae5d0c32fcdb87ba17"
+  },
+  "records": [
     {
       "verb": "count check",
       "script": "wiki/tools/count-claim-check.sh",
-      "status": "replaces",
       "selftest_citation": "wiki/tools/count-claim-check.sh --selftest",
-      "vocabulary_citation": "count-v0.5.3 — ../wiki/contracts/replacement-replay-2026-09-06.md:25-88",
-      "replay_citation": "evidence/replacement-replay-2026-09-06.json",
-      "replay_sha256": "1d29e6e0b2564acf11bbbfea48a5c36f45470680d8fd76ac8ec3a4dc2974ceb5",
+      "vocabulary_citation": "count-v2 — ../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:57-107",
       "fixtures": [
         {"name": "a", "script_exit": 0, "verb_exit": 0},
         {"name": "b", "script_exit": 1, "verb_exit": 1},
@@ -32,11 +34,8 @@
     {
       "verb": "declared-route check",
       "script": "wiki/tools/rulefloor-install-gate.sh",
-      "status": "replaces",
       "selftest_citation": "wiki/tools/rulefloor-install-gate.sh --selftest",
-      "vocabulary_citation": "declared-route-v2 — ../wiki/contracts/replacement-replay-2026-09-06.md:111-152",
-      "replay_citation": "evidence/replacement-replay-2026-09-06.json",
-      "replay_sha256": "1d29e6e0b2564acf11bbbfea48a5c36f45470680d8fd76ac8ec3a4dc2974ceb5",
+      "vocabulary_citation": "declared-route-v2 — ../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:124-156",
       "fixtures": [
         {"name": "01", "script_exit": 0, "verb_exit": 0},
         {"name": "02", "script_exit": 0, "verb_exit": 0},
@@ -53,7 +52,16 @@
     {
       "verb": "mirror check --digest",
       "script": "wiki/tools/gate-witness.sh",
-      "status": "candidate"
+      "selftest_citation": "wiki/tools/gate-witness.sh --selftest",
+      "vocabulary_citation": "wiki-live-entry — ../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:158-196",
+      "fixtures": [
+        {"name": "baseline", "script_exit": 0, "verb_exit": 0},
+        {"name": "master-byte-drift", "script_exit": 1, "verb_exit": 1},
+        {"name": "digest-hex-tamper", "script_exit": 1, "verb_exit": 1},
+        {"name": "digest-file-missing", "script_exit": 1, "verb_exit": 2},
+        {"name": "path-record-without-digest-name", "script_exit": 0, "verb_exit": 2},
+        {"name": "path-record-with-digest-name", "script_exit": 0, "verb_exit": 0}
+      ]
     }
   ]
 }
