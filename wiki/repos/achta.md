@@ -61,16 +61,17 @@ infer prose, execute generic gates, fetch, or mutate Git.
   and citation counts, caller-selected last-section scope and exemptions, and
   bounded claim/proof counts. Caller-patterned counted targets and assertions
   can compose within one paragraph using the smallest positive target count.
-  The canonical replacement manifest records 17-of-17 parity with
-  `wiki/tools/count-claim-check.sh`; Achta still refuses prose-claim and proof
-  meaning.
+  Its named-script disposition is `candidate`: the prior 17-of-17 claim was
+  retracted because the cited replay records fixture `g` as script 1 / verb 0.
+  Achta still refuses prose-claim and proof meaning.
 - `declared-route check` parses explicit files and deterministic direct workflow
   directories. Its compatibility default requires one route per file; opt-in
   per-file-any permits zero or many while every file remains ban-scanned and
   every designated-route user needs the caller-named key exactly once in the
   selected scope and once across the document. Comment-only files are evaluated
-  as zero live scalars. The canonical replacement manifest records 10-of-10
-  parity with `wiki/tools/rulefloor-install-gate.sh`.
+  as zero live scalars. Its named-script disposition is `candidate`: the prior
+  10-of-10 claim was retracted because the cited replay records five exit-code
+  differences.
 - `replacement check` validates the canonical `replacement-claims.json` gate.
   Caller-designated named-script replacement or retirement statuses require
   citations to the script's own selftests and a dual replay with agreeing
@@ -138,3 +139,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Close all five measured declared-route replay differences, record 10-of-10 script parity and the mirror refusal boundary, flip declared-route to replaces, and raise the mutation-proved floor from 40 to 42. |
 | 2026-09-06 | `co-versioned` | Add generic counted-target plus assertion paragraph composition, close fixture g, record 17-of-17 script parity, flip count check to replaces, and raise the mutation-proved floor from 42 to 43. |
 | 2026-09-06 | `co-versioned` | Advance source and exact version fixtures, fold the two parity entries under v0.5.4, and prepare the patch release without changing the 43-rule floor. |
+| 2026-09-06 | `co-versioned` | Retract the count and declared-route named-script replacement claims to candidate because their cited replay contradicts six manifest rows. |

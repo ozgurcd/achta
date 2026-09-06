@@ -1355,13 +1355,13 @@ define arbitrary executable commands.
 | Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition and ledger-claim checks | Candidate implementation: `achta ledger rows`; no named-script replacement or retirement claim is recorded |
-| Count-claim and breakdown-sum checks | Replaced by `achta count check`; `replacement-claims.json` cites all 17 agreeing script-selftest replay fixtures at `../wiki/contracts/replacement-replay-2026-09-06.md:53-71` |
+| Count-claim and breakdown-sum checks | Candidate implementation: `achta count check`; the prior replacement claim was retracted because its cited replay records fixture `g` as script 1 / verb 0 |
 | Byte-identical master/mirror and recorded-master-digest checks | Candidate implementation: `achta mirror check`; `replacement-claims.json` records no replacement claim until script-side parity evidence exists |
 | Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
 | Ledger census versus source graph | Keep as a composition gate; Rulefloor and Gograph retain ownership |
-| Rulefloor installation-route gate | Replaced by `achta declared-route check`; `replacement-claims.json` cites all 10 agreeing script-selftest replay fixtures at `../wiki/contracts/replacement-replay-2026-09-06.md:117-128` |
+| Rulefloor installation-route gate | Candidate implementation: `achta declared-route check`; the prior replacement claim was retracted because its cited replay records five exit-code differences |
 | Vulnerability fix-availability policy | Keep in a dedicated vulnerability analyzer; Achta does not own advisory or fix semantics |
 | Route, link, inert-parameter, clock, and wire analyzers | Keep dedicated |
 | Prompt inclusion, canonical-section reference checking, commit hook, and source-navigation hook | Keep in the agent harness; the caller owns heading vocabulary and hook wiring |

@@ -2,6 +2,15 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+### Corrected
+
+- Reverted `count check` and `declared-route check` from `replaces` to
+  `candidate`. The v0.5.4 manifest recorded equal exits for six rows whose
+  cited replay records unequal exits; a citation that contradicts a claim is
+  not parity evidence.
+
 ## v0.5.4 — 2026-09-06
 
 ### Changed

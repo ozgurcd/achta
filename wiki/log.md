@@ -500,3 +500,11 @@ v0.5.4 headings. The release is a patch because it closes measured gaps in two
 existing verbs and adds caller-opted pattern vocabulary without removing or
 renaming a command, changing a default, or changing a stable machine schema.
 The executable Rulefloor remains 43.
+
+## [2026-09-06] correction | retract-contradicted-replacement-claims
+
+`replacement-claims.json` returns `count check` and `declared-route check` to
+`candidate`. Their v0.5.4 rows asserted equal exits where the cited committed
+replay records six differences, so neither named-script replacement claim is
+currently supportable. Current specification and repository facts are corrected
+without rewriting the historical v0.5.4 release record.
