@@ -508,3 +508,14 @@ The executable Rulefloor remains 43.
 replay records six differences, so neither named-script replacement claim is
 currently supportable. Current specification and repository facts are corrected
 without rewriting the historical v0.5.4 release record.
+
+## [2026-09-06] feature | check-replacement-citations
+
+`replacement check` now requires v2 claims to cite a workspace-confined
+`achta.replacement-replay.v1` artifact, pin its exact SHA-256, and match its
+complete verb/script fixture record. The committed v0.5.3 replay table is
+vendored without rerunning either implementation; the frozen v0.5.4 claim state
+fails on count `g` and declared-route `02`, `03`, `04`, `07`, and `10`. Legacy
+v1 claims are explicitly attestations, both live dispositions remain
+`candidate`, and a second armed rule makes future release workflows reject
+lightweight tags. The executable Rulefloor rises from 43 to 45.

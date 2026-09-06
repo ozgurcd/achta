@@ -122,8 +122,11 @@ Achta must provide these guarantees:
 10. **Compatibility before replacement.** An existing script is not retired
     until its own selftest fixtures have been replayed against both the script
     and the proposed Achta replacement, with matching exit codes recorded for
-    every fixture. A named replacement or retirement claim without those
-    citations is an evaluated defect.
+    every fixture in a workspace-confined replay artifact whose exact SHA-256
+    is pinned by the claim. The gate opens that artifact and reconciles its
+    complete fixture set; an opaque citation string alone is an attestation,
+    not proof. A named replacement or retirement claim without checkable
+    evidence is an evaluated defect.
 
 ## 5. Ownership boundaries
 
@@ -276,17 +279,29 @@ caller.
 
 `replacement-claims.json` is the canonical place where this repository may
 claim that an Achta verb replaces or retires a named script. Achta owns its
-strict `achta.replacement-claims.v1` JSON shape: a schema marker and ordered
+strict `achta.replacement-claims.v2` JSON shape: a schema marker and ordered
 `claims`, each naming a `verb`, `script`, and caller-chosen `status`.
 
 The words that assert replacement or retirement remain caller vocabulary and
 are passed to the checker as repeatable `--claim-status` values with no
 default. An entry carrying one of those statuses must also contain non-empty
 `selftest_citation` and `replay_citation` fields and at least one named fixture
-with both `script_exit` and `verb_exit`. The two exit codes must agree for
-every fixture. Citations are opaque evidence references: Achta validates their
-presence and the recorded mechanics, not whether an external replay truly ran.
-Candidate entries need no evidence and make no replacement claim.
+with both `script_exit` and `verb_exit`. `replay_citation` names a confined
+`achta.replacement-replay.v1` artifact and `replay_sha256` pins its exact bytes.
+The two manifest exit codes must agree for every fixture, and the manifest's
+complete fixture set, exits, verb/script identity, and selftest citation must
+match the selected record inside the replay artifact. Candidate entries need
+no evidence and make no replacement claim.
+
+The replay artifact is reviewed, co-versioned evidence. It records the
+read-only source document's path, commit, and SHA-256 as provenance, followed
+by strict verb/script records and per-fixture exits. Achta cannot read a sibling
+workspace at repository verification time, so it does not pretend that an
+external path is a gate. It verifies the vendored bytes and their claim pin;
+it still does not execute either implementation or prove that the replay's
+author ran what the artifact says. Legacy `achta.replacement-claims.v1` remains
+parseable for candidates, but a v1 replacement status fails as an uncheckable
+attestation and must migrate to v2.
 
 ## 7. Command-line design
 
@@ -1103,19 +1118,23 @@ achta replacement check --file MANIFEST
   --claim-status STATUS [--claim-status STATUS]... [--json]
 ```
 
-`replacement check` parses only canonical `achta.replacement-claims.v1` and
-evaluates entries whose exact status matches a caller-supplied claim status.
-For every such verb-to-named-script claim it requires a citation to that
-script's own selftest fixtures, a citation to a recorded dual replay, and
-matching script and verb exit codes for every named fixture. Missing evidence
-or an exit disagreement is exit 1. Missing flags or files, malformed or
-unsupported JSON, repeated caller statuses or fixtures, and invalid exit codes
-are `cannot_evaluate`, exit 2. Clean evidence is exit 0.
+`replacement check` parses canonical `achta.replacement-claims.v2` and legacy
+v1, then evaluates entries whose exact status matches a caller-supplied claim
+status. For every v2 verb-to-named-script claim it requires a selftest
+citation, a confined `achta.replacement-replay.v1` artifact, its exact SHA-256,
+and matching script and verb exit codes for the complete fixture set. The gate
+opens the artifact, selects exactly one matching verb/script record, verifies
+the selftest citation, and reconciles every row in both directions. Missing
+evidence, a digest disagreement, an exit disagreement, a contradictory row,
+or an open fixture set is exit 1. A v1 claim status is also exit 1 because its
+opaque citation is only an attestation. Missing files, malformed or unsupported
+JSON, repeated identities or fixtures, and invalid exit codes are
+`cannot_evaluate`, exit 2. Clean evidence is exit 0.
 
 Achta refuses to classify natural-language release prose as a replacement
 claim, consistent with P-063: that is meaning inference. Instead, the
-structured manifest is the only authoritative replacement/retirement claim
-surface and `make verify` checks it. The command is read-only,
+structured v2 manifest is the only authoritative replacement/retirement claim
+surface and `make verify` checks it against co-versioned replay evidence. The command is read-only,
 workspace-confined, invokes neither shell nor Git, and writes nothing.
 
 ## 8. Exit codes
@@ -1235,6 +1254,7 @@ achta/
   internal/ledgerrows/
   internal/countcheck/
   internal/declaredroute/
+  internal/replacement/
   testdata/
     machine/
     wiki/
@@ -1282,6 +1302,8 @@ Responsibilities:
   exemptions, bounded proof comparison, and paragraph-scoped citation counts.
 - `internal/declaredroute`: real YAML mapping-scope resolution plus exact
   caller-pattern route, ban, per-file cardinality, and required-key counts.
+- `internal/replacement`: strict claim and replay artifact parsing, SHA-256
+  evidence pinning, and closed-set per-fixture exit reconciliation.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
@@ -1375,8 +1397,8 @@ because doing so would infer meaning. `capabilities` advertises command and
 schema existence only and has no replacement/parity field, so it is not a
 replacement-claim surface. Only a matching-status record in
 `replacement-claims.json` is an authoritative named-script replacement or
-retirement claim, and the repository gate rejects it without the required
-citations and exit-code replay.
+retirement claim, and the repository gate rejects it unless its v2 row cites
+and digest-pins confined replay evidence whose complete fixture set agrees.
 
 ### 13.3 Parity procedure
 
@@ -1394,7 +1416,9 @@ For every migrated script:
 8. Remove the old implementation in a later explicit slice.
 
 Before step 6 or 8 is claimed, record the script's own selftest-fixture
-citation, the dual-replay citation, and every fixture's two exit codes in
+citation and every fixture's two exit codes in a reviewed
+`achta.replacement-replay.v1` artifact, commit that artifact inside Achta, and
+pin its exact SHA-256 plus the same complete rows in
 `replacement-claims.json`; `make replacement-check` must pass.
 
 ## 14. Machine-interface requirements
@@ -1480,6 +1504,11 @@ Canonical artifact schemas added for v0.5.3:
 
 - `achta.replacement-claims.v1`
 
+Canonical artifact schemas added for v0.5.5:
+
+- `achta.replacement-claims.v2`
+- `achta.replacement-replay.v1`
+
 Do not publish a schema until the corresponding implementation and conformance
 tests are complete.
 
@@ -1548,8 +1577,10 @@ Add focused tests for:
   route-using file requires its scoped key, direct directories are bytewise
   ordered, and job-level keys cannot satisfy workflow-level scope.
 - replacement manifests where candidate statuses remain non-claims, claimed
-  named scripts require both citations and replay fixtures, matching exits
-  pass, mismatched exits fail, and unknown or malformed fields cannot evaluate.
+  named scripts require a selftest citation plus a confined digest-pinned replay
+  artifact, exact closed-set rows pass, contradictory, missing, extra, or
+  digest-mismatched rows fail, legacy v1 claims remain attestations, and unknown
+  or malformed fields cannot evaluate.
 
 ### 15.2 Integration tests
 
@@ -1576,7 +1607,9 @@ Cover complete workflows:
 9. Count-check clean, bad breakdown, citation undercount, missing input, and
    direct Markdown-directory selection.
 10. The frozen v0.5.1 count, declared-route, and mirror replacement claims all
-    fail because they have no script-side selftest or dual-replay evidence.
+    fail because their v1 citations are uncheckable attestations.
+11. The frozen v0.5.4 count and declared-route claim rows fail in all six places
+    where their pinned vendored replay records different exits.
 
 Use fake executables for Git and Rulefloor argument-vector tests where
 appropriate, while retaining a small end-to-end suite against installed
@@ -1673,6 +1706,8 @@ use by authorized workspace users:
 - use GoReleaser or an equivalently reproducible checked-in release workflow;
 - publish `checksums.txt`;
 - stamp the release version while also reporting Go build metadata;
+- create annotated semantic-version tags and make the release workflow refuse
+  a lightweight tag before validation or publication;
 - publish an `achta` Homebrew cask to `ozgurcd/homebrew-tap` after the private
   GitHub release succeeds; installation still requires authorized access to
   the private release assets through `HOMEBREW_GITHUB_API_TOKEN`;
@@ -2018,7 +2053,30 @@ The v0.3.0 release records these choices explicitly:
    existing verbs and adds only caller-opted pattern vocabulary. No command,
    default, stable schema, or 0/1/2 exit contract is removed.
 
-## 32. Success measure
+## 32. v0.5.5 decisions
+
+1. The claim manifest advances to `achta.replacement-claims.v2`. A replacement
+   or retirement status must cite a workspace-confined
+   `achta.replacement-replay.v1` artifact, pin its exact SHA-256, and match the
+   artifact's verb/script identity, selftest citation, and complete fixture set
+   row-for-row. Legacy v1 claim rows are attestations and cannot establish
+   replacement.
+2. The committed replay document in a sibling wiki is provenance, not an input
+   Achta can verify within its own workspace. Its measured rows are vendored
+   into Achta with source commit and digest metadata; the claim pins the
+   vendored bytes. Achta still does not execute the script or verb, so author
+   honesty remains outside the gate.
+3. Both `count check` and `declared-route check` remain candidates. The vendored
+   replay proves the v0.5.4 manifest contradicted six cited rows; no replay is
+   rerun or parity claim restored in this slice.
+4. Future release tags are annotated. The release workflow rejects a
+   lightweight tag object before building or publishing, making tag type part
+   of the checked release contract rather than operator convention.
+5. v0.5.5 is a patch: it corrects a false-positive governance gate and release
+   metadata discipline without removing a command or changing an existing
+   machine result schema.
+
+## 33. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

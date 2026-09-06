@@ -1,0 +1,64 @@
+{
+  "schema_version": "achta.replacement-replay.v1",
+  "source": {
+    "citation": "../wiki/contracts/replacement-replay-2026-09-06.md",
+    "commit": "aac516f40ae45105e3b70d9a0001f91623bc440d",
+    "sha256": "6f349b6353c9c9fcbd94f4bd0a1f26ba1bcc6f1f8cbe9cdf7d5fa65bbc76e0a2"
+  },
+  "records": [
+    {
+      "verb": "count check",
+      "script": "wiki/tools/count-claim-check.sh",
+      "selftest_citation": "wiki/tools/count-claim-check.sh --selftest",
+      "fixtures": [
+        {"name": "a", "script_exit": 0, "verb_exit": 0},
+        {"name": "b", "script_exit": 1, "verb_exit": 1},
+        {"name": "c", "script_exit": 0, "verb_exit": 0},
+        {"name": "d", "script_exit": 1, "verb_exit": 1},
+        {"name": "e", "script_exit": 0, "verb_exit": 0},
+        {"name": "f", "script_exit": 0, "verb_exit": 0},
+        {"name": "g", "script_exit": 1, "verb_exit": 0},
+        {"name": "h", "script_exit": 0, "verb_exit": 0},
+        {"name": "i", "script_exit": 1, "verb_exit": 1},
+        {"name": "j", "script_exit": 0, "verb_exit": 0},
+        {"name": "k", "script_exit": 0, "verb_exit": 0},
+        {"name": "p", "script_exit": 0, "verb_exit": 0},
+        {"name": "q", "script_exit": 0, "verb_exit": 0},
+        {"name": "l", "script_exit": 0, "verb_exit": 0},
+        {"name": "m", "script_exit": 1, "verb_exit": 1},
+        {"name": "n", "script_exit": 1, "verb_exit": 1},
+        {"name": "o", "script_exit": 0, "verb_exit": 0}
+      ]
+    },
+    {
+      "verb": "declared-route check",
+      "script": "wiki/tools/rulefloor-install-gate.sh",
+      "selftest_citation": "wiki/tools/rulefloor-install-gate.sh --selftest",
+      "fixtures": [
+        {"name": "01", "script_exit": 0, "verb_exit": 0},
+        {"name": "02", "script_exit": 0, "verb_exit": 2},
+        {"name": "03", "script_exit": 0, "verb_exit": 2},
+        {"name": "04", "script_exit": 0, "verb_exit": 2},
+        {"name": "05", "script_exit": 1, "verb_exit": 1},
+        {"name": "06", "script_exit": 1, "verb_exit": 1},
+        {"name": "07", "script_exit": 1, "verb_exit": 0},
+        {"name": "08", "script_exit": 1, "verb_exit": 1},
+        {"name": "09", "script_exit": 1, "verb_exit": 1},
+        {"name": "10", "script_exit": 0, "verb_exit": 2}
+      ]
+    },
+    {
+      "verb": "mirror check --digest",
+      "script": "wiki/tools/gate-witness.sh",
+      "selftest_citation": "wiki/tools/gate-witness.sh --selftest",
+      "fixtures": [
+        {"name": "baseline", "script_exit": 0, "verb_exit": 0},
+        {"name": "master-byte-drift", "script_exit": 1, "verb_exit": 1},
+        {"name": "digest-hex-tamper", "script_exit": 1, "verb_exit": 1},
+        {"name": "digest-file-missing", "script_exit": 1, "verb_exit": 2},
+        {"name": "path-record-without-digest-name", "script_exit": 0, "verb_exit": 2},
+        {"name": "path-record-with-digest-name", "script_exit": 0, "verb_exit": 0}
+      ]
+    }
+  ]
+}

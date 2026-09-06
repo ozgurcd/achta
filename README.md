@@ -281,13 +281,14 @@ workspace-confined regular files and invokes neither shell nor Git.
 `replacement check` makes named-script parity an explicit repository gate.
 The caller supplies the exact statuses that mean replacement or retirement;
 there are no vocabulary defaults and Achta does not infer claims from prose.
-Every matching `achta.replacement-claims.v1` entry must cite the named script's
-own selftest fixtures and a recorded replay of both implementations, then list
-matching script and verb exit codes for every fixture. Missing evidence or an
-exit disagreement is exit 1; malformed or unavailable evidence is exit 2.
-Candidate entries make no replacement claim. Citations remain attestations:
-Achta validates their presence and recorded agreement but executes neither
-implementation.
+Every matching `achta.replacement-claims.v2` entry must cite the named script's
+own selftest fixtures, name a workspace-confined `achta.replacement-replay.v1`
+artifact, pin that artifact's exact SHA-256, and list the complete fixture set.
+Achta opens the cited artifact and reconciles every script/verb exit pair in
+both directions. A digest, row, citation, or closed-set disagreement is exit 1;
+malformed or unavailable evidence is exit 2. Candidate entries make no claim.
+Legacy v1 claim rows are explicit attestations and cannot establish
+replacement. Achta still executes neither implementation.
 
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,
@@ -349,6 +350,8 @@ that can read `ozgurcd/achta` before installation. Tap publication separately
 uses the repository secret `HOMEBREW_TAP_GITHUB_TOKEN`; neither token is stored
 in the generated Cask. Configure the repository secret before pushing a release
 tag; the workflow verifies its tap push permission before creating the release.
+Release tags are annotated objects; the workflow refuses a lightweight tag
+before building or publishing artifacts.
 
 ## Rulefloor
 

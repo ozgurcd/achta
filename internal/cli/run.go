@@ -358,7 +358,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, ledgerrows.Schema, floorcensus.Schema, mirror.Schema, "achta.parts-operation.v1", "achta.parts-verify.v1", countcheck.Schema, declaredroute.Schema, "achta.replacement-check.v1"},
 		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--wiki-dir", "--workspace"},
 		Commands:          commands,
-		ArtifactSchemas:   []string{"achta.parts-lock.v1", "achta.replacement-claims.v1", "achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
+		ArtifactSchemas:   []string{"achta.parts-lock.v1", "achta.replacement-claims.v1", "achta.replacement-claims.v2", "achta.replacement-replay.v1", "achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
 		RulefloorSchemas:  []string{"rulefloor.capabilities.v1", "rulefloor.covers.v1", "rulefloor.ledger-diff.v1"},
 		SupportedOS:       []string{"darwin", "linux"},
 		Limitations: []string{

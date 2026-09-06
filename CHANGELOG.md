@@ -6,6 +6,13 @@
   replacement claims to `candidate`: their v0.5.4 manifest rows contradict the
   replay document they cite, so neither claim currently has checkable parity
   evidence.
+- Added `achta.replacement-claims.v2` and digest-pinned,
+  workspace-confined `achta.replacement-replay.v1` evidence. `replacement
+  check` now opens the cited artifact and reconciles every fixture row as a
+  closed set; the frozen v0.5.4 claims fail on all six contradictions.
+- Required annotated release tags in the checked workflow; lightweight tags
+  are refused before validation or publication. Raised the mutation-proved
+  Rulefloor from 43 to 45 for replay evidence and tag type.
 
 ## v0.5.4 — 2026-09-06
 

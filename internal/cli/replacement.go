@@ -42,7 +42,23 @@ func runReplacement(args []string, stdout, stderr io.Writer, opts globalOptions)
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, replacement.Schema, invalid("replacement check: %v", err))
 	}
-	result, err := replacement.Check(manifest, claimStatuses)
+	evidenceCache := map[string][]byte{}
+	readEvidence := func(value string) ([]byte, error) {
+		if data, ok := evidenceCache[value]; ok {
+			return data, nil
+		}
+		evidencePath, err := confinedPath(ws, value)
+		if err != nil {
+			return nil, err
+		}
+		evidence, err := safefile.Read(ws.Root, evidencePath, replacement.MaxReplay)
+		if err != nil {
+			return nil, err
+		}
+		evidenceCache[value] = evidence.Data
+		return evidence.Data, nil
+	}
+	result, err := replacement.Check(manifest, claimStatuses, readEvidence)
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, replacement.Schema, invalid("replacement check: %v", err))
 	}

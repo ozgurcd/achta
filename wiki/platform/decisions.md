@@ -402,3 +402,37 @@ exit agreement. It does not execute the cited replay or judge whether a
 citation is truthful. `make verify` runs the manifest check, and the frozen
 uncited v0.5.1 claims remain a red fixture so the former silent pass cannot
 recur.
+
+### P-076 — Replacement evidence is vendored, digest-pinned, and reconciled
+
+An opaque citation into a sibling workspace cannot prove parity inside Achta's
+repository gate. The v0.5.4 manifest demonstrated the defect: it recorded equal
+exits for six rows while the cited committed replay recorded different exits,
+and `replacement check` passed because it never opened the citation.
+
+Achta therefore owns `achta.replacement-claims.v2` and
+`achta.replacement-replay.v1`. A claim status must name a workspace-confined
+replay artifact, pin its exact SHA-256, and match one exact verb/script record,
+its selftest citation, and its complete fixture set in both directions. Digest,
+row, missing-fixture, and extra-fixture disagreements are evaluated failures.
+Missing, unsafe, malformed, or ambiguous evidence cannot evaluate. A v1 claim
+status is explicitly an attestation and cannot establish replacement.
+
+The vendored artifact records the sibling document's path, commit, and digest
+as provenance, but Achta does not read outside its workspace or rerun either
+implementation. It proves that the canonical claim agrees with reviewed,
+co-versioned replay bytes; it still cannot prove the replay author was honest.
+Both count and declared-route stay candidates until a caller-owned replay
+records actual parity and a later Achta slice vendors that new evidence.
+
+### P-077 — Release tags are annotated objects
+
+Future release tags are annotated, not lightweight. The release workflow checks
+the pushed ref with `git cat-file -t` and refuses unless it is a tag object,
+before source-version validation, build, release publication, or tap mutation.
+It still dereferences the annotated object and requires its commit to equal the
+checked-out HEAD.
+
+Published v0.5.4 remains untouched: moving or replacing that lightweight tag
+would rewrite a published release identity. Pinning the type prospectively
+removes operator ambiguity without altering existing history.

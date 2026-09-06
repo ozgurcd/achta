@@ -11,6 +11,22 @@ Release changes are recorded under their exact version, newest first.
   cited replay records unequal exits; a citation that contradicts a claim is
   not parity evidence.
 
+### Added
+
+- `achta.replacement-claims.v2` turns replay citations into checkable inputs.
+  Each replacement or retirement claim names a workspace-confined
+  `achta.replacement-replay.v1` artifact, pins its SHA-256, and must match its
+  verb/script identity, selftest citation, and complete fixture set row for
+  row. Legacy v1 claim rows fail as uncheckable attestations.
+- The committed replay evidence is vendored with its source path, source commit,
+  and source digest as provenance. The frozen v0.5.4 manifest now fails on the
+  six rows it contradicted: count `g` and declared-route `02`, `03`, `04`, `07`,
+  and `10`. No replay was rerun and neither candidate was promoted.
+- Release validation now requires an annotated tag object and still requires
+  its dereferenced commit to equal HEAD. v0.5.4 remains untouched; future
+  releases cannot repeat its lightweight-tag inconsistency.
+- Two mutation-proved rules raise the executable floor from 43 to 45.
+
 ## v0.5.4 — 2026-09-06
 
 ### Changed

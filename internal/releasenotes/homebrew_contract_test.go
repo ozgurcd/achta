@@ -81,6 +81,22 @@ func TestReleaseUsesCurrentHomebrewCaskPublishing(t *testing.T) {
 	}
 }
 
+// RULE: RELEASE-ANNOTATED-TAG-1
+func TestReleaseRequiresAnnotatedTag(t *testing.T) {
+	repositoryRoot, err := filepath.Abs("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow, err := os.ReadFile(filepath.Join(repositoryRoot, ".github/workflows/release.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const required = `test "$(git cat-file -t "$tag")" = tag`
+	if !strings.Contains(string(workflow), required) {
+		t.Fatalf("release workflow is missing annotated-tag requirement %q", required)
+	}
+}
+
 // RULE: HOMEBREW-NO-TOKEN-EVAL-1
 func TestHomebrewCaskTokenLookupIsNonThrowing(t *testing.T) {
 	repositoryRoot, err := filepath.Abs("../..")

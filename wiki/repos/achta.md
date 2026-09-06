@@ -26,7 +26,8 @@ infer prose, execute generic gates, fetch, or mutate Git.
   private assets requires authorized GitHub access.
 - A release is complete only after source push, tag and release publication,
   Homebrew cask commit and push, and installation through Homebrew prove the
-  installed version and newly shipped capability.
+  installed version and newly shipped capability. Release tags are annotated;
+  the workflow rejects lightweight tags before publication.
 - Achta-specific wiki material is co-versioned under `wiki/` in this
   repository and is not duplicated in the parent workspace wiki.
 - `wiki check --only NAME[,NAME...]` evaluates and reports exactly the selected
@@ -73,9 +74,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
   10-of-10 claim was retracted because the cited replay records five exit-code
   differences.
 - `replacement check` validates the canonical `replacement-claims.json` gate.
-  Caller-designated named-script replacement or retirement statuses require
-  citations to the script's own selftests and a dual replay with agreeing
-  script/verb exit codes for every fixture; candidate entries make no claim.
+  A v2 replacement or retirement status requires a selftest citation plus a
+  workspace-confined, SHA-256-pinned `achta.replacement-replay.v1` artifact;
+  verb/script identity, citation, and the complete fixture set must agree
+  row-for-row. Legacy v1 claims are attestations and candidates make no claim.
 
 ## Verification surface
 
@@ -87,9 +89,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 43 armed, mutation-proved invariants on the current
-  v0.5.4 source line, including empty-workflow evaluation, document-wide
-  required-key uniqueness, and paragraph claim composition.
+- `RULE-FLOOR.md` carries 45 armed, mutation-proved invariants on the current
+  source line, including digest-pinned closed-set replay evidence and annotated
+  release tags.
 
 ## Known limitations
 
@@ -140,3 +142,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Add generic counted-target plus assertion paragraph composition, close fixture g, record 17-of-17 script parity, flip count check to replaces, and raise the mutation-proved floor from 42 to 43. |
 | 2026-09-06 | `co-versioned` | Advance source and exact version fixtures, fold the two parity entries under v0.5.4, and prepare the patch release without changing the 43-rule floor. |
 | 2026-09-06 | `co-versioned` | Retract the count and declared-route named-script replacement claims to candidate because their cited replay contradicts six manifest rows. |
+| 2026-09-06 | `co-versioned` | Make replacement citations checkable through digest-pinned vendored replay evidence, reject all six v0.5.4 contradictions, require annotated release tags, and raise the floor from 43 to 45. |

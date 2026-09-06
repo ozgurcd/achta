@@ -1,5 +1,5 @@
 {
-  "schema_version": "achta.replacement-claims.v1",
+  "schema_version": "achta.replacement-claims.v2",
   "claims": [
     {
       "verb": "count check",
