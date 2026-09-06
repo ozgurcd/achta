@@ -555,3 +555,11 @@ that named claim becomes `replaces`. Fixture g remains an explicit human-output
 difference: count-v2 reports 22 where the script reports 4, while both exit 1.
 COUNT-REPLACEMENT-VOCAB-1 raises the executable floor from 47 to 48; mirror
 remains candidate.
+
+## [2026-09-06] release | achta-v0.5.7-earned-replacements
+
+Source, exact version fixtures, project status, changelog, release notes, and
+current wiki facts advance together to v0.5.7. The declared-route and count
+claims ship separately earned on their named replay vocabularies; mirror stays
+candidate, the fixture-g 22-versus-4 diagnostic difference remains explicit,
+and the executable Rulefloor remains 48.

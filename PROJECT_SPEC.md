@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.6 release specification
+Status: v0.5.7 release specification
 
 Project name: Achta
 
@@ -2131,6 +2131,9 @@ The v0.3.0 release records these choices explicitly:
    behavior.
 5. `mirror check --digest` remains a candidate: only four of six materialised
    rows agree and two vendored-copy rows remain unmeasurable from the wiki.
+6. v0.5.7 is a patch: it strengthens checkable replacement evidence and records
+   two earned dispositions without removing a command, changing a schema
+   identifier, or changing the stable 0/1/2 exit contract.
 
 ## 35. Success measure
 

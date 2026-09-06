@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.5.7 — 2026-09-06
+
 - Made each v2 named-script replacement claim cite the exact caller vocabulary
   and require that citation to match its digest-pinned replay record.
 - Vendored the v0.5.6 replay and recorded `declared-route check` as replacing
@@ -13,6 +15,9 @@
   replacing `wiki/tools/count-claim-check.sh` after all 17 fixture exits agreed.
   Recorded that fixture g reports target 22 instead of the script's 4 despite
   both exiting 1, and raised the floor from 47 to 48.
+- Advanced source and exact version fixtures to v0.5.7. This is a patch because
+  it strengthens replacement evidence without removing a command or changing a
+  stable schema identifier or exit contract.
 
 ## v0.5.6 — 2026-09-06
 

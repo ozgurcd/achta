@@ -2,7 +2,7 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.5.7 — 2026-09-06
 
 ### Changed
 
@@ -24,6 +24,9 @@ Release changes are recorded under their exact version, newest first.
   22 while count-v1 and the script report 4; all exit 1. The replacement claim
   is exit parity, not a claim of identical human diagnostics.
 - COUNT-REPLACEMENT-VOCAB-1 raises the executable Rulefloor from 47 to 48.
+- Source and exact version fixtures advance to v0.5.7. This is a patch because
+  the release strengthens replacement evidence without removing a command or
+  changing a stable schema identifier or exit contract.
 
 ## v0.5.6 — 2026-09-06
 
