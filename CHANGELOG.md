@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.5.4 — 2026-09-06
 
 - Closed all five measured `declared-route check` replay differences: comment-
   only workflows are evaluated as zero live scalars, and a designated-route

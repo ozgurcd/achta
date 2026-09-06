@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.3.
+- Current release line: v0.5.4.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -87,7 +87,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
 - `RULE-FLOOR.md` carries 43 armed, mutation-proved invariants on the current
-  v0.5.3 source line, including empty-workflow evaluation, document-wide
+  v0.5.4 source line, including empty-workflow evaluation, document-wide
   required-key uniqueness, and paragraph claim composition.
 
 ## Known limitations
@@ -137,3 +137,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Make principle 10 executable with a structured named-script replacement-claim gate, freeze the uncited v0.5.1 state as red, release v0.5.3, and raise the mutation-proved floor from 39 to 40. |
 | 2026-09-06 | `co-versioned` | Close all five measured declared-route replay differences, record 10-of-10 script parity and the mirror refusal boundary, flip declared-route to replaces, and raise the mutation-proved floor from 40 to 42. |
 | 2026-09-06 | `co-versioned` | Add generic counted-target plus assertion paragraph composition, close fixture g, record 17-of-17 script parity, flip count check to replaces, and raise the mutation-proved floor from 42 to 43. |
+| 2026-09-06 | `co-versioned` | Advance source and exact version fixtures, fold the two parity entries under v0.5.4, and prepare the patch release without changing the 43-rule floor. |

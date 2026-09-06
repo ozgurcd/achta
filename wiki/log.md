@@ -490,3 +490,13 @@ returned pass with zero claims. Restoration returned green.
 COUNT-PARAGRAPH-COMPOSITION-1 raises the executable floor from 42 to 43, and
 `replacement-claims.json` flips `count check` to `replaces`. Declared-route
 remains `replaces`; mirror remains `candidate`.
+
+## [2026-09-06] release | achta-v0.5.4-claim-flip
+
+Source, exact version fixtures, project status, changelog, release notes, and
+current wiki facts advance together to v0.5.4. The declared-route and count
+parity entries move unchanged in substance from Unreleased to the exact
+v0.5.4 headings. The release is a patch because it closes measured gaps in two
+existing verbs and adds caller-opted pattern vocabulary without removing or
+renaming a command, changing a default, or changing a stable machine schema.
+The executable Rulefloor remains 43.

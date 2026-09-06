@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.3 release specification
+Status: v0.5.4 release specification
 
 Project name: Achta
 
@@ -2014,6 +2014,9 @@ The v0.3.0 release records these choices explicitly:
    for the smallest positive target count. This closes fixture g without a
    paragraph-spanning expression fitted to that fixture and without claiming
    to understand the prose.
+5. v0.5.4 is a patch release: it closes measured behavioral gaps in two
+   existing verbs and adds only caller-opted pattern vocabulary. No command,
+   default, stable schema, or 0/1/2 exit contract is removed.
 
 ## 32. Success measure
 

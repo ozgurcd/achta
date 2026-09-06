@@ -2,7 +2,7 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.5.4 — 2026-09-06
 
 ### Changed
 

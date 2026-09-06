@@ -1,4 +1,4 @@
 // Package buildinfo contains the source-controlled module version.
 package buildinfo
 
-const Version = "v0.5.3"
+const Version = "v0.5.4"
