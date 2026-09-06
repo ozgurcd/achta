@@ -952,6 +952,47 @@ completion inference and condition-satisfaction truth. It uses
 file, invokes no external process, performs no Git operation, and writes
 nothing.
 
+### 7.22 Count relationship check
+
+```text
+achta count check --file MD [--file MD]... [--dir DIR]...
+  [--total-pattern REGEX --part-pattern REGEX]
+  [--claim-pattern REGEX --citation-pattern REGEX]
+  [--count-alias TOKEN=N]... [--json]
+```
+
+`count check` evaluates two optional structural relationships over an explicit
+Markdown document set. At least one complete pattern pair is required. Every
+total, part, and claim pattern has exactly one named `count` capture; other
+captures are permitted. Unsigned decimal tokens are intrinsic. Every
+non-decimal count token must be declared byte-for-byte by a repeatable
+`--count-alias TOKEN=N`; no claim, citation, or breakdown vocabulary has a
+default.
+
+For the breakdown pair, each line with exactly one total match and at least one
+part match is a breakdown. The part counts must sum without overflow to the
+stated total. More than one total on a line cannot evaluate. For the citation
+pair, Markdown blank lines delimit paragraphs. Every configured claim match in
+a paragraph must have at least its count of distinct exact full matches of the
+citation expression in that paragraph. Citation text is masked before claim
+matching so digits inside citations do not create claims. No case, whitespace,
+punctuation, Unicode, path, citation, or document-content normalization occurs.
+
+Repeatable `--file` inputs are evaluated first in caller order. Repeatable
+`--dir` inputs then contribute their direct `.md` or `.MD` regular files in
+bytewise filename order, preserving directory flag order. Empty, unsafe,
+linked, oversized, or unreadable selections, repeated documents, incomplete or
+ambiguous patterns, and invalid aliases are `cannot_evaluate`, exit 2. A
+structural disagreement is exit 1 and a clean evaluation is exit 0. The stable
+`achta.count-check.v1` result reports file and aggregate counts, then every
+violation's file, line, rule, claimed value, observed value, and bounded text.
+
+Accepted: decimal arithmetic, exact configured matching, paragraph scope, and
+distinct citation counting. Refused and reported: deciding whether
+unconfigured prose makes a count claim, and deciding whether a matched citation
+proves a disposition. The command reads only confined regular files, invokes no
+external process or shell, performs no Git operation, and writes nothing.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -1067,12 +1108,14 @@ achta/
   internal/mirror/
   internal/parts/
   internal/ledgerrows/
+  internal/countcheck/
   testdata/
     machine/
     wiki/
     witness/
     amendments/
     ledgerrows/
+    countcheck/
 ```
 
 Do not create empty packages. Introduce each package only when executable code
@@ -1107,6 +1150,8 @@ Responsibilities:
   transitions, exact-byte digests, and closed-set verification.
 - `internal/ledgerrows`: caller-shaped Markdown row parsing, exact literal
   state/prose relationships, and verbatim closure-quote verification.
+- `internal/countcheck`: caller-shaped count patterns, exact decimal and alias
+  parsing, breakdown arithmetic, and paragraph-scoped distinct-citation counts.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
@@ -1176,7 +1221,7 @@ define arbitrary executable commands.
 | Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition and ledger-claim checks | Implemented structurally by `achta ledger rows`; caller-owned vocabulary remains explicit and meaning inference is refused |
-| Count-claim and model-mirror checks | Candidates for explicit Achta components |
+| Count-claim and breakdown-sum checks | Implemented structurally by `achta count check`; caller patterns define claims, citations, and parts while meaning inference remains refused |
 | Byte-identical master/mirror and recorded-master-digest checks | Implemented by `achta mirror check`; retain old scripts until caller parity and retirement are explicit |
 | Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
@@ -1268,6 +1313,10 @@ Schemas added for v0.5.0:
 - `achta.parts-verify.v1`
 - `achta.ledger-rows.v1`
 
+Schemas added after v0.5.0:
+
+- `achta.count-check.v1`
+
 Canonical artifact schemas added for v0.5.0:
 
 - `achta.parts-lock.v1`
@@ -1328,6 +1377,9 @@ Add focused tests for:
 - caller-shaped ledger rows where each structural violation fires, clean rows
   remain silent, unconfigured semantic synonyms remain outside evaluation, and
   closure quotes must repeat exact bytes.
+- caller-shaped count documents where an incorrect breakdown and insufficient
+  distinct citations each fire, a correct breakdown and cited claim stay
+  clean, and incomplete vocabulary cannot evaluate.
 
 ### 15.2 Integration tests
 
@@ -1351,6 +1403,8 @@ Cover complete workflows:
    part drift, and unlocked neighboring part drift.
 8. Ledger-row clean, open-completion, absent closure-quote, and paraphrased
    closure-quote fixtures through the public 0/1/2 command contract.
+9. Count-check clean, bad breakdown, citation undercount, missing input, and
+   direct Markdown-directory selection.
 
 Use fake executables for Git and Rulefloor argument-vector tests where
 appropriate, while retaining a small end-to-end suite against installed
@@ -1712,6 +1766,17 @@ The v0.3.0 release records these choices explicitly:
    ending conversion, path normalization, and all master-content
    normalization. A valid recorded digest unequal to the computed digest is an
    evaluated failure, exit 1.
+4. Count checking owns only mechanics: unsigned decimal arithmetic, exact
+   aliases, line-scoped breakdown sums, blank-line paragraph scope, and
+   distinct exact citation matches. The caller supplies every total, part,
+   claim, and citation pattern with no default.
+5. The citation half is accepted only after the caller's claim expression has
+   made the prose classification explicit. Achta refuses to infer English fix
+   claims or decide that a matched citation proves a disposition; those are
+   meaning judgements, not count mechanics.
+6. Document selection is explicit. Files retain caller order; caller-named
+   directories contribute direct Markdown files in deterministic filename
+   order. No conventional log path is auto-detected.
 
 ## 29. Success measure
 

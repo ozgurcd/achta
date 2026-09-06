@@ -56,6 +56,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
   with explicit completion literals and closed conditional rows without a
   verbatim repeated quote, while refusing prose-meaning and satisfaction
   judgements.
+- `count check` reconciles caller-patterned breakdown sums and paragraph-scoped
+  distinct citation counts across explicit files and direct Markdown
+  directories. Achta owns exact mechanics and refuses prose-claim and proof
+  meaning.
 
 ## Verification surface
 
@@ -67,8 +71,8 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 34 armed, mutation-proved invariants on the current
-  v0.5.0 source line; the digest extension remains unreleased.
+- `RULE-FLOOR.md` carries 35 armed, mutation-proved invariants on the current
+  v0.5.0 source line; the digest and count-check extensions remain unreleased.
 
 ## Known limitations
 
@@ -110,3 +114,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Add caller-shaped `ledger rows`, enforce exact completion and closure-quote structure while refusing prose meaning, and raise the mutation-proved floor from 32 to 33 without releasing. |
 | 2026-09-05 | `co-versioned` | Release the complete conversion batch as v0.5.0, advancing source and exact fixtures while retaining the 33-rule floor for caller migration. |
 | 2026-09-06 | `co-versioned` | Add exact recorded-master-digest verification to `mirror check`, refuse absent or ambiguous evidence, and raise the mutation-proved floor from 33 to 34 without releasing. |
+| 2026-09-06 | `co-versioned` | Add caller-patterned breakdown and citation-count reconciliation, refuse implicit prose and proof meaning, and raise the mutation-proved floor from 34 to 35 without releasing. |

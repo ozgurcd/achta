@@ -2,7 +2,7 @@
 title: Achta Decisions
 category: platform
 status: authoritative
-updated: 2026-09-05
+updated: 2026-09-06
 ---
 
 # Achta Decisions
@@ -296,3 +296,26 @@ repair, line-ending conversion, path normalization, and master-content
 normalization. An absent digest file is `cannot_evaluate`, matching the absent
 master ruling in P-066. The command remains read-only, workspace-confined, and
 invokes neither shell nor Git.
+
+### P-070 — Count claims become mechanics only after caller classification
+
+Achta accepts both the arithmetic and citation-count halves, but not an English
+claim detector. `count check` requires the caller to provide each total, part,
+claim, and citation regular expression with no default. Count-bearing patterns
+expose one named `count` capture; exact non-decimal tokens require explicit
+aliases. Once the caller has classified the text, Achta owns the mechanical
+questions: do line-scoped parts sum to the stated total, and does the claim's
+blank-line-delimited paragraph contain at least the stated number of distinct
+exact citation matches?
+
+This keeps the same boundary as P-063, P-065, and P-067. Syntax and arithmetic
+are portable; whether prose claims a fix and whether a citation proves a
+disposition are caller meaning. The result therefore names both refusals. It
+does not build in fix verbs, dates, latest-section rules, exemptions, file:line
+grammar, or proof relevance. A caller can reproduce its chosen structure with
+flags without making that vocabulary Achta policy.
+
+Inputs are also explicit: repeatable files followed by repeatable direct
+Markdown directories, each directory in caller order and its files in bytewise
+filename order. Achta does not auto-detect `log/`. This avoids owning a caller's
+layout while still covering a growing split-log set without shell expansion.

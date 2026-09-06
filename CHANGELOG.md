@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Added `count check --file MD... [--dir DIR]...` with caller-supplied regular
+  expressions for stated totals, breakdown parts, count claims, and citations.
+  Breakdown parts must sum to their stated total; each configured claim must
+  have at least its count of distinct exact citation matches in the same
+  blank-line-delimited paragraph.
+- Count-bearing patterns expose exactly one named `count` capture. Decimal
+  counts are intrinsic; caller vocabulary such as number words requires an
+  explicit `--count-alias TOKEN=N`. Achta refuses to infer claims from prose or
+  decide whether a matched citation proves a disposition.
+- Explicit files are followed by explicitly selected directories; each
+  directory contributes only its direct Markdown files in bytewise filename
+  order. The command is read-only, workspace-confined, and uses the stable
+  `achta.count-check.v1` interface with the 0/1/2 exit contract.
+- Raised the executable Rulefloor from 34 to 35 with a mutation proof for
+  breakdown and citation-count reconciliation.
+
 - Added optional `mirror check --digest FILE` verification. Achta reads
   canonical lowercase `sha256  basename` records, selects exactly one record
   by the master's exact basename, and compares the recorded digest with the

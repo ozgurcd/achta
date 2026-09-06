@@ -128,6 +128,13 @@ achta --wiki-dir /path/to/workspace/wiki parts lock \
 achta --wiki-dir /path/to/workspace/wiki parts verify \
   --dir wiki/prompt/parts --lock wiki/prompt/parts.lock --json
 
+achta --wiki-dir /path/to/workspace/wiki count check \
+  --file wiki/log.md --dir wiki/log --file wiki/contracts/to-do-queue.MD \
+  --total-pattern 'TOTAL[[:space:]]+(?P<count>[0-9]+)[[:space:]]*[|]' \
+  --part-pattern '(VACUOUS|HAS-CONTROL|SOUND)[[:space:]]+(?P<count>[0-9]+)' \
+  --claim-pattern 'claims[[:space:]]+(?P<count>[0-9]+)[[:space:]]+fixed' \
+  --citation-pattern '[[:alnum:]_./-]+[.](go|md):[0-9]+' --json
+
 go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 ```
 
@@ -207,6 +214,22 @@ pass. Neither command invokes a shell or Git; only `parts lock` writes, and it
 atomically replaces the explicitly named lock. The separate question “does
 each part name a live canonical-document section?” remains caller-owned because
 heading vocabulary and document meaning are not properties of a byte lock.
+
+`count check` reconciles caller-declared count relationships across repeatable
+`--file` inputs and the direct Markdown files in repeatable `--dir` inputs.
+Explicit files come first; directories retain caller order and contribute files
+in bytewise filename order. `--total-pattern` and `--part-pattern` form the
+breakdown pair; `--claim-pattern` and `--citation-pattern` form the citation
+pair. At least one complete pair is required and every count-bearing regular
+expression has exactly one named `count` capture. Decimal tokens are built in;
+other exact tokens require repeatable `--count-alias TOKEN=N` declarations.
+Breakdowns are line-scoped. Claims and distinct exact citation matches are
+scoped to one blank-line-delimited paragraph. Achta does not infer English
+claim vocabulary, fix verbs, dates, exemptions, proof relevance, or semantic
+equivalence. The stable `achta.count-check.v1` result records each file, line,
+rule, claimed count, and observed count; disagreement is exit 1 and unavailable,
+unsafe, malformed, or incomplete evidence is exit 2. The command reads only,
+invokes neither a shell nor Git, and performs no content normalization.
 
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,

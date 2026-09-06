@@ -3,6 +3,7 @@ Achta v0.5.0 capabilities
   amendments rebase
   amendments reconcile
   capabilities
+  count check
   decision add
   floor census
   ledger census

@@ -6,6 +6,7 @@ import (
 
 	"github.com/ozgurcd/achta/internal/amendments"
 	"github.com/ozgurcd/achta/internal/census"
+	"github.com/ozgurcd/achta/internal/countcheck"
 	"github.com/ozgurcd/achta/internal/earned"
 	"github.com/ozgurcd/achta/internal/floorcensus"
 	"github.com/ozgurcd/achta/internal/ledgerrows"
@@ -313,6 +314,21 @@ func assertStableMachineContracts(t *testing.T) {
 				Covers:        floorcensus.CoversStats{Rules: 1, Mapped: 1},
 				Violations:    []floorcensus.Violation{},
 				Refused:       []string{floorcensus.RefusedArmed},
+			},
+		},
+		{
+			name: "count-check.json",
+			value: countcheck.Result{
+				SchemaVersion: countcheck.Schema,
+				Status:        "fail",
+				Files:         1,
+				Breakdowns:    1,
+				Claims:        1,
+				Violations: []countcheck.Violation{
+					{File: "wiki/log/entry.md", Line: 3, Rule: countcheck.RuleBreakdownSum, Claimed: 12, Observed: 14, Text: "breakdown parts sum to 14, stated total is 12"},
+					{File: "wiki/log/entry.md", Line: 5, Rule: countcheck.RuleClaimCitation, Claimed: 2, Observed: 1, Text: "claim requires 2 distinct citation(s), found 1 in its paragraph"},
+				},
+				Refused: []string{countcheck.RefusedClaimMeaning, countcheck.RefusedCitationMeaning},
 			},
 		},
 		{

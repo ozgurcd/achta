@@ -6,6 +6,28 @@ Release changes are recorded under their exact version, newest first.
 
 ### Added
 
+- `count check --file MD [--file MD]... [--dir DIR]...
+  [--total-pattern REGEX --part-pattern REGEX]
+  [--claim-pattern REGEX --citation-pattern REGEX]
+  [--count-alias TOKEN=N]... [--json]` checks two caller-declared structural
+  relationships. Breakdown parts must sum to the stated total on their line;
+  a configured count claim needs at least that many distinct exact citation
+  matches in its blank-line-delimited paragraph. At least one complete pattern
+  pair is required, and each count-bearing pattern exposes exactly one named
+  `count` capture.
+- Explicit files are evaluated before explicit directories; direct `.md` or
+  `.MD` directory entries are evaluated in bytewise filename order. Achta owns
+  decimal arithmetic, paragraph scope, and exact distinct-match counting. The
+  caller owns every token and regular expression; non-decimal count tokens need
+  explicit `--count-alias TOKEN=N` declarations.
+- `achta.count-check.v1` reports every violation's file, line, rule,
+  claimed count, observed count, and text. Achta refuses to infer that
+  unconfigured prose makes a claim or that a matched citation proves a
+  disposition. Exit 0 is clean, exit 1 is a structural disagreement, and
+  unsafe, absent, malformed, ambiguous, or incomplete input is exit 2.
+- A mutation-proved Rulefloor invariant raises the executable floor from 34 to
+  35. This remains unreleased on the v0.5.0 source line.
+
 - `mirror check --master PATH --digest FILE [--mirror PATH]...` verifies that
   the SHA-256 recorded for the master's exact basename equals the digest of
   the master's exact bytes. Its additive `achta.mirror-check.v1` digest result

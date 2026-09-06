@@ -365,3 +365,20 @@ refuses case, whitespace, line-ending, path, and content normalization. The
 new MIRROR-RECORDED-DIGEST-1 invariant is mutation-proved and raises the
 executable Rulefloor from 33 to 34. The source remains v0.5.0, the release notes
 stay under Unreleased, and no remote or release action belongs to this slice.
+
+## [2026-09-06] feature | count-relationship-check
+
+`count check` accepts explicit Markdown files and caller-named directories of
+direct Markdown files. Caller-supplied total and part patterns drive
+line-scoped breakdown arithmetic; caller-supplied claim and citation patterns
+drive distinct exact citation counts within blank-line-delimited paragraphs.
+Count-bearing patterns expose one named `count` capture, and explicit aliases
+are the only non-decimal vocabulary.
+
+P-070 accepts both structural halves while refusing the semantic leap: Achta
+does not infer that unconfigured prose claims a fix or that a matched citation
+proves a disposition. Bad sums and citation undercounts fail, missing or
+ambiguous inputs cannot evaluate, and correct fixtures remain clean. The
+CLAIM-COUNT-RELATIONSHIPS-1 mutation proof raises the executable Rulefloor from
+34 to 35. The source remains v0.5.0, all release entries stay under Unreleased,
+and no remote or release action belongs to this slice.
