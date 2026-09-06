@@ -10,6 +10,12 @@
   `wiki/tools/rulefloor-install-gate.sh` after all 10 script selftest fixtures
   agreed under the contract-complete caller vocabulary. Raised the executable
   Rulefloor from 40 to 42 with separate mutation proofs.
+- Added repeatable caller-owned `--claim-target-pattern` and
+  `--claim-assertion-pattern` composition to `count check`. A paragraph with
+  both selects its smallest positive counted target for citation enforcement.
+- Recorded `count check` as replacing `wiki/tools/count-claim-check.sh` after
+  all 17 selftest fixtures agreed, and raised the floor from 42 to 43 with a
+  separate mutation proof.
 
 ## v0.5.3 — 2026-09-06
 

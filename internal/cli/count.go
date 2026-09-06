@@ -24,6 +24,8 @@ func runCount(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	var directories repeatedValue
 	var aliases repeatedValue
 	var claimPatterns repeatedValue
+	var claimTargetPatterns repeatedValue
+	var claimAssertionPatterns repeatedValue
 	var proofClaimPatterns repeatedValue
 	var proofPatterns repeatedValue
 	var exemptPatterns repeatedValue
@@ -32,6 +34,8 @@ func runCount(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	totalPattern := set.String("total-pattern", "", "caller regexp with named count capture for a stated total")
 	partPattern := set.String("part-pattern", "", "caller regexp with named count capture for breakdown parts")
 	set.Var(&claimPatterns, "claim-pattern", "repeatable caller regexp with named count capture for a citation-backed claim")
+	set.Var(&claimTargetPatterns, "claim-target-pattern", "repeatable caller regexp with named count capture for a counted target")
+	set.Var(&claimAssertionPatterns, "claim-assertion-pattern", "repeatable caller regexp classifying an assertion in the same paragraph as a counted target")
 	citationPattern := set.String("citation-pattern", "", "caller regexp whose full matches are distinct citations")
 	set.Var(&proofClaimPatterns, "proof-claim-pattern", "repeatable caller regexp with named count capture for a proof-backed claim")
 	set.Var(&proofPatterns, "proof-pattern", "repeatable caller regexp with named count capture for a proof count")
@@ -80,16 +84,18 @@ func runCount(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 		}
 	}
 	result, err := countcheck.Check(documents, countcheck.Options{
-		TotalPattern:        *totalPattern,
-		PartPattern:         *partPattern,
-		ClaimPatterns:       claimPatterns,
-		CitationPattern:     *citationPattern,
-		ProofClaimPatterns:  proofClaimPatterns,
-		ProofPatterns:       proofPatterns,
-		ProofWithinLines:    *proofWithinLines,
-		ClaimSectionPattern: *claimSectionPattern,
-		ExemptPatterns:      exemptPatterns,
-		CountAliases:        aliases,
+		TotalPattern:           *totalPattern,
+		PartPattern:            *partPattern,
+		ClaimPatterns:          claimPatterns,
+		ClaimTargetPatterns:    claimTargetPatterns,
+		ClaimAssertionPatterns: claimAssertionPatterns,
+		CitationPattern:        *citationPattern,
+		ProofClaimPatterns:     proofClaimPatterns,
+		ProofPatterns:          proofPatterns,
+		ProofWithinLines:       *proofWithinLines,
+		ClaimSectionPattern:    *claimSectionPattern,
+		ExemptPatterns:         exemptPatterns,
+		CountAliases:           aliases,
 	})
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, countcheck.Schema, invalid("count check: %v", err))

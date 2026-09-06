@@ -59,8 +59,11 @@ infer prose, execute generic gates, fetch, or mutate Git.
   judgements.
 - `count check` reconciles caller-patterned breakdown sums, repeatable claim
   and citation counts, caller-selected last-section scope and exemptions, and
-  bounded claim/proof counts. Achta owns exact mechanics and refuses prose-claim
-  and proof meaning.
+  bounded claim/proof counts. Caller-patterned counted targets and assertions
+  can compose within one paragraph using the smallest positive target count.
+  The canonical replacement manifest records 17-of-17 parity with
+  `wiki/tools/count-claim-check.sh`; Achta still refuses prose-claim and proof
+  meaning.
 - `declared-route check` parses explicit files and deterministic direct workflow
   directories. Its compatibility default requires one route per file; opt-in
   per-file-any permits zero or many while every file remains ban-scanned and
@@ -83,9 +86,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 42 armed, mutation-proved invariants on the current
-  v0.5.3 source line, including empty-workflow evaluation and document-wide
-  required-key uniqueness.
+- `RULE-FLOOR.md` carries 43 armed, mutation-proved invariants on the current
+  v0.5.3 source line, including empty-workflow evaluation, document-wide
+  required-key uniqueness, and paragraph claim composition.
 
 ## Known limitations
 
@@ -133,3 +136,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Close the three measured script-retirement gaps, add exact caller-shaped count, route-cardinality, and digest-record controls, release v0.5.2, and raise the mutation-proved floor from 36 to 39. |
 | 2026-09-06 | `co-versioned` | Make principle 10 executable with a structured named-script replacement-claim gate, freeze the uncited v0.5.1 state as red, release v0.5.3, and raise the mutation-proved floor from 39 to 40. |
 | 2026-09-06 | `co-versioned` | Close all five measured declared-route replay differences, record 10-of-10 script parity and the mirror refusal boundary, flip declared-route to replaces, and raise the mutation-proved floor from 40 to 42. |
+| 2026-09-06 | `co-versioned` | Add generic counted-target plus assertion paragraph composition, close fixture g, record 17-of-17 script parity, flip count check to replaces, and raise the mutation-proved floor from 42 to 43. |

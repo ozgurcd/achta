@@ -4,7 +4,28 @@
     {
       "verb": "count check",
       "script": "wiki/tools/count-claim-check.sh",
-      "status": "candidate"
+      "status": "replaces",
+      "selftest_citation": "../wiki/tools/count-claim-check.sh --selftest",
+      "replay_citation": "../wiki/contracts/replacement-replay-2026-09-06.md:53-71",
+      "fixtures": [
+        {"name": "a", "script_exit": 0, "verb_exit": 0},
+        {"name": "b", "script_exit": 1, "verb_exit": 1},
+        {"name": "c", "script_exit": 0, "verb_exit": 0},
+        {"name": "d", "script_exit": 1, "verb_exit": 1},
+        {"name": "e", "script_exit": 0, "verb_exit": 0},
+        {"name": "f", "script_exit": 0, "verb_exit": 0},
+        {"name": "g", "script_exit": 1, "verb_exit": 1},
+        {"name": "h", "script_exit": 0, "verb_exit": 0},
+        {"name": "i", "script_exit": 1, "verb_exit": 1},
+        {"name": "j", "script_exit": 0, "verb_exit": 0},
+        {"name": "k", "script_exit": 0, "verb_exit": 0},
+        {"name": "p", "script_exit": 0, "verb_exit": 0},
+        {"name": "q", "script_exit": 0, "verb_exit": 0},
+        {"name": "l", "script_exit": 0, "verb_exit": 0},
+        {"name": "m", "script_exit": 1, "verb_exit": 1},
+        {"name": "n", "script_exit": 1, "verb_exit": 1},
+        {"name": "o", "script_exit": 0, "verb_exit": 0}
+      ]
     },
     {
       "verb": "declared-route check",

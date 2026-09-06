@@ -979,6 +979,8 @@ nothing.
 achta count check --file MD [--file MD]... [--dir DIR]...
   [--total-pattern REGEX --part-pattern REGEX]
   [--claim-pattern REGEX]... [--citation-pattern REGEX]
+  [--claim-target-pattern REGEX]...
+  [--claim-assertion-pattern REGEX]...
   [--claim-section-pattern REGEX] [--exempt-pattern REGEX]...
   [--proof-claim-pattern REGEX]... [--proof-pattern REGEX]...
   [--proof-within-lines N]
@@ -1002,6 +1004,16 @@ match in a paragraph must have at least its count of distinct exact full
 matches of the citation expression in that paragraph. Citation text is masked
 before claim matching so digits inside citations do not create claims.
 
+The optional paragraph-composition relationship requires both repeatable
+`--claim-target-pattern` and repeatable `--claim-assertion-pattern` families.
+Every target pattern has one named `count` capture; assertion patterns have no
+count capture requirement. If at least one expression from each family matches
+the same blank-line-delimited paragraph, the smallest positive target count in
+that paragraph becomes one citation-backed claim. Zero targets are ignored.
+This is generic composition over caller vocabulary, not inference: target
+nouns and assertion verbs have no defaults, and a pattern fitted to one fixture
+is not part of the contract.
+
 `--claim-section-pattern` restricts citation claims to the last `## ` section
 whose heading matches that caller expression; no matching section yields zero
 citation claims. Each `--exempt-pattern` classifies one marker line and exempts
@@ -1023,7 +1035,8 @@ violation's file, line, rule, claimed value, observed value, and bounded text.
 
 Accepted: decimal arithmetic, exact configured matching, caller-selected last
 section scope, caller-classified exemption, nearest bounded proof comparison,
-paragraph scope, and distinct citation counting. Refused and reported:
+same-paragraph target/assertion composition, smallest-positive target
+selection, paragraph scope, and distinct citation counting. Refused and reported:
 deciding whether unconfigured prose makes a count claim, whether a matched
 citation proves a disposition, or whether matched proof prose actually proves
 a claim. The command reads only confined regular files, invokes no external
@@ -1342,7 +1355,7 @@ define arbitrary executable commands.
 | Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition and ledger-claim checks | Candidate implementation: `achta ledger rows`; no named-script replacement or retirement claim is recorded |
-| Count-claim and breakdown-sum checks | Candidate implementation: `achta count check`; `replacement-claims.json` records no replacement claim until script-side parity evidence exists |
+| Count-claim and breakdown-sum checks | Replaced by `achta count check`; `replacement-claims.json` cites all 17 agreeing script-selftest replay fixtures at `../wiki/contracts/replacement-replay-2026-09-06.md:53-71` |
 | Byte-identical master/mirror and recorded-master-digest checks | Candidate implementation: `achta mirror check`; `replacement-claims.json` records no replacement claim until script-side parity evidence exists |
 | Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
@@ -1527,8 +1540,9 @@ Add focused tests for:
 - caller-shaped count documents where an incorrect breakdown and insufficient
   distinct citations each fire, a correct breakdown and cited claim stay
   clean, repeated claim patterns remain additive, last matching section scope
-  and caller exemptions are honored, a nearby proof mismatch fires, and
-  incomplete vocabulary cannot evaluate.
+  and caller exemptions are honored, a nearby proof mismatch fires, a counted
+  target plus an assertion in the same paragraph uses the smallest positive
+  target count, and incomplete vocabulary cannot evaluate.
 - declared-route workflow sets where default exact-one and opt-in per-file-any
   cardinality are distinct, every route-free file is still ban-scanned, each
   route-using file requires its scoped key, direct directories are bytewise
@@ -1994,6 +2008,12 @@ The v0.3.0 release records these choices explicitly:
    not path normalization. Because two vendored-copy cases were not replayed,
    `mirror check --digest` remains a candidate regardless of the two explicit
    exit-class decisions.
+4. Counted-target nouns and fix-assertion verbs remain caller vocabulary.
+   Achta accepts the generic structural relation that one pattern from each
+   family occurs in the same paragraph, then conservatively requires citations
+   for the smallest positive target count. This closes fixture g without a
+   paragraph-spanning expression fitted to that fixture and without claiming
+   to understand the prose.
 
 ## 32. Success measure
 

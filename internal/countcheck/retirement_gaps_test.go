@@ -67,6 +67,36 @@ func TestCheckCoversCountClaimRetirementMechanics(t *testing.T) {
 	}
 }
 
+func TestCheckComposesCountedTargetsWithAssertionsOnlyWithinTheirParagraph(t *testing.T) {
+	opts := Options{
+		ClaimTargetPatterns:    []string{`\b(?P<count>[0-9]+)\b[^.\n]{0,60}?\bstatements?\b`},
+		ClaimAssertionPatterns: []string{`is[[:space:]]+asserted`},
+		CitationPattern:        `[[:alnum:]_./-]+[.]go:[0-9]+`,
+	}
+
+	result, err := Check([]Document{{Path: "log/entry.md", Data: []byte("Only UPDATE/DELETE can match zero rows silently: **22**, of which **4 uncovered and hot**, all audit-chain tamper statements. RowsAffected is asserted now.\n")}}, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "fail" || result.Claims != 1 || len(result.Violations) != 1 || result.Violations[0].Rule != RuleClaimCitation || result.Violations[0].Claimed != 4 || result.Violations[0].Observed != 0 {
+		t.Fatalf("composed claim result = %+v", result)
+	}
+
+	separate, err := Check([]Document{{Path: "log/entry.md", Data: []byte("4 uncovered audit statements.\n\nRowsAffected is asserted now.\n")}}, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if separate.Status != "pass" || separate.Claims != 0 || len(separate.Violations) != 0 {
+		t.Fatalf("separate paragraphs result = %+v", separate)
+	}
+
+	incomplete := opts
+	incomplete.ClaimAssertionPatterns = nil
+	if _, err := Check([]Document{{Path: "log/entry.md", Data: []byte("4 audit statements.\n")}}, incomplete); err == nil {
+		t.Fatal("counted targets without assertion vocabulary must not evaluate")
+	}
+}
+
 func TestCheckRefusesIncompleteRetirementVocabulary(t *testing.T) {
 	for name, opts := range map[string]Options{
 		"proof without window": {

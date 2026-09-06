@@ -135,6 +135,8 @@ achta --wiki-dir /path/to/workspace/wiki count check \
   --part-pattern '(VACUOUS|HAS-CONTROL|SOUND)[[:space:]]+(?P<count>[0-9]+)' \
   --claim-pattern 'claims[[:space:]]+(?P<count>[0-9]+)[[:space:]]+fixed' \
   --claim-pattern '(?P<count>[0-9]+)[[:space:]]+sites fixed' \
+  --claim-target-pattern '(?i)\b(?P<count>[0-9]{1,3}|Four|Five|One)\b[^.\n]{0,60}?\b(sites?|tests?|fences?|statements?|assertions?|controls?|gaps?|callers?|routes?|guards?|probes?|seeds?|mutations?)\b' \
+  --claim-assertion-pattern '(?i)(closed|repaired|red-proved|now[[:space:]]+asserts?|is[[:space:]]+asserted|are[[:space:]]+asserted)' \
   --claim-section-pattern '^[[]20[0-9]{2}-[0-9]{2}-[0-9]{2}[]]' \
   --exempt-pattern 'count-claim-exempt:' \
   --citation-pattern '[[:alnum:]_./-]+[.](go|md):[0-9]+' --json
@@ -247,10 +249,15 @@ paragraph. Repeatable `--proof-claim-pattern` and `--proof-pattern`, with
 `--proof-within-lines`, compare a claim count with the nearest bounded proof
 count. Every count-bearing expression has one named `count` capture. Decimal
 tokens are built in; aliases are explicit. Achta owns only those exact
-mechanics: it does not infer English claims or decide that proof prose or a
-citation is true or relevant. Disagreement is exit 1 and unavailable, unsafe,
-malformed, or incomplete evidence is exit 2. The command reads only, invokes
-neither a shell nor Git, and performs no content normalization.
+mechanics. Repeatable `--claim-target-pattern` expressions classify counted
+targets, while repeatable `--claim-assertion-pattern` expressions classify an
+assertion elsewhere in the same blank-line-delimited paragraph. When both
+families match, the smallest positive target count is one citation-backed
+claim. The patterns have no defaults: Achta does not infer English claims or
+decide that proof prose or a citation is true or relevant. Disagreement is
+exit 1 and unavailable, unsafe, malformed, or incomplete evidence is exit 2.
+The command reads only, invokes neither a shell nor Git, and performs no
+content normalization.
 
 `declared-route check` parses every explicit file, plus direct `.yml` and
 `.yaml` files from explicit directories, as one YAML document. The default

@@ -472,3 +472,21 @@ therefore exit 2, while a valid disagreeing record is exit 1. A path-form
 record name is opaque caller vocabulary and requires exact `--digest-name`;
 there is no path normalization fallback. Two vendored-copy cases remain
 unreplayed, so no mirror replacement claim is made.
+
+## [2026-09-06] feature | count-full-replay-parity
+
+`count check` now composes two caller-owned, repeatable pattern families: a
+count-bearing target and an assertion anywhere in the same blank-line-delimited
+paragraph. When both occur, the smallest positive target count becomes one
+citation-backed claim. This is a generic mechanic with no target-noun or
+assertion-verb defaults; it does not infer prose meaning and does not use a
+paragraph-spanning expression fitted to replay fixture g.
+
+The frozen table at
+`../wiki/contracts/replacement-replay-2026-09-06.md:53-71` consequently agrees
+on all 17 `count-claim-check.sh` selftest fixtures. Disabling assertion
+recognition made both domain and CLI tests red: the four-target paragraph
+returned pass with zero claims. Restoration returned green.
+COUNT-PARAGRAPH-COMPOSITION-1 raises the executable floor from 42 to 43, and
+`replacement-claims.json` flips `count check` to `replaces`. Declared-route
+remains `replaces`; mirror remains `candidate`.

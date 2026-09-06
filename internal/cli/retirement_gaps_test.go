@@ -38,6 +38,25 @@ func TestCountCheckRetirementGapFlags(t *testing.T) {
 	}
 }
 
+// RULE: COUNT-PARAGRAPH-COMPOSITION-1
+func TestCountCheckComposesCountedTargetAndAssertionWithinParagraph(t *testing.T) {
+	root, _, _ := testWorkspaceRepo(t, "sample")
+	writeTestFile(t, filepath.Join(root, "wiki", "entry.md"), "## [2026-08-06] fix | the-counted-remainder\n\nOnly UPDATE/DELETE can match zero rows silently: **22**, of which **4 uncovered and hot**, all audit-chain tamper statements. `RowsAffected` is asserted at the mutation now.\n")
+	args := []string{
+		"--json", "--workspace", root, "count", "check", "--file", "wiki/entry.md",
+		"--claim-target-pattern", `(?i)\b(?P<count>[0-9]{1,3}|Four|Five|One|four|five)\b[^.\n]{0,60}?\b(sites?|tests?|fences?|statements?|assertions?|controls?|gaps?|callers?|routes?|guards?|probes?|seeds?|mutations?)\b`,
+		"--claim-assertion-pattern", `(?i)(closed|repaired|red-proved|now[[:space:]]+asserts?|is[[:space:]]+asserted|are[[:space:]]+asserted|now[[:space:]]+asserted?)`,
+		"--citation-pattern", `[[:alnum:]_./-]+[.](go|sql|sh|md|py|ts|tsx|ya?ml):[0-9]+`,
+		"--claim-section-pattern", `^## `,
+		"--count-alias", "Four=4", "--count-alias", "Five=5", "--count-alias", "One=1",
+		"--count-alias", "four=4", "--count-alias", "five=5",
+	}
+	var stdout, stderr bytes.Buffer
+	if code := Run(args, &stdout, &stderr, "v0.5.3"); code != 1 || !strings.Contains(stdout.String(), `"rule":"claim-citation-count"`) || !strings.Contains(stdout.String(), `"claimed":4`) {
+		t.Fatalf("composed claim code/output = %d/%s stderr=%s", code, stdout.String(), stderr.String())
+	}
+}
+
 func TestDeclaredRouteCheckSupportsWorkflowDirectorySet(t *testing.T) {
 	root, _, _ := testWorkspaceRepo(t, "sample")
 	dir := filepath.Join(root, ".github", "workflows")

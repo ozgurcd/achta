@@ -16,6 +16,14 @@ Release changes are recorded under their exact version, newest first.
 - `replacement-claims.json` records full 10-of-10 parity with
   `wiki/tools/rulefloor-install-gate.sh`, citing the script selftest and the
   frozen dual-replay table. Two mutation-proved rules raise the floor to 42.
+- `count check` accepts repeatable caller-owned `--claim-target-pattern` and
+  `--claim-assertion-pattern`. When both match within one blank-line-delimited
+  paragraph, the smallest positive target count is checked against the exact
+  distinct citations in that paragraph. This captures split assertion prose
+  without inferring its vocabulary.
+- `replacement-claims.json` records full 17-of-17 parity with
+  `wiki/tools/count-claim-check.sh`, citing its selftest and the frozen replay
+  table. COUNT-PARAGRAPH-COMPOSITION-1 raises the floor from 42 to 43.
 
 ## v0.5.3 — 2026-09-06
 
