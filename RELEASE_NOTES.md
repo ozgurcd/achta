@@ -2,7 +2,7 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.5.1 — 2026-09-06
 
 ### Added
 
@@ -26,8 +26,7 @@ Release changes are recorded under their exact version, newest first.
   command reads only confined regular files and invokes neither shell nor Git.
 - A measured correctness requirement adds the stable
   `go.yaml.in/yaml/v3 v3.0.5` AST parser. A mutation-proved Rulefloor
-  invariant raises the executable floor from 35 to 36. This remains unreleased
-  on the v0.5.0 source line.
+  invariant raises the executable floor from 35 to 36.
 
 - `count check --file MD [--file MD]... [--dir DIR]...
   [--total-pattern REGEX --part-pattern REGEX]
@@ -49,7 +48,7 @@ Release changes are recorded under their exact version, newest first.
   disposition. Exit 0 is clean, exit 1 is a structural disagreement, and
   unsafe, absent, malformed, ambiguous, or incomplete input is exit 2.
 - A mutation-proved Rulefloor invariant raises the executable floor from 34 to
-  35. This remains unreleased on the v0.5.0 source line.
+  35.
 
 - `mirror check --master PATH --digest FILE [--mirror PATH]...` verifies that
   the SHA-256 recorded for the master's exact basename equals the digest of
@@ -62,7 +61,7 @@ Release changes are recorded under their exact version, newest first.
   Digest disagreement is exit 1; absent, malformed, or ambiguous evidence is
   `cannot_evaluate`, exit 2.
 - A mutation-proved Rulefloor invariant raises the executable floor from 33 to
-  34. This remains unreleased on the v0.5.0 source line.
+  34.
 
 ## v0.5.0 — 2026-09-05
 

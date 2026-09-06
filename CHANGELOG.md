@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.5.1 — 2026-09-06
 
 - Added `declared-route check --file YAML... --route-pattern REGEX...
   --ban-pattern REGEX... --required-route-pattern REGEX --required-key KEY

@@ -401,3 +401,13 @@ red because the job-level fixture passed at exit 0. Restoration returned green,
 and DECLARED-ROUTE-YAML-SCOPE-1 raises the executable floor from 35 to 36. The
 source remains v0.5.0, entries stay under Unreleased, and no remote or release
 action belongs to this slice.
+
+## [2026-09-06] release | achta-v0.5.1
+
+The source version, exact machine and human fixtures, current wiki facts,
+changelog, release notes, and project specification advance together to
+v0.5.1. The recorded-digest, count-check, and declared-route entries move
+unchanged in substance from Unreleased to the exact v0.5.1 heading. The
+specification records `go.yaml.in/yaml/v3 v3.0.5` as Achta's first external Go
+module dependency and the measured correctness exception for true YAML scope.
+The executable Rulefloor remains 36.

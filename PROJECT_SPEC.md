@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.0 release specification
+Status: v0.5.1 release specification
 
 Project name: Achta
 
@@ -1205,7 +1205,9 @@ stdout, stderr, terminal formatting, or process exit codes.
 Use only the Go standard library unless a dependency has a compelling measured
 correctness or security benefit. True YAML scope is that measured exception:
 use the stable `go.yaml.in/yaml/v3` node parser rather than reproducing YAML
-with indentation heuristics. Markdown operations should use narrow
+with indentation heuristics. `go.yaml.in/yaml/v3 v3.0.5` is Achta's first
+external Go module dependency; before it, the module was standard-library-only.
+Markdown operations should use narrow
 format-specific parsers rather than a general Markdown rendering dependency.
 
 ## 12. Configuration
@@ -1361,7 +1363,7 @@ Schemas added for v0.5.0:
 - `achta.parts-verify.v1`
 - `achta.ledger-rows.v1`
 
-Schemas added after v0.5.0:
+Schemas added for v0.5.1:
 
 - `achta.count-check.v1`
 - `achta.declared-route-check.v1`
@@ -1801,7 +1803,7 @@ The v0.3.0 release records these choices explicitly:
    truth; a configured literal is either present or absent, and a quoted string
    is either repeated byte-for-byte or it is not.
 
-## 28. Unreleased decisions
+## 28. v0.5.1 decisions
 
 1. A digest record is evidence about the selected master only when its filename
    equals the master's basename byte-for-byte. A single differently named

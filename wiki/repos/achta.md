@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.0.
+- Current release line: v0.5.1.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -77,8 +77,8 @@ infer prose, execute generic gates, fetch, or mutate Git.
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
 - `RULE-FLOOR.md` carries 36 armed, mutation-proved invariants on the current
-  v0.5.0 source line; the digest, count-check, and declared-route extensions
-  remain unreleased.
+  v0.5.1 source line, including the digest, count-check, and declared-route
+  extensions.
 
 ## Known limitations
 
@@ -122,3 +122,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Add exact recorded-master-digest verification to `mirror check`, refuse absent or ambiguous evidence, and raise the mutation-proved floor from 33 to 34 without releasing. |
 | 2026-09-06 | `co-versioned` | Add caller-patterned breakdown and citation-count reconciliation, refuse implicit prose and proof meaning, and raise the mutation-proved floor from 34 to 35 without releasing. |
 | 2026-09-06 | `co-versioned` | Add true-YAML `declared-route check` with caller-owned route, ban, key, and scope flags, and raise the mutation-proved floor from 35 to 36 without releasing. |
+| 2026-09-06 | `co-versioned` | Release the second additive conversion batch as v0.5.1, advance exact version fixtures, record Achta's first external Go module dependency, and retain the 36-rule floor. |
