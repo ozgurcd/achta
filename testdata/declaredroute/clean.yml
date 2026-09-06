@@ -1,0 +1,12 @@
+name: CI
+env:
+  RULEFLOOR_VERSION: v0.9.1
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install pinned Rulefloor
+        run: |
+          # brew install --cask example/rulefloor is only documentation
+          curl -fsSL "https://github.com/example/rulefloor/archive/refs/tags/${RULEFLOOR_VERSION}.tar.gz" -o rulefloor.tar.gz
+          go build -ldflags "-X main.version=${RULEFLOOR_VERSION}" ./cmd/rulefloor

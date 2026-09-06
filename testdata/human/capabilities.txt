@@ -5,6 +5,7 @@ Achta v0.5.0 capabilities
   capabilities
   count check
   decision add
+  declared-route check
   floor census
   ledger census
   ledger rows

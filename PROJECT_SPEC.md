@@ -32,7 +32,7 @@ Achta is a deterministic, workspace-local governance and evidence tool.
 
 It replaces repeated ad hoc Python, Perl, `jq`, and shell manipulation of wiki
 pins, decision records, amendment manifests, and gate-witness records with one
-small, dependency-free Go binary. It owns the mechanical integrity of those
+small Go binary. It owns the mechanical integrity of those
 workspace artifacts. It does not decide whether their human claims are true.
 
 Achta complements existing tools rather than absorbing them:
@@ -993,6 +993,48 @@ unconfigured prose makes a count claim, and deciding whether a matched citation
 proves a disposition. The command reads only confined regular files, invokes no
 external process or shell, performs no Git operation, and writes nothing.
 
+### 7.23 Declared-route check
+
+```text
+achta declared-route check --file WORKFLOW [--file WORKFLOW]...
+  --route-pattern REGEX [--route-pattern REGEX]...
+  --ban-pattern REGEX [--ban-pattern REGEX]...
+  --required-route-pattern REGEX --required-key KEY
+  --required-scope JSON_POINTER [--json]
+```
+
+`declared-route check` evaluates an explicit set of single-document YAML
+workflow files. Each file must contain exactly one match occurrence across all
+caller-supplied route alternatives and zero matches for every caller-supplied
+banned pattern. Matching is performed on parsed scalar values; YAML comments
+and scalar lines whose first non-space byte is `#` are excluded. Patterns
+must not be empty, repeated, invalid, capable of matching empty text, or longer
+than 4 KiB; each pattern family is capped at 64 expressions and 4,096 matches
+per document. No route or banned-command vocabulary is built in.
+
+`--required-route-pattern` must equal exactly one configured route alternative.
+When that alternative is the selected match, `--required-scope` is an RFC 6901
+JSON Pointer to a YAML mapping and `--required-key` is the exact caller-owned
+key that must appear once in that mapping. Other route alternatives do not
+require the key. Scope is resolved from YAML mapping nodes, never indentation
+or a line-level approximation. Thus `/jobs/verify/env` is structurally
+distinct from workflow-level `/env`. A missing conditionally required key is
+an evaluated violation;
+malformed or multi-document YAML, a non-mapping or ambiguously repeated scope,
+unsafe input, or incomplete vocabulary is `cannot_evaluate`, exit 2.
+
+The stable `achta.declared-route-check.v1` result preserves file order and
+reports each route and banned pattern's count and source lines, the selected
+scope and exact key count, and every violation's file, line, rule, expected
+count, observed count, and bounded text. Exit 0 means all relationships hold
+and exit 1 means at least one evaluated disagreement. The command reads only
+workspace-confined regular files, invokes no external process or shell,
+performs no Git operation, and writes nothing.
+
+Accepted: YAML syntax and mapping scope, exact caller-pattern counting, and
+comment exclusion. Refused and reported: default route, banned-command, token,
+or scope vocabulary and line-level inference of YAML scope.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -1109,6 +1151,7 @@ achta/
   internal/parts/
   internal/ledgerrows/
   internal/countcheck/
+  internal/declaredroute/
   testdata/
     machine/
     wiki/
@@ -1116,6 +1159,7 @@ achta/
     amendments/
     ledgerrows/
     countcheck/
+    declaredroute/
 ```
 
 Do not create empty packages. Introduce each package only when executable code
@@ -1152,12 +1196,16 @@ Responsibilities:
   state/prose relationships, and verbatim closure-quote verification.
 - `internal/countcheck`: caller-shaped count patterns, exact decimal and alias
   parsing, breakdown arithmetic, and paragraph-scoped distinct-citation counts.
+- `internal/declaredroute`: real YAML mapping-scope resolution plus exact
+  caller-pattern route, ban, and required-key counts.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
 
 Use only the Go standard library unless a dependency has a compelling measured
-correctness or security benefit. Markdown operations should use narrow
+correctness or security benefit. True YAML scope is that measured exception:
+use the stable `go.yaml.in/yaml/v3` node parser rather than reproducing YAML
+with indentation heuristics. Markdown operations should use narrow
 format-specific parsers rather than a general Markdown rendering dependency.
 
 ## 12. Configuration
@@ -1227,7 +1275,7 @@ define arbitrary executable commands.
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
 | Repository green build/test gate | Keep outside; Achta is not a generic test runner |
 | Ledger census versus source graph | Keep as a composition gate; Rulefloor and Gograph retain ownership |
-| Rulefloor installation-route gate | Keep outside; it audits workflow/distribution policy |
+| Rulefloor installation-route gate | Implemented mechanically by `achta declared-route check`; caller flags retain all route, ban, token, and scope vocabulary, and old scripts remain during measured shadow parity |
 | Vulnerability fix-availability policy | Keep in a dedicated vulnerability analyzer; Achta does not own advisory or fix semantics |
 | Route, link, inert-parameter, clock, and wire analyzers | Keep dedicated |
 | Prompt inclusion, canonical-section reference checking, commit hook, and source-navigation hook | Keep in the agent harness; the caller owns heading vocabulary and hook wiring |
@@ -1316,6 +1364,7 @@ Schemas added for v0.5.0:
 Schemas added after v0.5.0:
 
 - `achta.count-check.v1`
+- `achta.declared-route-check.v1`
 
 Canonical artifact schemas added for v0.5.0:
 

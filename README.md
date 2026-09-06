@@ -135,6 +135,15 @@ achta --wiki-dir /path/to/workspace/wiki count check \
   --claim-pattern 'claims[[:space:]]+(?P<count>[0-9]+)[[:space:]]+fixed' \
   --citation-pattern '[[:alnum:]_./-]+[.](go|md):[0-9]+' --json
 
+achta --workspace /path/to/workspace declared-route check \
+  --file identuum-idp-oss/.github/workflows/ci.yml \
+  --file identuum-ui/.github/workflows/ci.yml \
+  --route-pattern 'rulefloor/archive/refs/tags/[$][{]RULEFLOOR_VERSION[}]' \
+  --required-route-pattern 'rulefloor/archive/refs/tags/[$][{]RULEFLOOR_VERSION[}]' \
+  --ban-pattern 'brew install[^#]*rulefloor' \
+  --ban-pattern 'go install[^#]*rulefloor' \
+  --required-key RULEFLOOR_VERSION --required-scope /env --json
+
 go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 ```
 
@@ -230,6 +239,20 @@ equivalence. The stable `achta.count-check.v1` result records each file, line,
 rule, claimed count, and observed count; disagreement is exit 1 and unavailable,
 unsafe, malformed, or incomplete evidence is exit 2. The command reads only,
 invokes neither a shell nor Git, and performs no content normalization.
+
+`declared-route check` parses every explicit workflow as one YAML document.
+Across live scalar text, the configured route alternatives must match exactly
+once per file and every configured banned expression must match zero times.
+The caller designates one route pattern that needs a scoped key, then names
+that exact key and its YAML mapping with a JSON Pointer such as `/env`. The
+key is required only when that route is selected. This is syntax-tree scope, so
+a job-level `/jobs/verify/env` declaration cannot stand in for workflow-level
+`/env`.
+YAML comments and comment-only lines within scalar command blocks do not count.
+There are no route, ban, key, or scope defaults. Missing, malformed,
+multi-document, unsafe, or ambiguous input is `cannot_evaluate`, exit 2. The
+command reads only workspace-confined regular files and invokes neither shell
+nor Git.
 
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,

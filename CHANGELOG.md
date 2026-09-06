@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Added `declared-route check --file YAML... --route-pattern REGEX...
+  --ban-pattern REGEX... --required-route-pattern REGEX --required-key KEY
+  --required-scope JSON_POINTER`.
+  Each selected workflow must contain exactly one configured route alternative,
+  no configured banned scalar text, and, when the designated route is selected,
+  exactly one required key in the caller-selected YAML mapping.
+- YAML scope is resolved from a syntax tree, so a job-level key cannot satisfy
+  a workflow-level `/env` requirement. YAML comments and comment-only lines
+  inside scalar command blocks do not count.
+- The command is read-only, workspace-confined, invokes neither shell nor Git,
+  and uses the stable `achta.declared-route-check.v1` 0/1/2 contract.
+- Added the narrowly scoped stable `go.yaml.in/yaml/v3` parser dependency and
+  raised the executable Rulefloor from 35 to 36 with a mutation proof for true
+  YAML scope.
+
 - Added `count check --file MD... [--dir DIR]...` with caller-supplied regular
   expressions for stated totals, breakdown parts, count claims, and citations.
   Breakdown parts must sum to their stated total; each configured claim must

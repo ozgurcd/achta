@@ -7,6 +7,7 @@ import (
 	"github.com/ozgurcd/achta/internal/amendments"
 	"github.com/ozgurcd/achta/internal/census"
 	"github.com/ozgurcd/achta/internal/countcheck"
+	"github.com/ozgurcd/achta/internal/declaredroute"
 	"github.com/ozgurcd/achta/internal/earned"
 	"github.com/ozgurcd/achta/internal/floorcensus"
 	"github.com/ozgurcd/achta/internal/ledgerrows"
@@ -329,6 +330,31 @@ func assertStableMachineContracts(t *testing.T) {
 					{File: "wiki/log/entry.md", Line: 5, Rule: countcheck.RuleClaimCitation, Claimed: 2, Observed: 1, Text: "claim requires 2 distinct citation(s), found 1 in its paragraph"},
 				},
 				Refused: []string{countcheck.RefusedClaimMeaning, countcheck.RefusedCitationMeaning},
+			},
+		},
+		{
+			name: "declared-route-check.json",
+			value: declaredroute.Result{
+				SchemaVersion: declaredroute.Schema,
+				Status:        "fail",
+				Documents: []declaredroute.DocumentResult{{
+					File:   ".github/workflows/ci.yml",
+					Status: "fail",
+					Routes: []declaredroute.PatternCount{
+						{Pattern: "derived-route", Count: 2, Lines: []int{12, 18}},
+						{Pattern: "approved-action", Count: 0, Lines: []int{}},
+					},
+					Banned: []declaredroute.PatternCount{
+						{Pattern: "brew-install", Count: 1, Lines: []int{20}},
+					},
+					RequiredKey: declaredroute.KeyCount{RoutePattern: "derived-route", Required: true, Scope: "/env", Key: "RULEFLOOR_VERSION", Count: 0, Lines: []int{}},
+				}},
+				Violations: []declaredroute.Violation{
+					{File: ".github/workflows/ci.yml", Line: 12, Rule: declaredroute.RuleRouteCount, Expected: 1, Observed: 2, Text: "configured route alternatives must appear exactly once across the workflow"},
+					{File: ".github/workflows/ci.yml", Line: 20, Rule: declaredroute.RuleBanned, Expected: 0, Observed: 1, Text: "configured banned pattern \"brew-install\" appears in a live YAML scalar"},
+					{File: ".github/workflows/ci.yml", Line: 1, Rule: declaredroute.RuleRequiredKey, Expected: 1, Observed: 0, Text: "required key \"RULEFLOOR_VERSION\" must appear exactly once in YAML mapping \"/env\" for route \"derived-route\""},
+				},
+				Refused: []string{declaredroute.RefusedLineScope, declaredroute.RefusedVocabulary},
 			},
 		},
 		{

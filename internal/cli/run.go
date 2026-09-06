@@ -14,6 +14,7 @@ import (
 	"github.com/ozgurcd/achta/internal/buildinfo"
 	"github.com/ozgurcd/achta/internal/census"
 	"github.com/ozgurcd/achta/internal/countcheck"
+	"github.com/ozgurcd/achta/internal/declaredroute"
 	"github.com/ozgurcd/achta/internal/floorcensus"
 	"github.com/ozgurcd/achta/internal/ledgerrows"
 	"github.com/ozgurcd/achta/internal/mirror"
@@ -124,6 +125,8 @@ func dispatch(args []string, stdout, stderr io.Writer, releaseVersion string, op
 		return runCapabilities(rest, stdout, stderr, opts, releaseVersion)
 	case "count":
 		return runCount(rest, stdout, stderr, opts)
+	case "declared-route":
+		return runDeclaredRoute(rest, stdout, stderr, opts)
 	case "wiki":
 		return runWiki(rest, stdout, stderr, opts)
 	case "witness":
@@ -320,6 +323,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "amendments reconcile", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "capabilities"},
 		{Name: "count check", Reads: true, RequiresWorkspace: true},
+		{Name: "declared-route check", Reads: true, RequiresWorkspace: true},
 		{Name: "decision add", Reads: true, Writes: true, RequiresWorkspace: true},
 		{Name: "reachability classify", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "recipe check", Reads: true, RequiresWorkspace: true},
@@ -348,7 +352,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 	doc := capabilitiesDocument{
 		SchemaVersion:     capabilitiesSchema,
 		Version:           normalizeVersion(releaseVersion),
-		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, ledgerrows.Schema, floorcensus.Schema, mirror.Schema, "achta.parts-operation.v1", "achta.parts-verify.v1", countcheck.Schema},
+		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, ledgerrows.Schema, floorcensus.Schema, mirror.Schema, "achta.parts-operation.v1", "achta.parts-verify.v1", countcheck.Schema, declaredroute.Schema},
 		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--wiki-dir", "--workspace"},
 		Commands:          commands,
 		ArtifactSchemas:   []string{"achta.parts-lock.v1", "achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
@@ -441,6 +445,7 @@ Commands:
   version       report release and Go module versions
   capabilities report supported machine interfaces and operations
   count check   reconcile caller-declared breakdown totals and claim citations
+  declared-route check enforce caller-declared alternatives, bans, and a YAML-scoped key
   decision add  allocate and insert an explicit platform decision
   reachability classify decide REQUIRED or SKIPPABLE from changed paths and declared no-reach patterns
   slice check   audit a landed slice from Git and wiki evidence

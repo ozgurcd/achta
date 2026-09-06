@@ -1,0 +1,8 @@
+name: CI
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      RULEFLOOR_VERSION: v0.9.1
+    steps:
+      - run: curl -fsSL "https://github.com/example/rulefloor/archive/refs/tags/${RULEFLOOR_VERSION}.tar.gz"

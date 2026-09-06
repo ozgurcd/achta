@@ -319,3 +319,24 @@ Inputs are also explicit: repeatable files followed by repeatable direct
 Markdown directories, each directory in caller order and its files in bytewise
 filename order. Achta does not auto-detect `log/`. This avoids owning a caller's
 layout while still covering a growing split-log set without shell expansion.
+
+### P-071 — Declared-route checks own YAML syntax, not route vocabulary
+
+Achta takes YAML structure into its boundary because mapping scope is portable
+document mechanics: workflow-level `/env` and job-level
+`/jobs/verify/env` are different syntax-tree locations regardless of what a
+key means. A line counter cannot preserve that distinction and would silently
+pass the measured wrong-scope failure. `declared-route check` therefore uses
+the stable `go.yaml.in/yaml/v3` node parser; this is the measured correctness
+exception to the standard-library preference. The maintained v3 API is chosen
+over the current v4 release candidate.
+
+The caller still owns every policy word. Files, route alternatives, banned
+patterns, designated route requiring the key, required key, and JSON-Pointer
+scope are explicit flags with no defaults, consistent with P-063, P-065,
+P-067, and P-070. The scoped key is required only when that designated route
+is selected. Achta owns only exact match counts, YAML mapping resolution, and
+comment exclusion. It refuses
+line-level scope approximation, shell interpretation, route-name defaults, and
+any claim that an install route is operationally correct. Malformed or
+ambiguous YAML cannot evaluate; it never passes.

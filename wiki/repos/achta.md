@@ -60,6 +60,11 @@ infer prose, execute generic gates, fetch, or mutate Git.
   distinct citation counts across explicit files and direct Markdown
   directories. Achta owns exact mechanics and refuses prose-claim and proof
   meaning.
+- `declared-route check` parses explicit workflow YAML, requires exactly one
+  caller-patterned route, rejects caller-patterned bans, and counts a required
+  key only for the caller-designated route and only in an explicit JSON-Pointer
+  mapping scope. It refuses line-level scope inference and all built-in install
+  vocabulary.
 
 ## Verification surface
 
@@ -71,8 +76,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 35 armed, mutation-proved invariants on the current
-  v0.5.0 source line; the digest and count-check extensions remain unreleased.
+- `RULE-FLOOR.md` carries 36 armed, mutation-proved invariants on the current
+  v0.5.0 source line; the digest, count-check, and declared-route extensions
+  remain unreleased.
 
 ## Known limitations
 
@@ -115,3 +121,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-05 | `co-versioned` | Release the complete conversion batch as v0.5.0, advancing source and exact fixtures while retaining the 33-rule floor for caller migration. |
 | 2026-09-06 | `co-versioned` | Add exact recorded-master-digest verification to `mirror check`, refuse absent or ambiguous evidence, and raise the mutation-proved floor from 33 to 34 without releasing. |
 | 2026-09-06 | `co-versioned` | Add caller-patterned breakdown and citation-count reconciliation, refuse implicit prose and proof meaning, and raise the mutation-proved floor from 34 to 35 without releasing. |
+| 2026-09-06 | `co-versioned` | Add true-YAML `declared-route check` with caller-owned route, ban, key, and scope flags, and raise the mutation-proved floor from 35 to 36 without releasing. |

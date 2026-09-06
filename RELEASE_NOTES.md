@@ -6,6 +6,29 @@ Release changes are recorded under their exact version, newest first.
 
 ### Added
 
+- `declared-route check --file WORKFLOW [--file WORKFLOW]...
+  --route-pattern REGEX [--route-pattern REGEX]...
+  --ban-pattern REGEX [--ban-pattern REGEX]...
+  --required-route-pattern REGEX --required-key KEY
+  --required-scope JSON_POINTER [--json]` evaluates an
+  explicit workflow set. Exactly one configured route alternative must occur
+  per file and configured banned patterns must occur zero times. When the
+  designated route is selected, its required key must occur exactly once in
+  the selected YAML mapping.
+- `--required-scope` is a caller-owned JSON Pointer such as `/env`, resolved
+  through a real YAML syntax tree. A key under `/jobs/verify/env` does not
+  satisfy `/env`; malformed, multi-document, missing, unsafe, or structurally
+  ambiguous YAML is `cannot_evaluate`, exit 2. YAML comments and comment-only
+  scalar lines are excluded from route and ban counts.
+- `achta.declared-route-check.v1` reports each file's per-pattern counts and
+  lines, the structurally scoped key count, and every 0/1 disagreement.
+  Route, designated-route, banned-command, key, and scope vocabulary have no defaults. The
+  command reads only confined regular files and invokes neither shell nor Git.
+- A measured correctness requirement adds the stable
+  `go.yaml.in/yaml/v3 v3.0.5` AST parser. A mutation-proved Rulefloor
+  invariant raises the executable floor from 35 to 36. This remains unreleased
+  on the v0.5.0 source line.
+
 - `count check --file MD [--file MD]... [--dir DIR]...
   [--total-pattern REGEX --part-pattern REGEX]
   [--claim-pattern REGEX --citation-pattern REGEX]

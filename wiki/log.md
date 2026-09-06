@@ -382,3 +382,22 @@ ambiguous inputs cannot evaluate, and correct fixtures remain clean. The
 CLAIM-COUNT-RELATIONSHIPS-1 mutation proof raises the executable Rulefloor from
 34 to 35. The source remains v0.5.0, all release entries stay under Unreleased,
 and no remote or release action belongs to this slice.
+
+## [2026-09-06] feature | declared-route-check
+
+`declared-route check` reads explicit workflow YAML files, counts exactly one
+caller-patterned route alternative, rejects caller-patterned banned text, and
+when the caller-designated route is selected requires an exact caller-named key
+once in a caller-selected JSON-Pointer mapping scope. YAML comments and
+comment-only scalar lines do not count.
+Malformed, multi-document, absent, unsafe, or ambiguous input cannot evaluate.
+
+P-071 accepts YAML syntax because mapping scope is portable structure, not
+caller meaning. The stable `go.yaml.in/yaml/v3` node parser is the measured
+correctness exception to the standard-library preference; line-level scope
+inference and all default route vocabulary are refused. A mutation that let a
+nested job key satisfy absent workflow `/env` made both domain and CLI tests
+red because the job-level fixture passed at exit 0. Restoration returned green,
+and DECLARED-ROUTE-YAML-SCOPE-1 raises the executable floor from 35 to 36. The
+source remains v0.5.0, entries stay under Unreleased, and no remote or release
+action belongs to this slice.

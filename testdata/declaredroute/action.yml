@@ -1,0 +1,6 @@
+name: CI
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: example/approved-rulefloor-action@v1
