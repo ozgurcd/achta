@@ -1059,6 +1059,17 @@ citation proves a disposition, or whether matched proof prose actually proves
 a claim. The command reads only confined regular files, invokes no external
 process or shell, performs no Git operation, and writes nothing.
 
+The repository's named `count-v2` replacement vocabulary excludes a decimal
+count whose neighboring byte is a digit or dash, matching the script's refusal
+to treat a date fragment as a count. This vocabulary has full 17-of-17 exit
+parity at
+`../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:57-107`, but exit
+parity is not diagnostic parity: on fixture g, count-v2 reports counted target
+22 while count-v1 and the script report 4; every implementation exits 1. The
+replacement changes what a human reads on that red while preserving the gate
+verdict, and the claim records that limitation rather than treating equal exits
+as equal diagnostics.
+
 ### 7.23 Declared-route check
 
 ```text
@@ -1380,7 +1391,7 @@ define arbitrary executable commands.
 | Gate-witness shell copies | Keep during measured shadow parity; retire only in a later explicit slice after callers and failure semantics agree |
 | Slice postcheck | Implemented by `achta slice check`; no fetch or mutation |
 | Close-condition and ledger-claim checks | Candidate implementation: `achta ledger rows`; no named-script replacement or retirement claim is recorded |
-| Count-claim and breakdown-sum checks | Candidate implementation: `achta count check`; the v0.5.6 replay reaches 17/17 only under count-v2, which is not yet the README vocabulary at this commit |
+| Count-claim and breakdown-sum checks | Replaced by `achta count check` under the README's count-v2 dash-excluding vocabulary; all 17 selftest fixture exits agree, with the recorded diagnostic difference that fixture g reports target 22 instead of the script's 4 |
 | Byte-identical master/mirror and recorded-master-digest checks | Candidate implementation: `achta mirror check`; `replacement-claims.json` records no replacement claim until script-side parity evidence exists |
 | Prompt-part lock writing and exact closed-set verification | Implemented by `achta parts lock` and `achta parts verify`; caller migrates its lock and gates in a later explicit parity slice |
 | Amendment gate and authoring | Migrate to `achta amendments` using Rulefloor machine output |
@@ -2108,7 +2119,17 @@ The v0.3.0 release records these choices explicitly:
    `../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:124-156`.
    Fixture 07 fires `required-key-document expected=1 observed=2`, preserving
    THE-SECOND-INSTALL guard.
-3. `mirror check --digest` remains a candidate: only four of six materialised
+3. `count check` replaces `wiki/tools/count-claim-check.sh` only under count-v2,
+   the dash-excluding target pattern now documented by README and replayed
+   17/17 at
+   `../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:57-107`.
+   This is a correction, not a fixture-specific allowance: dates are not count
+   claims, and the script has always refused digits touching a dash.
+4. Exit parity is not diagnostic parity. On fixture g, count-v2 names target 22
+   while count-v1 and the script name 4; all exit 1. The replacement claim
+   accepts the changed human diagnostic but does not describe it as identical
+   behavior.
+5. `mirror check --digest` remains a candidate: only four of six materialised
    rows agree and two vendored-copy rows remain unmeasurable from the wiki.
 
 ## 35. Success measure

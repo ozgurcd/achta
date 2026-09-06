@@ -135,7 +135,7 @@ achta --wiki-dir /path/to/workspace/wiki count check \
   --part-pattern '(VACUOUS|HAS-CONTROL|SOUND)[[:space:]]+(?P<count>[0-9]+)' \
   --claim-pattern 'claims[[:space:]]+(?P<count>[0-9]+)[[:space:]]+fixed' \
   --claim-pattern '(?P<count>[0-9]+)[[:space:]]+sites fixed' \
-  --claim-target-pattern '(?i)\b(?P<count>[0-9]{1,3}|Four|Five|One)\b[^.\n]{0,60}?\b(sites?|tests?|fences?|statements?|assertions?|controls?|gaps?|callers?|routes?|guards?|probes?|seeds?|mutations?)\b' \
+  --claim-target-pattern '(?i)(?:^|[^-0-9])(?P<count>[0-9]{1,3}|Four|Five|One)(?:[^-0-9])[^.\n]{0,60}?\b(sites?|tests?|fences?|statements?|assertions?|controls?|gaps?|callers?|routes?|guards?|probes?|seeds?|mutations?)\b' \
   --claim-assertion-pattern '(?i)(closed|repaired|red-proved|now[[:space:]]+asserts?|is[[:space:]]+asserted|are[[:space:]]+asserted)' \
   --claim-section-pattern '^[[]20[0-9]{2}-[0-9]{2}-[0-9]{2}[]]' \
   --exempt-pattern 'count-claim-exempt:' \
@@ -258,6 +258,13 @@ decide that proof prose or a citation is true or relevant. Disagreement is
 exit 1 and unavailable, unsafe, malformed, or incomplete evidence is exit 2.
 The command reads only, invokes neither a shell nor Git, and performs no
 content normalization.
+
+The replacement vocabulary above is named `count-v2`. Its count token may not
+touch a digit or dash, matching the retired script's refusal to treat date
+fragments as claim counts. Exit-code parity is not diagnostic parity: on replay
+fixture g, count-v2 reports counted target 22 while count-v1 and the script name
+4; all three are exit 1. A caller retiring the script accepts that changed human
+diagnostic while preserving the gate verdict.
 
 `declared-route check` parses every explicit file, plus direct `.yml` and
 `.yaml` files from explicit directories, as one YAML document. The default

@@ -545,3 +545,13 @@ only under declared-route-v2 at the cited source lines, where all 10 selftest
 fixtures agree and fixture 07 preserves THE-SECOND-INSTALL. Count and mirror
 remain candidates. REPLACEMENT-VOCAB-CITATION-1 raises the executable floor
 from 46 to 47.
+
+## [2026-09-06] feature | count-check-earned-flip
+
+The README's counted-target pattern advances to count-v2, excluding decimal
+digits that touch another digit or a dash. The pinned v0.5.6 replay records all
+17 `count-claim-check.sh` selftest exits agreeing under that vocabulary, so only
+that named claim becomes `replaces`. Fixture g remains an explicit human-output
+difference: count-v2 reports 22 where the script reports 4, while both exit 1.
+COUNT-REPLACEMENT-VOCAB-1 raises the executable floor from 47 to 48; mirror
+remains candidate.

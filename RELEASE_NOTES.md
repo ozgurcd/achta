@@ -15,6 +15,15 @@ Release changes are recorded under their exact version, newest first.
   `../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:124-156`. All 10
   exits agree, including fixture 07's document-wide second declaration.
 - REPLACEMENT-VOCAB-CITATION-1 raises the executable Rulefloor from 46 to 47.
+- The README's replacement command now documents count-v2, whose counted token
+  cannot touch another digit or a dash. That correction prevents the `08` in a
+  date from becoming a claim count and earns 17-of-17 exit parity for `count
+  check` against `wiki/tools/count-claim-check.sh`, cited at
+  `../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:57-107`.
+- Fixture g remains an explicit diagnostic difference: count-v2 reports target
+  22 while count-v1 and the script report 4; all exit 1. The replacement claim
+  is exit parity, not a claim of identical human diagnostics.
+- COUNT-REPLACEMENT-VOCAB-1 raises the executable Rulefloor from 47 to 48.
 
 ## v0.5.6 — 2026-09-06
 

@@ -62,9 +62,11 @@ infer prose, execute generic gates, fetch, or mutate Git.
   and citation counts, caller-selected last-section scope and exemptions, and
   bounded claim/proof counts. Caller-patterned counted targets and assertions
   can compose within one paragraph using the smallest positive target count.
-  Its named-script disposition is `candidate`: the prior 17-of-17 claim was
-  retracted because the cited replay records fixture `g` as script 1 / verb 0.
-  Achta still refuses prose-claim and proof meaning.
+  It replaces `wiki/tools/count-claim-check.sh` only under the README's
+  dash-excluding count-v2 vocabulary, whose 17 selftest exits all agree in the
+  pinned v0.5.6 replay. Fixture g deliberately differs diagnostically: count-v2
+  reports target 22 while the script reports 4, with both exiting 1. Achta still
+  refuses prose-claim and proof meaning.
 - `declared-route check` parses explicit files and deterministic direct workflow
   directories. Its compatibility default requires one route per file; opt-in
   per-file-any permits zero or many while every file remains ban-scanned and
@@ -150,3 +152,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Release v0.5.5 with checked replay evidence, retracted replacement claims, annotated-tag enforcement, and the 45-rule floor. |
 | 2026-09-06 | `co-versioned` | Fix forward to v0.5.6 by making local and release validation share the release-note extractor, forbidding empty Unreleased sections, and raising the floor from 45 to 46. |
 | 2026-09-06 | `co-versioned` | Require exact caller-vocabulary citations in replacement claims, vendor the v0.5.6 replay, flip only declared-route under its documented 10-of-10 vocabulary, and raise the floor from 46 to 47. |
+| 2026-09-06 | `co-versioned` | Document the dash-excluding count-v2 pattern, flip count check only on its 17-of-17 replay, record the fixture-g 22-versus-4 diagnostic difference, and raise the floor from 47 to 48. |

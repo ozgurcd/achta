@@ -465,3 +465,19 @@ README's four-ban vocabulary. The manifest cites
 is red on both sides through `required-key-document expected=1 observed=2`.
 That claim becomes `replaces`. `count check` and `mirror check --digest` remain
 candidate at this commit.
+
+### P-080 — Count replacement uses dash-excluding count-v2
+
+The README's replacement command adopts count-v2: a decimal count may not touch
+another digit or a dash. This is a vocabulary correction, not a fixture-shaped
+exception. A date fragment is not a claim count, and
+`count-claim-check.sh` has always refused digits touching a dash. Under the
+v0.5.6 replay, count-v2 agrees with all 17 script selftest exits and the manifest
+cites `../wiki/contracts/replacement-replay-2026-09-06-v0.5.6.md:57-107`.
+`count check` therefore becomes `replaces` on exactly that vocabulary.
+
+The retirement accepts one diagnostic difference rather than hiding it. In
+fixture g, count-v2's consuming boundary makes the verb report target 22;
+count-v1 and the script report 4. All are red at exit 1. Exit-code parity is the
+replacement contract recorded by the replay; it is not diagnostic parity, and
+the project specification names the human-visible difference.

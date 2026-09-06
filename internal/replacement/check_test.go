@@ -1,9 +1,11 @@
 package replacement
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -111,6 +113,18 @@ func TestCheckRequiresAndReconcilesVocabularyCitation(t *testing.T) {
 			t.Fatalf("result = %#v, want vocabulary-citation-mismatch", result)
 		}
 	})
+}
+
+// RULE: COUNT-REPLACEMENT-VOCAB-1
+func TestCountReplacementVocabularyIsDocumented(t *testing.T) {
+	readme, err := os.ReadFile("../../README.md")
+	if err != nil {
+		t.Fatalf("read README: %v", err)
+	}
+	const targetPattern = `--claim-target-pattern '(?i)(?:^|[^-0-9])(?P<count>[0-9]{1,3}|Four|Five|One)(?:[^-0-9])[^.\n]{0,60}?\b(sites?|tests?|fences?|statements?|assertions?|controls?|gaps?|callers?|routes?|guards?|probes?|seeds?|mutations?)\b'`
+	if got := bytes.Count(readme, []byte(targetPattern)); got != 1 {
+		t.Fatalf("README count-v2 target pattern occurrences = %d, want 1", got)
+	}
 }
 
 func TestCheckRejectsExitCodeDisagreement(t *testing.T) {

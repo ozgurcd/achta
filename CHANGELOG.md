@@ -8,6 +8,11 @@
   `wiki/tools/rulefloor-install-gate.sh` under declared-route-v2 after all 10
   selftest fixtures agreed, including the document-wide duplicate in fixture
   07. Raised the mutation-proved Rulefloor from 46 to 47.
+- Corrected the README's counted-target vocabulary to count-v2 so date digits
+  touching a dash cannot become claim counts, then recorded `count check` as
+  replacing `wiki/tools/count-claim-check.sh` after all 17 fixture exits agreed.
+  Recorded that fixture g reports target 22 instead of the script's 4 despite
+  both exiting 1, and raised the floor from 47 to 48.
 
 ## v0.5.6 — 2026-09-06
 
