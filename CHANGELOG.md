@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## v0.5.6 — 2026-09-06
+
+- Added `release-notes-check` to `make verify` and made both release workflow
+  stages invoke that same target, eliminating the local/CI extractor gap.
+- Defined one release-note grammar: an optional `## Unreleased` section must
+  contain substantive content, while an empty section is rejected. Raised the
+  mutation-proved Rulefloor from 45 to 46.
+
 ## v0.5.5 — 2026-09-06
 
 - Retracted the `count check` and `declared-route check` named-script

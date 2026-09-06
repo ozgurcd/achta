@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.5.
+- Current release line: v0.5.6.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -81,15 +81,17 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Verification surface
 
-- `make verify` is canonical: format, build, unit tests, vet, Staticcheck,
-  govulncheck, module tidiness, precise Gograph, Rulefloor execute mode, and the
-  repository-owned wiki check.
+- `make verify` is canonical: release-note extraction, format, build, unit
+  tests, vet, Staticcheck, govulncheck, module tidiness, precise Gograph,
+  Rulefloor execute mode, and the repository-owned wiki check. Both release
+  workflow stages invoke the same `release-notes-check` target; an optional
+  `## Unreleased` section is rejected when empty.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 45 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 46 armed, mutation-proved invariants on the current
   source line, including digest-pinned closed-set replay evidence and annotated
   release tags.
 
@@ -144,3 +146,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Retract the count and declared-route named-script replacement claims to candidate because their cited replay contradicts six manifest rows. |
 | 2026-09-06 | `co-versioned` | Make replacement citations checkable through digest-pinned vendored replay evidence, reject all six v0.5.4 contradictions, require annotated release tags, and raise the floor from 43 to 45. |
 | 2026-09-06 | `co-versioned` | Release v0.5.5 with checked replay evidence, retracted replacement claims, annotated-tag enforcement, and the 45-rule floor. |
+| 2026-09-06 | `co-versioned` | Fix forward to v0.5.6 by making local and release validation share the release-note extractor, forbidding empty Unreleased sections, and raising the floor from 45 to 46. |

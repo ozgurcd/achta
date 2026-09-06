@@ -2,7 +2,22 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.5.6 — 2026-09-06
+
+### Fixed
+
+- `make verify` now runs `release-notes-check`, the exact Make target used by
+  both release workflow stages. A release-note file accepted locally therefore
+  reaches the same checked-in extractor path in CI.
+- `cmd/release-notes` uses the source version when no explicit version is
+  supplied, so the shared local and CI target needs no second version parser.
+
+### Changed
+
+- One optional leading `## Unreleased` section is accepted only while it
+  contains substantive content. An empty section is forbidden and must be
+  removed after its entries are folded into an exact version section.
+- RELEASE-NOTES-LOCAL-PARITY-1 raises the executable Rulefloor from 45 to 46.
 
 ## v0.5.5 — 2026-09-06
 

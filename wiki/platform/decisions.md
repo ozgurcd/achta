@@ -436,3 +436,16 @@ checked-out HEAD.
 Published v0.5.4 remains untouched: moving or replacing that lightweight tag
 would rewrite a published release identity. Pinning the type prospectively
 removes operator ambiguity without altering existing history.
+
+### P-078 — Release notes have one local-and-CI grammar
+
+An optional leading `## Unreleased` section is accepted only while it contains
+nonblank content. Once those entries are folded into an exact version section,
+the empty heading is removed. This preserves the working convention without
+letting a syntactically present but content-free section pass locally.
+
+`make verify` runs `release-notes-check`, and both release workflow stages call
+that same Make target. The target invokes the checked-in `cmd/release-notes`
+entry point, which defaults to the source version; there is no copied heading
+parser or second CI-only command. The v0.5.5 annotated tag remains immutable,
+and the failed publication is corrected forward as v0.5.6.

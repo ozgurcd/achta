@@ -97,6 +97,41 @@ func TestReleaseRequiresAnnotatedTag(t *testing.T) {
 	}
 }
 
+// RULE: RELEASE-NOTES-LOCAL-PARITY-1
+func TestReleaseNotesGateMatchesWorkflowAndRejectsEmptyUnreleased(t *testing.T) {
+	repositoryRoot, err := filepath.Abs("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	makefile, err := os.ReadFile(filepath.Join(repositoryRoot, "Makefile"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	makeText := string(makefile)
+	for _, required := range []string{
+		"release-notes-check:\n\tgo run ./cmd/release-notes RELEASE_NOTES.md > \"$(RELEASE_NOTES_OUTPUT)\"",
+		"verify: fmt-check release-notes-check",
+	} {
+		if !strings.Contains(makeText, required) {
+			t.Fatalf("Makefile release-note gate is missing %q", required)
+		}
+	}
+	workflow, err := os.ReadFile(filepath.Join(repositoryRoot, ".github/workflows/release.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflowInvocation := "make release-notes-check RELEASE_NOTES_OUTPUT=\"$RUNNER_TEMP/release-notes.md\""
+	if count := strings.Count(string(workflow), workflowInvocation); count != 2 {
+		t.Fatalf("release workflow invokes the shared release-note gate %d times, want 2", count)
+	}
+	if _, err := Extract([]byte("# Notes\n\n## Unreleased\n\n## v0.5.6 — 2026-09-06\n\nBody.\n"), "v0.5.6"); err == nil || err.Error() != "release notes Unreleased section is empty" {
+		t.Fatalf("empty Unreleased error = %v", err)
+	}
+	if _, err := Extract([]byte("# Notes\n\n## Unreleased\n\nPending.\n\n## v0.5.6 — 2026-09-06\n\nBody.\n"), "v0.5.6"); err != nil {
+		t.Fatalf("non-empty Unreleased section was refused: %v", err)
+	}
+}
+
 // RULE: HOMEBREW-NO-TOKEN-EVAL-1
 func TestHomebrewCaskTokenLookupIsNonThrowing(t *testing.T) {
 	repositoryRoot, err := filepath.Abs("../..")

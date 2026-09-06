@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.5 release specification
+Status: v0.5.6 release specification
 
 Project name: Achta
 
@@ -1665,6 +1665,7 @@ staticcheck ./...
 govulncheck ./...
 go mod tidy -diff
 gograph build . --precise
+make release-notes-check
 make replacement-check
 rulefloor check --repo . --run-profile unit --timings
 ```
@@ -1732,18 +1733,23 @@ The tool must remain buildable without third-party runtime services.
 
 `RELEASE_NOTES.md` is the detailed, user-facing source for release bodies. It
 contains newest-first sections whose headings are exactly
-`## vMAJOR.MINOR.PATCH — YYYY-MM-DD`. Every change is recorded under the version
-that first ships it; historical version sections are not rewritten to describe
-later work.
+`## vMAJOR.MINOR.PATCH — YYYY-MM-DD`. One optional leading `## Unreleased`
+section is valid only while it contains nonblank content; an empty one is
+forbidden and is removed when its entries are folded into a version section.
+Every change is recorded under the version that first ships it; historical
+version sections are not rewritten to describe later work.
 
 `CHANGELOG.md` is the concise newest-first historical summary. It may omit
 implementation detail but must not disagree with the release notes.
 
 The checked-in `cmd/release-notes` helper validates an exact semantic version,
-requires exactly one matching heading, and extracts only that section. The
-release workflow uses the tag as the requested version and passes the extracted
-temporary file to GoReleaser. A missing, duplicate, or malformed version
-section fails the release before publication.
+requires exactly one matching heading, validates the optional Unreleased
+section, and extracts only the requested version. With no explicit version it
+uses the source version. `make release-notes-check` is a prerequisite of
+`make verify`, and both release workflow stages invoke that same target before
+passing its output to GoReleaser. A missing, duplicate, malformed, or empty
+required section therefore fails locally and in release CI through one code
+path.
 
 ## 19. Delivery phases
 
@@ -2076,7 +2082,18 @@ The v0.3.0 release records these choices explicitly:
    metadata discipline without removing a command or changing an existing
    machine result schema.
 
-## 33. Success measure
+## 33. v0.5.6 decisions
+
+1. `## Unreleased` is optional in `RELEASE_NOTES.md`, but when present it must
+   contain nonblank content and precede all version sections. Once its entries
+   are folded, the heading is removed rather than retained empty.
+2. Local and release validation invoke one `release-notes-check` Make target,
+   which runs the checked-in extractor with the source version. The release
+   workflow does not maintain a second invocation or grammar.
+3. v0.5.6 is a fix-forward patch because v0.5.5's annotated tag remains
+   immutable while its release workflow never published artifacts or a cask.
+
+## 34. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

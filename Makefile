@@ -1,11 +1,12 @@
 SHELL := /bin/sh
 
-.PHONY: help build test test-fuzz fmt-check wiki-check replacement-check verify rulefloor-static install-tools
+.PHONY: help build test test-fuzz fmt-check wiki-check replacement-check release-notes-check verify rulefloor-static install-tools
 
 FUZZTIME ?= 5s
+RELEASE_NOTES_OUTPUT ?= /dev/null
 
 help:
-	@printf '%s\n' 'Targets:' '  build             build ./cmd/achta' '  test              run unit tests' '  test-fuzz         fuzz every narrow parser for FUZZTIME each' '  fmt-check         fail on unformatted Go files' '  wiki-check        validate the co-versioned repository wiki' '  replacement-check require cited replay for named script replacement claims' '  verify            run the complete local verification gate' '  rulefloor-static  validate the ledger without executing bindings' '  install-tools     install pinned verification tools'
+	@printf '%s\n' 'Targets:' '  build               build ./cmd/achta' '  test                run unit tests' '  test-fuzz           fuzz every narrow parser for FUZZTIME each' '  fmt-check           fail on unformatted Go files' '  wiki-check          validate the co-versioned repository wiki' '  replacement-check   require cited replay for named script replacement claims' '  release-notes-check run the release extractor for the source version' '  verify              run the complete local verification gate' '  rulefloor-static    validate the ledger without executing bindings' '  install-tools       install pinned verification tools'
 
 build:
 	go build ./...
@@ -29,7 +30,10 @@ wiki-check:
 replacement-check:
 	go run ./cmd/achta --workspace . replacement check --file replacement-claims.json --claim-status replaces --claim-status retired --json
 
-verify: fmt-check
+release-notes-check:
+	go run ./cmd/release-notes RELEASE_NOTES.md > "$(RELEASE_NOTES_OUTPUT)"
+
+verify: fmt-check release-notes-check
 	go version
 	go build ./...
 	go test ./... -count=1 -timeout=120s

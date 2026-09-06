@@ -527,3 +527,11 @@ checkable replay-evidence entries move unchanged in substance under the exact
 release headings, while both named-script dispositions remain `candidate`.
 The release workflow now requires an annotated tag, and the executable
 Rulefloor remains 45.
+
+## [2026-09-06] release | achta-v0.5.6-release-notes-parity
+
+`make verify` and both release workflow stages now invoke one
+`release-notes-check` target backed by the checked-in extractor. An optional
+Unreleased section must be non-empty, the v0.5.5 tag remains untouched, source
+and exact fixtures advance to v0.5.6, and RELEASE-NOTES-LOCAL-PARITY-1 raises
+the executable Rulefloor from 45 to 46.

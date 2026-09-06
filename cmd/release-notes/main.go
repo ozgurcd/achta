@@ -4,13 +4,18 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ozgurcd/achta/internal/buildinfo"
 	"github.com/ozgurcd/achta/internal/releasenotes"
 )
 
 func main() {
-	if len(os.Args) != 3 {
-		fmt.Fprintln(os.Stderr, "usage: release-notes FILE vMAJOR.MINOR.PATCH")
+	if len(os.Args) != 2 && len(os.Args) != 3 {
+		fmt.Fprintln(os.Stderr, "usage: release-notes FILE [vMAJOR.MINOR.PATCH]")
 		os.Exit(2)
+	}
+	version := buildinfo.Version
+	if len(os.Args) == 3 {
+		version = os.Args[2]
 	}
 	info, err := os.Lstat(os.Args[1])
 	if err != nil || !info.Mode().IsRegular() || info.Size() > releasenotes.MaxFile {
@@ -22,7 +27,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "release-notes: cannot read input")
 		os.Exit(2)
 	}
-	section, err := releasenotes.Extract(data, os.Args[2])
+	section, err := releasenotes.Extract(data, version)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "release-notes: %v\n", err)
 		os.Exit(2)

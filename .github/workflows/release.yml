@@ -38,7 +38,7 @@ jobs:
       - name: Verify
         run: make verify
       - name: Select version release notes
-        run: go run ./cmd/release-notes RELEASE_NOTES.md "$GITHUB_REF_NAME" > "$RUNNER_TEMP/release-notes.md"
+        run: make release-notes-check RELEASE_NOTES_OUTPUT="$RUNNER_TEMP/release-notes.md"
       - name: Validate release artifacts
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7
         with:
@@ -68,7 +68,7 @@ jobs:
           test -n "$GH_TOKEN"
           test "$(gh api repos/ozgurcd/homebrew-tap --jq '.permissions.push')" = true
       - name: Select version release notes
-        run: go run ./cmd/release-notes RELEASE_NOTES.md "$GITHUB_REF_NAME" > "$RUNNER_TEMP/release-notes.md"
+        run: make release-notes-check RELEASE_NOTES_OUTPUT="$RUNNER_TEMP/release-notes.md"
       - name: Publish private GitHub release
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7
         with:

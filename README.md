@@ -357,8 +357,9 @@ before building or publishing artifacts.
 
 [`RULE-FLOOR.md`](RULE-FLOOR.md) is Achta's canonical repository-local ledger.
 Its floor contains armed, mutation-proved release invariants. `make verify`
-validates the ledger, enforces `replacement-claims.json`, and executes its
-Go-test bindings on every slice:
+validates the ledger, runs the same release-note extractor target as release
+CI, enforces `replacement-claims.json`, and executes its Go-test bindings on
+every slice:
 
 ```sh
 rulefloor check --repo . --run-profile unit --timings
@@ -433,4 +434,6 @@ Achta; it is not Achta's ledger.
 Detailed release bodies live in `RELEASE_NOTES.md`, newest version first.
 `CHANGELOG.md` is the concise historical summary. Release automation requires
 one exact `## vMAJOR.MINOR.PATCH — YYYY-MM-DD` heading and publishes only the
-section matching the release tag.
+section matching the release tag. One optional leading `## Unreleased` section
+must contain content; remove the heading after folding its entries. Local
+`make verify` and both release stages run the same `release-notes-check` target.
