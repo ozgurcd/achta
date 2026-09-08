@@ -2,6 +2,28 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.8 — 2026-09-08
+
+### Added
+
+- `achta hook cd` reads Bash PreToolUse JSON from stdin and blocks a
+  committed-table writing statement unless the command first changes to an
+  absolute or home-based directory, or every writing statement carries an
+  absolute or home-based `-C` selector.
+- Heredoc bodies are stripped, pipelines stay intact, and newline, semicolon,
+  `&&`, and `||` form statement boundaries. Relative selectors deny; malformed
+  or unsupported input warns and allows; unknown verbs are not writes.
+- The committed table covers Git write verbs, `make`, write-mode Go and text
+  tools, filesystem writers and redirections, `rulefloor rehash`, and every
+  advertised Achta writer. The stable contract is `achta.hook-cd.v1`.
+- A 46-case verdict table plus CLI integration tests cover the classification,
+  selector, stdin, exit, diagnostic, and capability contracts.
+- HOOK-CD-WORKDIR-1 raises the executable Rulefloor from 48 to 49. Removing
+  `make` from the committed table made five wrong-directory cases fail before
+  the source was restored byte-identically.
+- Source and exact version fixtures advance to v0.5.8. This is a patch because
+  it adds an opt-in hook without removing or changing an existing interface.
+
 ## v0.5.7 — 2026-09-06
 
 ### Changed

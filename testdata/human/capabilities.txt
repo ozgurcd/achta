@@ -1,4 +1,4 @@
-Achta v0.5.7 capabilities
+Achta v0.5.8 capabilities
   amendments declare
   amendments rebase
   amendments reconcile
@@ -7,6 +7,7 @@ Achta v0.5.7 capabilities
   decision add
   declared-route check
   floor census
+  hook cd
   ledger census
   ledger rows
   mirror check

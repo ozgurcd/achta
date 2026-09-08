@@ -18,11 +18,13 @@ go install ./cmd/achta
 
 ## Commands
 
-`version` and `capabilities` are workspace-independent:
+`version`, `capabilities`, and the Bash PreToolUse hook are
+workspace-independent:
 
 ```sh
 achta version --json
 achta capabilities --json
+achta hook cd
 ```
 
 `--help` and `-h` are also workspace-independent before or after a command
@@ -158,6 +160,45 @@ achta --wiki-dir /path/to/repository/wiki replacement check \
   --claim-status replaces --claim-status retired --json
 
 go run ./cmd/achta --wiki-dir ./wiki wiki check --json
+```
+
+`hook cd` reads one PreToolUse JSON document from stdin and evaluates
+`tool_input.command`. It removes heredoc bodies, splits statements on newline,
+`;`, `&&`, and `||`, and keeps pipelines together. A command containing a
+writing statement is allowed only when its first statement is an exact `cd` to
+an absolute, `~`, `$HOME`, or `${HOME}` path before any assignment, or when
+every writing statement contains `-C` with one of those absolute path forms.
+Relative `cd` and `-C` paths do not count. Denial is exit 2 and names the
+statement number, classified verb, and both fixes. Input that cannot be parsed
+warns on stderr and allows with exit 0; unknown verbs are read-only by contract.
+
+The committed writer vocabulary is:
+
+- Git: `add`, `am`, `apply`, `bisect`, `branch`, `checkout`, `cherry-pick`,
+  `clean`, `clone`, `commit`, `config`, `fetch`, `gc`, `init`, `merge`, `mv`,
+  `notes`, `pull`, `push`, `rebase`, `remote`, `reset`, `restore`, `revert`,
+  `rm`, `stash`, `submodule`, `switch`, `tag`, and `worktree`.
+- Direct writers: `make`, `mv`, `cp`, `rm`, `mkdir`, `touch`, `tee`, output
+  redirection with `>` or `>>`, `gofmt -w`, `sed -i`, `go mod`, `go get`,
+  `go install`, `go generate`, and `rulefloor rehash`.
+- Achta writers: `amendments declare`, `amendments rebase`, `decision add`,
+  `parts lock`, `wiki derive`, `wiki pin`, `witness finalize`, `witness init`,
+  and `witness step`.
+
+The stable hook contract is `achta.hook-cd.v1`. A Claude Code owner can add
+this object to the existing `hooks.PreToolUse` array in the machine-local
+settings file:
+
+```json
+{
+  "matcher": "Bash",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "achta hook cd"
+    }
+  ]
+}
 ```
 
 `wiki pin` writes only after the caller explicitly attests that review

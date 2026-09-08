@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## v0.5.8 — 2026-09-08
+
+- Added workspace-independent `achta hook cd` for Bash PreToolUse calls. It
+  strips heredoc bodies, preserves pipelines, splits the specified statement
+  operators, and denies committed-table writes without an initial absolute or
+  home `cd` or an absolute or home `-C` on every writer.
+- Recorded the closed Git, direct-tool, Rulefloor, and Achta writer tables;
+  unknown verbs remain non-writes and unparseable input warns and allows.
+- Advertised `achta.hook-cd.v1`, added a 46-case verdict table and CLI contract
+  tests, and raised the mutation-proved Rulefloor from 48 to 49.
+- Advanced source and exact version fixtures to v0.5.8. This is a patch because
+  it adds an opt-in hook without changing an existing stable contract.
+
 ## v0.5.7 — 2026-09-06
 
 - Made each v2 named-script replacement claim cite the exact caller vocabulary

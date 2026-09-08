@@ -563,3 +563,15 @@ current wiki facts advance together to v0.5.7. The declared-route and count
 claims ship separately earned on their named replay vocabularies; mirror stays
 candidate, the fixture-g 22-versus-4 diagnostic difference remains explicit,
 and the executable Rulefloor remains 48.
+
+## [2026-09-08] release | achta-v0.5.8-cd-hook
+
+`achta hook cd` adds the workspace-independent `achta.hook-cd.v1` Bash
+PreToolUse contract. It strips heredoc bodies, preserves pipelines, splits only
+the declared statement operators, and denies committed-table writes without an
+initial absolute or home `cd` or an absolute or home `-C` on every writer.
+Unknown verbs are non-writes and unparseable input warns and allows. The
+46-case verdict table covers the complete committed vocabulary;
+HOOK-CD-WORKDIR-1 is mutation-proved by removing `make`, raising the executable
+Rulefloor from 48 to 49. Source, exact fixtures, release documents, and current
+co-versioned wiki facts advance together to v0.5.8.

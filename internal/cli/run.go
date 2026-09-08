@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"runtime/debug"
 	"sort"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	"github.com/ozgurcd/achta/internal/countcheck"
 	"github.com/ozgurcd/achta/internal/declaredroute"
 	"github.com/ozgurcd/achta/internal/floorcensus"
+	"github.com/ozgurcd/achta/internal/hookcd"
 	"github.com/ozgurcd/achta/internal/ledgerrows"
 	"github.com/ozgurcd/achta/internal/mirror"
 	"github.com/ozgurcd/achta/internal/recipe"
@@ -61,18 +63,22 @@ func mismatch(format string, args ...any) error {
 
 // Run executes one CLI invocation and returns its process exit code.
 func Run(args []string, stdout, stderr io.Writer, releaseVersion string) int {
+	return runWithInput(args, os.Stdin, stdout, stderr, releaseVersion)
+}
+
+func runWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseVersion string) int {
 	started := time.Now()
 	opts, command, rest, err := parseGlobal(args)
 	jsonMode := jsonRequested(args)
 	if !opts.timing && (!opts.quiet || jsonMode) {
-		return dispatch(args, stdout, stderr, releaseVersion, opts, command, rest, err)
+		return dispatch(args, stdin, stdout, stderr, releaseVersion, opts, command, rest, err)
 	}
 	if jsonMode {
 		opts.json = true
 	}
 
 	var commandStdout, commandStderr bytes.Buffer
-	code := dispatch(args, &commandStdout, &commandStderr, releaseVersion, opts, command, rest, err)
+	code := dispatch(args, stdin, &commandStdout, &commandStderr, releaseVersion, opts, command, rest, err)
 	if jsonMode {
 		document := commandStdout.Bytes()
 		if opts.timing {
@@ -103,7 +109,7 @@ func Run(args []string, stdout, stderr io.Writer, releaseVersion string) int {
 	return code
 }
 
-func dispatch(args []string, stdout, stderr io.Writer, releaseVersion string, opts globalOptions, command string, rest []string, err error) int {
+func dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseVersion string, opts globalOptions, command string, rest []string, err error) int {
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, "achta.error.v1", err)
 	}
@@ -147,6 +153,8 @@ func dispatch(args []string, stdout, stderr io.Writer, releaseVersion string, op
 		return runLedger(rest, stdout, stderr, opts)
 	case "floor":
 		return runFloor(rest, stdout, stderr, opts)
+	case "hook":
+		return runHook(rest, stdin, stderr)
 	case "mirror":
 		return runMirror(rest, stdout, stderr, opts)
 	case "parts":
@@ -336,6 +344,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "parts lock", Reads: true, Writes: true, RequiresWorkspace: true},
 		{Name: "parts verify", Reads: true, RequiresWorkspace: true},
 		{Name: "floor census", Reads: true, ExecutesExternal: true, RequiresWorkspace: true},
+		{Name: "hook cd", Reads: true},
 		{Name: "slice check", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "toolchain check", Reads: true, RequiresWorkspace: true},
 		{Name: "version"},
@@ -355,7 +364,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 	doc := capabilitiesDocument{
 		SchemaVersion:     capabilitiesSchema,
 		Version:           normalizeVersion(releaseVersion),
-		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, ledgerrows.Schema, floorcensus.Schema, mirror.Schema, "achta.parts-operation.v1", "achta.parts-verify.v1", countcheck.Schema, declaredroute.Schema, "achta.replacement-check.v1"},
+		MachineInterfaces: []string{capabilitiesSchema, versionSchema, "achta.wiki-pin.v1", achtawiki.FreshnessSchema, achtawiki.DeriveSchema, achtawiki.UnpushedSchema, wikiCheckSchema, decisionAddSchema, "achta.reachability.v1", "achta.toolchain-parity.v1", "achta.witness-summary.v1", witnessOperationSchema, witnessCheckSchema, "achta.witness-earned.v1", "achta.amendments-operation.v1", "achta.amendments-reconciliation.v1", "achta.slice-check.v1", recipe.Schema, census.Schema, ledgerrows.Schema, floorcensus.Schema, hookcd.Schema, mirror.Schema, "achta.parts-operation.v1", "achta.parts-verify.v1", countcheck.Schema, declaredroute.Schema, "achta.replacement-check.v1"},
 		GlobalOptions:     []string{"--help", "--json", "--quiet", "--timing", "--wiki-dir", "--workspace"},
 		Commands:          commands,
 		ArtifactSchemas:   []string{"achta.parts-lock.v1", "achta.replacement-claims.v1", "achta.replacement-claims.v2", "achta.replacement-replay.v1", "achta.toolchain-manifest.v1", "gate-run.v1", "ledger-amendments.v1"},
@@ -457,6 +466,7 @@ Commands:
   ledger census recount a markdown ledger table against its totals and the files on disk
   ledger rows   enforce explicit state/prose marker relationships in markdown ledger rows
   floor census  recount a fenced completeness census against itself and rulefloor's covers map
+  hook cd       require an absolute working-directory selector for recognized Bash writes
   mirror check  compare one master with mirrors and/or a recorded exact-byte SHA-256 digest
   parts lock    write the canonical versioned SHA-256 lock for direct .txt parts
   parts verify  compare every locked part and reject unlocked neighboring .txt files

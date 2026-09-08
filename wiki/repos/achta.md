@@ -3,8 +3,8 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-09-06
-verified: 2026-09-06
+updated: 2026-09-08
+verified: 2026-09-08
 co_versioned: true
 ---
 
@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.7.
+- Current release line: v0.5.8.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -82,6 +82,12 @@ infer prose, execute generic gates, fetch, or mutate Git.
   `achta.replacement-replay.v1` artifact; verb/script identity, citations, and
   the complete fixture set must agree row-for-row. Legacy v1 claims are
   attestations and candidates make no claim.
+- `hook cd` is a workspace-independent Bash PreToolUse guard. It strips
+  heredoc bodies, keeps pipelines together, and denies committed-table writes
+  unless the first statement is an absolute or home `cd`, or every writing
+  statement has an absolute or home `-C`. Unknown verbs are not writes;
+  unparseable input warns and allows. Its stable contract is
+  `achta.hook-cd.v1`.
 
 ## Verification surface
 
@@ -95,9 +101,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 47 armed, mutation-proved invariants on the current
-  source line, including digest-pinned closed-set replay evidence and annotated
-  release tags.
+- `RULE-FLOOR.md` carries 49 armed, mutation-proved invariants on the current
+  source line, including digest-pinned closed-set replay evidence, annotated
+  release tags, and the closed working-directory hook writer table.
 
 ## Known limitations
 
@@ -154,3 +160,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Require exact caller-vocabulary citations in replacement claims, vendor the v0.5.6 replay, flip only declared-route under its documented 10-of-10 vocabulary, and raise the floor from 46 to 47. |
 | 2026-09-06 | `co-versioned` | Document the dash-excluding count-v2 pattern, flip count check only on its 17-of-17 replay, record the fixture-g 22-versus-4 diagnostic difference, and raise the floor from 47 to 48. |
 | 2026-09-06 | `co-versioned` | Release v0.5.7 with vocabulary-pinned declared-route and count replacement claims, exact version fixtures, and the 48-rule floor. |
+| 2026-09-08 | `co-versioned` | Add and release v0.5.8 `hook cd` with its committed writer table, 46-case verdict contract, stable capability, and mutation-proved floor 49. |

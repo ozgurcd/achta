@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.7 release specification
+Status: v0.5.8 release specification
 
 Project name: Achta
 
@@ -141,7 +141,8 @@ Achta must provide these guarantees:
 | Amendment manifest lifecycle | Achta | Author explicit declarations, rebase, and reconcile |
 | Product-specific wire, route, link, or clock checks | Dedicated analyzers | Keep external |
 | Repository compilation and test suites | Make/CI | Achta may inspect records but must not become their runner |
-| Agent prompt injection and source-navigation hooks | Agent harness | Keep external initially |
+| Agent prompt injection and source-navigation hooks | Agent harness | Keep external |
+| Bash working-directory write guard | Achta | Classify a committed writer vocabulary and enforce explicit absolute repository selection without executing the command |
 
 ## 6. Canonical artifacts
 
@@ -1151,6 +1152,42 @@ structured v2 manifest is the only authoritative replacement/retirement claim
 surface and `make verify` checks it against co-versioned replay evidence. The command is read-only,
 workspace-confined, invokes neither shell nor Git, and writes nothing.
 
+### 7.25 Working-directory PreToolUse hook
+
+```text
+achta hook cd
+```
+
+`hook cd` is workspace-independent and reads one bounded PreToolUse JSON
+document from stdin. It evaluates only the string at `tool_input.command` and
+never executes that command. Heredoc bodies are stripped before statements are
+split on newline, semicolon, `&&`, or `||`; pipes stay within their statement.
+
+A writing command is allowed only when the first statement is exactly `cd`
+plus one absolute, `~`, `$HOME`, or `${HOME}` path before any assignment, or
+when every writing statement has `-C` plus one of those absolute path forms.
+Relative paths do not satisfy either condition. A denial is exit 2 and its
+bounded stderr identifies the statement ordinal, classified verb, and both
+fixes. Empty, malformed, oversized, command-substituting, or otherwise
+unparseable input warns on stderr and allows with exit 0 because a PreToolUse
+parser may not convert uncertainty into an invented write classification.
+
+The committed writer vocabulary is closed. Git writers are `add`, `am`,
+`apply`, `bisect`, `branch`, `checkout`, `cherry-pick`, `clean`, `clone`,
+`commit`, `config`, `fetch`, `gc`, `init`, `merge`, `mv`, `notes`, `pull`,
+`push`, `rebase`, `remote`, `reset`, `restore`, `revert`, `rm`, `stash`,
+`submodule`, `switch`, `tag`, and `worktree`. Other writers are `make`, `go
+mod`, `go get`, `go install`, `go generate`, `gofmt -w`, `sed -i`, `mv`, `cp`,
+`rm`, `mkdir`, `touch`, `tee`, `>` or `>>`, and `rulefloor rehash`. Achta
+writers are `amendments declare`, `amendments rebase`, `decision add`, `parts
+lock`, `wiki derive`, `wiki pin`, `witness finalize`, `witness init`, and
+`witness step`. Unknown verbs are not writes. This table is the contract, not
+an inference from help output or command names.
+
+`achta.hook-cd.v1` names the stable stdin, verdict, diagnostic, and exit
+contract. The command emits no success output and requires neither a workspace
+nor Git. The agent harness owns hook registration and invocation.
+
 ## 8. Exit codes
 
 All commands use one central contract:
@@ -1269,6 +1306,7 @@ achta/
   internal/countcheck/
   internal/declaredroute/
   internal/replacement/
+  internal/hookcd/
   testdata/
     machine/
     wiki/
@@ -1318,6 +1356,8 @@ Responsibilities:
   caller-pattern route, ban, per-file cardinality, and required-key counts.
 - `internal/replacement`: strict claim and replay artifact parsing, SHA-256
   evidence pinning, and closed-set per-fixture exit reconciliation.
+- `internal/hookcd`: bounded PreToolUse JSON decoding, heredoc and statement
+  parsing, closed write-verb classification, and working-directory verdicts.
 
 Domain packages must return typed results and errors. They must not depend on
 stdout, stderr, terminal formatting, or process exit codes.
@@ -1510,6 +1550,10 @@ Schemas added for v0.5.3:
 
 - `achta.replacement-check.v1`
 
+Machine contract added for v0.5.8:
+
+- `achta.hook-cd.v1`
+
 Canonical artifact schemas added for v0.5.0:
 
 - `achta.parts-lock.v1`
@@ -1596,6 +1640,10 @@ Add focused tests for:
   missing, extra, vocabulary-mismatched, or digest-mismatched rows fail, legacy
   v1 claims remain attestations, and unknown or malformed fields cannot
   evaluate.
+- a table of at least 20 Bash hook commands covering all committed write
+  classes, read-only and unknown verbs, every statement separator, retained
+  pipes, ignored heredoc bodies, absolute and relative selectors, assignments
+  before `cd`, per-writer `-C`, malformed JSON, and unparseable shell input.
 
 ### 15.2 Integration tests
 
@@ -2135,7 +2183,28 @@ The v0.3.0 release records these choices explicitly:
    two earned dispositions without removing a command, changing a schema
    identifier, or changing the stable 0/1/2 exit contract.
 
-## 35. Success measure
+## 35. v0.5.8 decisions
+
+1. Achta owns the mechanical Bash working-directory guard because the write
+   vocabulary and repository-selection test are reusable command mechanics;
+   prompt injection and Go source-navigation policy remain agent-harness
+   concerns.
+2. The writer table is closed and committed. Unknown verbs are not writes, so
+   expanding enforcement is an explicit reviewed contract change rather than
+   a heuristic guess.
+3. Unparseable input warns and allows. The hook cannot safely deny from a
+   parser guess, and the warning preserves visible evidence of the uncovered
+   command shape.
+4. Heredoc bodies are data, pipelines remain one statement, and only newline,
+   semicolon, `&&`, and `||` create statement boundaries for this contract.
+5. HOOK-CD-WORKDIR-1 raises the executable Rulefloor from 48 to 49 with a
+   mutation of the committed `make` classification observed red before its
+   byte-identical restoration.
+6. v0.5.8 is a patch because it adds one opt-in hook command and machine
+   contract without removing or changing an existing command, artifact, or
+   stable interface.
+
+## 36. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical
