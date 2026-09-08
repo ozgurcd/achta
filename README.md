@@ -171,6 +171,11 @@ every writing statement contains `-C` with one of those absolute path forms.
 Relative `cd` and `-C` paths do not count. Denial is exit 2 and names the
 statement number, classified verb, and both fixes. Input that cannot be parsed
 warns on stderr and allows with exit 0; unknown verbs are read-only by contract.
+An unquoted `>` or `>>` is a write only when its next token is a file target.
+Targets beginning with `&` are file-descriptor duplication, and the exact
+target `/dev/null` is a sink; neither is a filesystem write. Numeric or
+combined prefixes do not weaken a real file redirect: `2>err.log`, `&>out`,
+and `1>>log` remain writes.
 
 The committed writer vocabulary is:
 
@@ -178,8 +183,8 @@ The committed writer vocabulary is:
   `clean`, `clone`, `commit`, `config`, `fetch`, `gc`, `init`, `merge`, `mv`,
   `notes`, `pull`, `push`, `rebase`, `remote`, `reset`, `restore`, `revert`,
   `rm`, `stash`, `submodule`, `switch`, `tag`, and `worktree`.
-- Direct writers: `make`, `mv`, `cp`, `rm`, `mkdir`, `touch`, `tee`, output
-  redirection with `>` or `>>`, `gofmt -w`, `sed -i`, `go mod`, `go get`,
+- Direct writers: `make`, `mv`, `cp`, `rm`, `mkdir`, `touch`, `tee`, file-
+  targeting output redirection with `>` or `>>`, `gofmt -w`, `sed -i`, `go mod`, `go get`,
   `go install`, `go generate`, and `rulefloor rehash`.
 - Achta writers: `amendments declare`, `amendments rebase`, `decision add`,
   `parts lock`, `wiki derive`, `wiki pin`, `witness finalize`, `witness init`,

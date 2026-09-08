@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## v0.5.9 — 2026-09-08
+
+- Fixed the v0.5.8 `hook cd` defect that classified every output-redirection
+  token as a file write. Descriptor duplication (`>&N` and `N>&M`) and exact
+  `/dev/null` targets are now read-only; `N>file`, `&>file`, and `N>>file`
+  remain writes.
+- Added eight redirect verdict cases, including pipelines and a leading
+  absolute `cd`, without changing the first-statement directory rule.
+- Rehashed the existing HOOK-CD-WORKDIR-1 binding for its expanded verdict
+  table. The declared Rulefloor remains 49/49.
+- Advanced source and exact version fixtures to v0.5.9. This is a corrective
+  patch and does not change the `achta.hook-cd.v1` identifier.
+
 ## v0.5.8 — 2026-09-08
 
 - Added workspace-independent `achta hook cd` for Bash PreToolUse calls. It

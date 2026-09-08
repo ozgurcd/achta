@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.8 release specification
+Status: v0.5.9 release specification
 
 Project name: Achta
 
@@ -1172,6 +1172,14 @@ fixes. Empty, malformed, oversized, command-substituting, or otherwise
 unparseable input warns on stderr and allows with exit 0 because a PreToolUse
 parser may not convert uncertainty into an invented write classification.
 
+An unquoted `>` or `>>` token is a write only when its next token names a file.
+A target beginning with `&` is descriptor duplication (`>&N` or `N>&M`), and
+the exact `/dev/null` target is a non-file sink; neither is classified as a
+write. A numeric descriptor or combined-output prefix does not exempt a file
+target, so `N>file`, `&>file`, and `N>>file` remain writes. Multiple redirects
+are evaluated independently, and any file target makes the statement a write.
+This refinement does not change the first-statement `cd` rule.
+
 The committed writer vocabulary is closed. Git writers are `add`, `am`,
 `apply`, `bisect`, `branch`, `checkout`, `cherry-pick`, `clean`, `clone`,
 `commit`, `config`, `fetch`, `gc`, `init`, `merge`, `mv`, `notes`, `pull`,
@@ -1643,7 +1651,8 @@ Add focused tests for:
 - a table of at least 20 Bash hook commands covering all committed write
   classes, read-only and unknown verbs, every statement separator, retained
   pipes, ignored heredoc bodies, absolute and relative selectors, assignments
-  before `cd`, per-writer `-C`, malformed JSON, and unparseable shell input.
+  before `cd`, per-writer `-C`, file redirects, descriptor duplication,
+  `/dev/null`, malformed JSON, and unparseable shell input.
 
 ### 15.2 Integration tests
 
@@ -2204,7 +2213,21 @@ The v0.3.0 release records these choices explicitly:
    contract without removing or changing an existing command, artifact, or
    stable interface.
 
-## 36. Success measure
+## 36. v0.5.9 decisions
+
+1. Output redirection is classified by its target, not by the operator alone.
+   Descriptor duplication and exact `/dev/null` output do not write repository
+   bytes; a real file target remains a write regardless of numeric or combined
+   descriptor prefix.
+2. The first-statement absolute or home `cd` rule is unchanged. The correction
+   narrows only false-positive redirection classification inside a statement.
+3. HOOK-CD-WORKDIR-1 remains the owning invariant. Its expanded verdict table
+   is rehashed without declaring a second rule, so the executable floor stays
+   49.
+4. v0.5.9 is a corrective patch retaining the `achta.hook-cd.v1` machine
+   contract and all existing exit semantics.
+
+## 37. Success measure
 
 Achta succeeds when agents and humans stop writing one-off scripts for the same
 workspace bookkeeping, while every claim remains explicit and every canonical

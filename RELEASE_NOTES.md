@@ -2,6 +2,23 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.9 — 2026-09-08
+
+### Fixed
+
+- `hook cd` no longer treats file-descriptor duplication (`>&N` or `N>&M`) as
+  a filesystem write, so common read-only pipelines such as `go test ./...
+  2>&1 | tail` are allowed without a directory selector.
+- Output redirected exactly to `/dev/null`, including `&>/dev/null`, is also
+  read-only. A redirection whose next token is a file remains a write:
+  `2>err.log`, `&>out`, and `1>>log` still require the unchanged directory
+  rule.
+- Eight new verdict cases were captured red against v0.5.8 and green after the
+  target-aware fix. HOOK-CD-WORKDIR-1 was rehashed from `0d4b2bdb6bbb` to
+  `e1f6f8c31790`; the declared Rulefloor stays 49/49.
+- Source and exact version fixtures advance to v0.5.9. The stable hook contract
+  remains `achta.hook-cd.v1`.
+
 ## v0.5.8 — 2026-09-08
 
 ### Added

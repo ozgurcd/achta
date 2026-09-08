@@ -14,6 +14,9 @@ const (
 	Schema     = "achta.hook-cd.v1"
 	MaxInput   = 1 << 20
 	MaxCommand = 256 << 10
+
+	redirectOutputToken = "\x00>"
+	redirectAppendToken = "\x00>>"
 )
 
 type Verdict string
@@ -356,6 +359,11 @@ func lex(statement string) ([]string, error) {
 				operator += string(char)
 				index++
 			}
+			if operator == ">" {
+				operator = redirectOutputToken
+			} else if operator == ">>" {
+				operator = redirectAppendToken
+			}
 			tokens = append(tokens, operator)
 			continue
 		}
@@ -377,11 +385,24 @@ func firstStatementIsAbsoluteCD(statement string) bool {
 }
 
 func writingVerb(tokens []string) string {
-	if contains(tokens, ">>") {
-		return ">>"
-	}
-	if contains(tokens, ">") {
-		return ">"
+	for index, token := range tokens {
+		verb := ""
+		switch token {
+		case redirectOutputToken:
+			verb = ">"
+		case redirectAppendToken:
+			verb = ">>"
+		default:
+			continue
+		}
+		if index+1 >= len(tokens) {
+			continue
+		}
+		target := tokens[index+1]
+		if target == "/dev/null" || strings.HasPrefix(target, "&") {
+			continue
+		}
+		return verb
 	}
 	for _, segment := range pipelineSegments(tokens) {
 		if verb := segmentWritingVerb(segment); verb != "" {

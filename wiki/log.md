@@ -575,3 +575,14 @@ Unknown verbs are non-writes and unparseable input warns and allows. The
 HOOK-CD-WORKDIR-1 is mutation-proved by removing `make`, raising the executable
 Rulefloor from 48 to 49. Source, exact fixtures, release documents, and current
 co-versioned wiki facts advance together to v0.5.8.
+
+## [2026-09-08] release | achta-v0.5.9-cd-hook-redirect
+
+The v0.5.8 hook classified every output-redirection token as a file write,
+blocking descriptor duplication and `/dev/null` sinks in ordinary read-only
+commands. Eight new verdict cases reproduce the shipped defect before the
+target-aware correction: `>&N`, `N>&M`, and exact `/dev/null` output now allow,
+while numeric and combined redirects to real files still deny. The leading
+absolute `cd` rule is unchanged. HOOK-CD-WORKDIR-1 was rehashed without a new
+declaration, so Rulefloor remains 49/49; source, exact fixtures, release
+documents, and current co-versioned wiki facts advance to v0.5.9.
