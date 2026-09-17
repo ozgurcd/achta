@@ -2,6 +2,19 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+- Scope `wiki check` with repeatable `--repo NAME` and `--exclude NAME=REASON`;
+  explicitly report NOT judged pages without changing selected judgements.
+- Enforce `wiki freshness` by default; label opt-in `--report-only` results.
+- Default `wiki derive` to a read-only before/after preview; require `--write`
+  for mutation, report written pages, and identify Achta/version in block headers.
+- Pin only `verified_against`, `verified` and `updated`; preserve DERIVED and
+  lead bytes and state that new lead prose belongs to the PM.
+- Add `recipe check --expect-order` for ordered, occurrence-sensitive expectations.
+- Prove explicit wiki selection isolates reads and writes. No routing defect
+  reproduced at v0.5.9; `--wiki-dir` continues selecting a canonical direct wiki.
+
 ## v0.5.9 — 2026-09-08
 
 ### Fixed

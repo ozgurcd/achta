@@ -35,6 +35,7 @@ type FreshnessPage struct {
 type FreshnessResult struct {
 	SchemaVersion string          `json:"schema_version"`
 	Status        string          `json:"status"`
+	Mode          string          `json:"mode,omitempty"`
 	Fresh         int             `json:"fresh"`
 	Behind        int             `json:"behind"`
 	Unpinned      int             `json:"unpinned"`
@@ -57,6 +58,10 @@ type UnpushedResult struct {
 // Freshness checks repository-page pins against local repository HEADs. It
 // performs no fetch; its result is a staleness signal, never a truth verdict.
 func Freshness(root, filter string) (FreshnessResult, error) {
+	return FreshnessSelected(root, filter, nil)
+}
+
+func FreshnessSelected(root, filter string, selection Selection) (FreshnessResult, error) {
 	result := FreshnessResult{SchemaVersion: FreshnessSchema, Status: "pass", Pages: []FreshnessPage{}}
 	if filter != "" && !repoPattern.MatchString(filter) {
 		return result, errors.New("invalid repository filter")
@@ -85,6 +90,12 @@ func Freshness(root, filter string) (FreshnessResult, error) {
 		}
 		matched = true
 		page := FreshnessPage{Repository: repoName, Page: filepath.ToSlash(filepath.Join("wiki", "repos", entry.Name()))}
+		if reason := selection[repoName]; reason != "" {
+			page.Status, page.Problem = "not_judged", reason
+			result.Skipped++
+			result.Pages = append(result.Pages, page)
+			continue
+		}
 		snapshot, readErr := safefile.Read(root, filepath.Join(directory, entry.Name()), MaxPageSize)
 		if readErr != nil {
 			page.Status, page.Problem = "unreadable", boundedProblem(readErr)

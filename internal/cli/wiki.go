@@ -17,6 +17,8 @@ type wikiPinDocument struct {
 	SHA           string `json:"sha"`
 	Verified      string `json:"verified"`
 	Changed       bool   `json:"changed"`
+	Updated       string `json:"updated"`
+	Notice        string `json:"notice"`
 }
 
 func runWiki(args []string, stdout, stderr io.Writer, opts globalOptions) int {
@@ -99,7 +101,7 @@ func runWikiPin(rest []string, stdout, stderr io.Writer, opts globalOptions) int
 	} else if err := snapshot.Replace(result.Data, achtawiki.MaxPageSize); err != nil {
 		return renderError(stdout, stderr, opts.json, "achta.wiki-pin.v1", invalid("replace wiki page: %v", err))
 	}
-	doc := wikiPinDocument{SchemaVersion: "achta.wiki-pin.v1", Status: status, Repository: repository, SHA: *sha, Verified: *verified, Changed: result.Changed}
+	doc := wikiPinDocument{SchemaVersion: "achta.wiki-pin.v1", Status: status, Repository: repository, SHA: *sha, Verified: *verified, Changed: result.Changed, Updated: *verified, Notice: "A new front lead is the PM's to write; lead text and DERIVED content are unchanged."}
 	if opts.json {
 		if writeJSON(stdout, stderr, doc) != 0 {
 			return 2
@@ -116,4 +118,5 @@ func renderWikiPinHuman(output io.Writer, doc wikiPinDocument) {
 		shortSHA = shortSHA[:7]
 	}
 	fmt.Fprintf(output, "wiki pin %s: %s at %s (%s)\n", doc.Status, doc.Repository, shortSHA, doc.Verified)
+	fmt.Fprintln(output, doc.Notice)
 }

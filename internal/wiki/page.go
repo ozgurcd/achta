@@ -63,13 +63,13 @@ func RenderPin(source []byte, repository, fullSHA, verified, branch string) (Pin
 	if len(parts) != 4 || strings.TrimSpace(parts[1]) != "Repo HEAD" {
 		return PinResult{}, errors.New("malformed Repo HEAD derived row")
 	}
-	valueSuffix := ""
-	if open := strings.Index(parts[2], "("); open >= 0 {
-		valueSuffix = " " + strings.TrimSpace(parts[2][open:])
-	} else if branch != "" {
-		valueSuffix = " (" + branch + ")"
+	if index, ok := page.fields["updated"]; ok {
+		page.lines[index] = []byte("updated: " + verified)
+	} else {
+		// Append the new field within frontmatter without altering existing body bytes.
+		index := page.fields["verified"]
+		page.lines = append(page.lines[:index], append([][]byte{[]byte("updated: " + verified)}, page.lines[index:]...)...)
 	}
-	page.lines[page.derivedHead] = []byte("| Repo HEAD | " + fullSHA[:7] + valueSuffix + " |")
 	rendered := bytes.Join(page.lines, page.newline)
 	if _, err := parsePage(rendered, repository); err != nil {
 		return PinResult{}, fmt.Errorf("rendered page validation: %w", err)

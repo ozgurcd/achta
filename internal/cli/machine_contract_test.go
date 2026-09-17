@@ -43,6 +43,8 @@ func assertStableMachineContracts(t *testing.T) {
 				SHA:           "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 				Verified:      "2026-09-04",
 				Changed:       true,
+				Updated:       "2026-09-04",
+				Notice:        "A new front lead is the PM's to write; lead text and DERIVED content are unchanged.",
 			},
 		},
 		{

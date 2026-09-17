@@ -3,8 +3,8 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-09-08
-verified: 2026-09-08
+updated: 2026-09-17
+verified: 2026-09-17
 co_versioned: true
 ---
 
@@ -34,6 +34,13 @@ infer prose, execute generic gates, fetch, or mutate Git.
   checks under the unchanged exit contract; an empty, unknown, or repeated name
   is exit 2 with nothing evaluated. `achta.wiki-check.v1` names the resolved
   `wiki_dir`.
+- Unreleased: `wiki check --repo NAME` and `--exclude NAME=REASON` scope both
+  checks with explicit NOT judged evidence. Freshness enforces by default;
+  `--report-only` labels non-enforcement while retaining drift and unavailable
+  evidence statuses. Derive defaults to a read-only before/after preview;
+  `--write` names written pages and headers identify Achta/version. Pinning
+  advances both dates and the pin without touching DERIVED or lead text.
+  Recipe consumers opt into order-sensitive expectations with `--expect-order`.
 - `recipe check` refuses neutralized make recipe lines (a `-` prefix, a pipe, a
   trailing `&`, a swallowed exit, with `--forbid-noop` a no-op command) and
   matches `--expect-line` / `--expect-file` byte for byte. `ledger census`
@@ -163,3 +170,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-06 | `co-versioned` | Release v0.5.7 with vocabulary-pinned declared-route and count replacement claims, exact version fixtures, and the 48-rule floor. |
 | 2026-09-08 | `co-versioned` | Add and release v0.5.8 `hook cd` with its committed writer table, 46-case verdict contract, stable capability, and mutation-proved floor 49. |
 | 2026-09-08 | `co-versioned` | Correct v0.5.8 redirect false positives, add eight target-aware verdict cases, rehash HOOK-CD-WORKDIR-1, and release v0.5.9 with floor 49 unchanged. |
+| 2026-09-17 | `co-versioned` | THE-WIKI-TOOL-THAT-SAYS-WHAT-IT-DOES: explicit per-repository scope, enforcing freshness, read-only derive previews, metadata-only pins, ordered recipes and selected-wiki isolation proofs. |

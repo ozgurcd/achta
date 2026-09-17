@@ -56,7 +56,7 @@ achta --wiki-dir /path/to/repository/wiki wiki check --only freshness --json
 achta --workspace /path/to/workspace decision add \
   --title 'complete decision title' --body-file decision-body.md --check
 
-achta --workspace /path/to/workspace wiki freshness --strict --json
+achta --workspace /path/to/workspace wiki freshness --json
 achta --workspace /path/to/workspace wiki derive --check --json
 achta --workspace /path/to/workspace wiki unpushed --repo REPOSITORY --json
 achta --workspace /path/to/workspace wiki check --json
@@ -208,8 +208,9 @@ settings file:
 
 `wiki pin` writes only after the caller explicitly attests that review
 occurred. It checks the supplied full SHA against repository HEAD, preserves
-the existing `verified_against` suffix, updates the derived `Repo HEAD` row,
-validates the complete rendered page, and atomically replaces only that page.
+the existing `verified_against` suffix, lead text and DERIVED bytes, and moves
+`verified:` and `updated:` together with the pin (adding `updated:` if absent). It
+validates the complete rendered page and atomically replaces only that page.
 Repository-owned pages instead use `co_versioned: true`: they omit the
 impossible self-referential SHA pin and are committed atomically with source.
 
@@ -225,13 +226,33 @@ not fetch. The composed check reports freshness and derivation separately;
 named checks under the unchanged exit contract, so a gate can enforce pin
 freshness on a working tree it has legitimately dirtied. An empty or unknown
 name is exit 2 with nothing evaluated. The JSON document names the resolved
-`wiki_dir` so a pass against the wrong wiki cannot be silent.
+`wiki_dir` so a pass against the wrong wiki cannot be silent. Repeatable
+`--repo NAME` scopes repository pages; repeatable `--exclude NAME=REASON` names
+an exclusion with its required reason. Both checks honor that scope, report every
+excluded repository as NOT judged, and keep all selected judgements unchanged.
+Unknown, duplicate or conflicting selectors fail before evaluation.
+
+`wiki freshness --repo NAME` now enforces drift by default (exit 1). `--strict`
+remains accepted; use `--report-only` for an explicitly labelled report with exit
+0 for evaluated drift. Unavailable evidence still exits 2 in either mode.
+
+`wiki derive` and `wiki derive --check` preview before/after content per changed
+page without writing (exit 1 when stale). Apply with `wiki derive --write`, which
+names updated pages. `--print NAME` prints a block. The explicit modes are
+mutually exclusive. Generated headers identify Achta and its version. Pinning
+does not regenerate blocks and reports that a new front lead is the PM's to write.
+All selectors are resolved from global `--wiki-dir WORKSPACE/wiki`, which must
+precede the command, for both reads and writes; the working directory is not a
+second authority.
 
 `recipe check` reads one Makefile target's recipe as text and refuses
 neutralizers — a `-` prefix whose exit make ignores, a pipe, a trailing `&`, a
 swallowed exit, and with `--forbid-noop` a command that cannot fail — while
 `--expect-line` and `--expect-file` demand byte-exact lines, so anything
-appended fails. `ledger census` recounts a markdown ledger table against its
+appended fails. Add `--expect-order` to require an ordered subsequence, matching
+each occurrence once (`--expect-line` values first, then `--expect-file` lines).
+Reordering identical membership then fails; other lines are still checked.
+`ledger census` recounts a markdown ledger table against its
 totals rows and against the files (`--dir`) or directories (`--tree --ext`) on
 disk: a present row must exist at exactly its stated size, a RETIRED row must
 be gone, and every entry on disk must have a row. Both are read-only,

@@ -586,3 +586,20 @@ while numeric and combined redirects to real files still deny. The leading
 absolute `cd` rule is unchanged. HOOK-CD-WORKDIR-1 was rehashed without a new
 declaration, so Rulefloor remains 49/49; source, exact fixtures, release
 documents, and current co-versioned wiki facts advance to v0.5.9.
+
+
+## [2026-09-17] change | THE-WIKI-TOOL-THAT-SAYS-WHAT-IT-DOES
+
+Measured the v0.5.9 source at 6a6e7df using fixture workspaces. Added explicit
+repository selection/exclusion with reasons, aligned freshness enforcement,
+made derive preview read-only by default with explicit writes and versioned
+headers, confined pin edits to the pin and both dates, and added opt-in ordered
+recipe expectations. Updated command help, specification and consumer migration
+directions. No consumer repository was modified and no release is made here.
+
+The brief overstates three claims at this head: derive already has --check;
+pin already preserves lead text; --wiki-dir routing already selects the canonical
+wiki for writes. Regression fixtures retain those truths. Existing expectations
+for rewriting DERIVED Repo HEAD and naming a retired script are replaced with
+byte-preservation and current-producer assertions. Detailed red/green evidence,
+assertion counts, and open boundaries are recorded in docs/wiki-behavior.md.

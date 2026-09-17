@@ -23,6 +23,7 @@ type Options struct {
 	Target      string
 	ExpectLines []string
 	ForbidNoop  bool
+	ExpectOrder bool
 }
 
 // Violation names one refused recipe line.
@@ -57,6 +58,9 @@ var (
 // violations and missing expectations are a normal fail.
 func Check(data []byte, opts Options) (Result, error) {
 	result := Result{SchemaVersion: Schema, Status: "pass", Target: opts.Target, Violations: []Violation{}, MissingExpected: []string{}}
+	if opts.ExpectOrder && len(opts.ExpectLines) == 0 {
+		return result, errors.New("--expect-order requires expected lines")
+	}
 	if !targetName.MatchString(opts.Target) {
 		return result, errors.New("invalid target name")
 	}
@@ -121,16 +125,24 @@ func Check(data []byte, opts Options) (Result, error) {
 			}
 		}
 	}
+	cursor := 0
 	for _, want := range opts.ExpectLines {
 		found := false
-		for _, p := range recipe {
+		for i, p := range recipe {
+			if opts.ExpectOrder && i < cursor {
+				continue
+			}
 			if p.text == want { // EQUALITY, byte for byte: appended text must fail
 				found = true
+				cursor = i + 1
 				break
 			}
 		}
 		if !found {
 			result.MissingExpected = append(result.MissingExpected, want)
+			if opts.ExpectOrder {
+				result.Violations = append(result.Violations, Violation{Rule: "expected-order", Text: want})
+			}
 		}
 	}
 	if len(result.Violations) > 0 || len(result.MissingExpected) > 0 {

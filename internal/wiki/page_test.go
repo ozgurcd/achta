@@ -32,8 +32,8 @@ func TestRenderPinPreservesSuffixAndUnrelatedBytes(t *testing.T) {
 	if !strings.Contains(text, "verified_against: sample @ "+sha+" (main). Earlier prose stays.") {
 		t.Fatalf("suffix not preserved:\n%s", text)
 	}
-	if !strings.Contains(text, "| Repo HEAD | bbbbbbb (main) |") {
-		t.Fatalf("head row not updated:\n%s", text)
+	if !strings.Contains(text, "| Repo HEAD | aaaaaaa (main) |") {
+		t.Fatalf("head row was changed:\n%s", text)
 	}
 }
 

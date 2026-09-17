@@ -48,7 +48,7 @@ func TestWikiPinWorkflowAndAttestationRefusal(t *testing.T) {
 		t.Fatalf("pin code = %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
 	got := readTestFile(t, pagePath)
-	if !strings.Contains(got, "verified_against: sample @ "+head+" (main). Keep this suffix.") || !strings.Contains(got, "| Repo HEAD | "+head[:7]+" (main) |") {
+	if !strings.Contains(got, "verified_against: sample @ "+head+" (main). Keep this suffix.") || !strings.Contains(got, "| Repo HEAD | aaaaaaa (main) |") {
 		t.Fatalf("page not pinned correctly:\n%s", got)
 	}
 	if _, err := os.Stat(repo); err != nil {

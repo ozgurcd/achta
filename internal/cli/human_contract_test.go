@@ -42,6 +42,8 @@ func TestPhaseOneHumanContracts(t *testing.T) {
 			SHA:           "0123456789abcdef0123456789abcdef01234567",
 			Verified:      "2026-09-04",
 			Changed:       true,
+			Updated:       "2026-09-04",
+			Notice:        "A new front lead is the PM's to write; lead text and DERIVED content are unchanged.",
 		})
 		assertHumanGolden(t, "wiki-pin.txt", output.String())
 	})

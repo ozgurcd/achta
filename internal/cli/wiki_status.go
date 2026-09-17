@@ -9,7 +9,8 @@ import (
 
 func runWikiFreshness(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	set := flagSet("wiki freshness")
-	strict := set.Bool("strict", false, "exit nonzero on pin drift")
+	strict := set.Bool("strict", true, "enforce pin drift (the default)")
+	reportOnly := set.Bool("report-only", false, "report drift without exit 1; unavailable evidence remains exit 2")
 	repository := set.String("repo", "", "check one repository page")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
 	if err := parseFlags(set, args); err != nil {
@@ -17,6 +18,9 @@ func runWikiFreshness(args []string, stdout, stderr io.Writer, opts globalOption
 		return renderError(stdout, stderr, opts.json, achtawiki.FreshnessSchema, err)
 	}
 	opts.json = *jsonMode
+	if (!*strict && !*reportOnly) || (flagGiven(set, "strict") && *reportOnly) {
+		return renderError(stdout, stderr, opts.json, achtawiki.FreshnessSchema, invalid("use --report-only for non-enforcing reports; do not combine it with --strict"))
+	}
 	ws, err := resolveWorkspace(opts)
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, achtawiki.FreshnessSchema, err)
@@ -25,10 +29,14 @@ func runWikiFreshness(args []string, stdout, stderr io.Writer, opts globalOption
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, achtawiki.FreshnessSchema, invalid("wiki freshness: %v", err))
 	}
+	result.Mode = "enforcing"
+	if *reportOnly {
+		result.Mode = "report_only"
+	}
 	code := 0
 	if result.Status == "cannot_evaluate" {
 		code = 2
-	} else if *strict && result.Status == "drift" {
+	} else if !*reportOnly && result.Status == "drift" {
 		code = 1
 	}
 	if opts.json {
@@ -37,6 +45,7 @@ func runWikiFreshness(args []string, stdout, stderr io.Writer, opts globalOption
 		}
 		return code
 	}
+	fmt.Fprintf(stdout, "wiki freshness mode: %s\n", result.Mode)
 	for _, page := range result.Pages {
 		if page.Status == "fresh" && opts.quiet {
 			continue

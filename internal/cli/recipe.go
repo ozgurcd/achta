@@ -20,6 +20,7 @@ func runRecipe(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 	var expectLines repeatedValue
 	set.Var(&expectLines, "expect-line", "repeatable recipe line that must be present, byte for byte, without its leading tab")
 	expectFile := set.String("expect-file", "", "file whose every line must be present, byte for byte")
+	expectOrder := set.Bool("expect-order", false, "require expected lines in order, with each occurrence matched once")
 	forbidNoop := set.Bool("forbid-noop", false, "refuse a recipe line whose command is true, :, echo or printf")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
 	if err := parseFlags(set, rest); err != nil {
@@ -56,7 +57,7 @@ func runRecipe(args []string, stdout, stderr io.Writer, opts globalOptions) int 
 			expected = append(expected, l)
 		}
 	}
-	result, err := recipe.Check(snapshot.Data, recipe.Options{Target: *target, ExpectLines: expected, ForbidNoop: *forbidNoop})
+	result, err := recipe.Check(snapshot.Data, recipe.Options{Target: *target, ExpectLines: expected, ForbidNoop: *forbidNoop, ExpectOrder: *expectOrder})
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, recipe.Schema, invalid("recipe check: %v", err))
 	}

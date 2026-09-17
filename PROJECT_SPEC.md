@@ -425,11 +425,12 @@ Behavior:
 2. Require `--attest-reviewed`. Its absence is a refusal, not an implicit yes.
 3. Validate the full SHA and require it to equal the selected repository's HEAD
    by default.
-4. Update both `verified:` and the SHA prefix of `verified_against:`.
+4. Update `verified:`, `updated:` and the SHA prefix of `verified_against:`
+   together; add `updated:` within frontmatter if absent.
 5. Preserve any prose following the canonical `<repo> @ <sha>` prefix unless a
    separate future command explicitly replaces it.
-6. Update the measured repository-HEAD value in the page's derived block using
-   the same internal renderer used by `achta wiki derive`.
+6. Preserve all DERIVED content and lead text byte for byte. Report that a new
+   front lead is the PM's to write; pinning cannot attest to new prose.
 7. Validate the complete page after rendering.
 8. Replace it atomically only if every check succeeds.
 9. `--check` performs every validation and prints the proposed summary without
@@ -642,26 +643,29 @@ Until those checks exist, clearing remains an explicit reviewed edit.
 ### 7.11 Wiki status and derivation commands
 
 ```text
-achta wiki freshness [--strict] [--repo NAME] [--json]
-achta wiki derive [--check | --print REPOSITORY] [--json]
+achta wiki freshness [--strict | --report-only] [--repo NAME] [--json]
+achta wiki derive [--check | --write | --print REPOSITORY] [--json]
 achta wiki unpushed [--repo PATH] [--json]
-achta wiki check [--only NAME[,NAME...]] [--json]
+achta wiki check [--only NAME[,NAME...]] [--repo NAME]... [--exclude NAME=REASON]... [--json]
 ```
 
 `wiki freshness` compares each externally owned repository page's anchored
 canonical pin with the corresponding local repository HEAD. A self-owned page
 is fresh only when it carries `co_versioned: true`, omits `verified_against:`,
 has a review date, and its selected workspace root is the exact Git repository
-root. It never fetches or writes. Without `--strict`, measured drift is reported
-but does not fail the command;
-`--strict` maps drift to exit 1. Unreadable or ambiguous evidence is
-`cannot_evaluate` and exit 2.
+root. It never fetches or writes. Drift exits 1 by default; `--strict` remains
+an explicit spelling of that default. `--report-only` returns 0 for evaluated
+drift while retaining its status and reporting `mode: report_only` (otherwise
+`enforcing`). Unreadable or ambiguous evidence remains `cannot_evaluate`, exit 2,
+in either mode. Use `--report-only`, not `--strict=false`, for non-enforcement.
 
-`wiki derive --check` renders every marked derived block from local facts and
-returns exit 1 when any page would change. Without `--check`, each page is
-validated and replaced independently and atomically. `--print` renders exactly
-one repository block without editing a page and is mutually exclusive with
-`--check`.
+`wiki derive` and `wiki derive --check` render every marked derived block from
+local facts without writing, return exit 1 when any page would change, and print
+page-by-page before/after content (`before` and `after` in JSON). `--write`
+validates and replaces each page independently and atomically, naming every
+updated page. The header names Achta and its source version, not a workspace
+script. `--print` renders exactly one repository block without editing a page.
+The explicit `--check`, `--write` and `--print` modes are mutually exclusive.
 
 `wiki unpushed` compares HEAD with the configured local upstream tracking ref.
 It deliberately performs no fetch and records that limitation in JSON. Its
@@ -677,6 +681,19 @@ never a per-check exit code. An empty, unknown, or repeated name is invalid
 input: exit 2 and nothing is evaluated. Without `--only`, every check runs. The
 JSON document also carries `wiki_dir`, the wiki directory Achta actually
 resolved, because a pass against the wrong wiki would otherwise be silent.
+
+Repeatable `--repo NAME` limits judgement to the named repository pages;
+others are explicitly `not_judged` with reason `not selected by --repo`.
+Repeatable `--exclude NAME=REASON` excludes a named repository with a required
+caller reason. Names must identify existing wiki repository pages; duplicate,
+unknown, empty or conflicting selections exit 2 before any judgement. Repository
+selection applies to both checks, including marked blocks naming an excluded
+repository outside `repos/`. Unrelated marked blocks continue to be judged.
+Default scope is all pages. The top-level `not_judged` mapping retains scope
+reasons even when a selected check cannot evaluate; detailed page results name
+excluded pages, and human output explicitly says `NOT judged`. A scoped pass
+claims only the selected judgements; it does not decide whether the caller's
+exclusion is justified or whether a pin moved in a commit.
 
 The stable schemas are `achta.wiki-freshness.v1`, `achta.wiki-derive.v1`,
 `achta.wiki-unpushed.v1`, and `achta.wiki-check.v1`.
@@ -802,7 +819,7 @@ the check executes no external process. Output uses
 ### 7.16 Recipe check
 
 ```text
-achta recipe check --makefile PATH --target NAME [--expect-line S]... [--expect-file PATH] [--forbid-noop] [--json]
+achta recipe check --makefile PATH --target NAME [--expect-line S]... [--expect-file PATH] [--expect-order] [--forbid-noop] [--json]
 ```
 
 `recipe check` reads one Makefile target's recipe as TEXT — the physical lines
@@ -822,6 +839,13 @@ toolchain. Exit 1 on any violation or absent expectation; a missing or
 duplicated target, an empty recipe, or an unreadable makefile is
 `cannot_evaluate` and exit 2. The makefile and expect-file are confined to
 the workspace. Output uses `achta.recipe-check.v1`.
+With `--expect-order`, expectations must match an ordered subsequence, each
+occurrence at most once. Repeatable `--expect-line` values precede file lines.
+Other recipe lines are still checked for neutralizers; extra lines are permitted.
+Identical membership in a different order fails as `expected-order`. An ordered
+check without expectations exits 2. The membership-only default is retained for
+compatibility; consumers whose plans are ordered must require `--expect-order`.
+
 
 ### 7.17 Ledger census
 

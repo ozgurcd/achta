@@ -115,6 +115,9 @@ func dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseV
 	}
 	if command != "" && command != "help" && commandHelpRequested(rest) {
 		fmt.Fprint(stdout, helpText)
+		if len(rest) > 0 {
+			fmt.Fprint(stdout, scopedCommandHelp[command+" "+rest[0]])
+		}
 		return 0
 	}
 
@@ -472,8 +475,8 @@ Commands:
   parts verify  compare every locked part and reject unlocked neighboring .txt files
   toolchain check compare declared workspace versions and script digests with CI pins
   wiki pin      update a reviewed repository verification pin
-  wiki freshness compare repository-page pins with local HEADs
-  wiki derive   check, print, or update generated repository facts
+  wiki freshness enforce repository-page pins; --report-only reports drift
+  wiki derive   preview generated facts by default; --write applies changes
   wiki unpushed compare a repository with its local upstream ref
   wiki check    report freshness and derived-block checks separately; --only NAME[,NAME] selects a subset
   witness summarize summarize a gate-run.v1 record
@@ -487,3 +490,44 @@ Commands:
   amendments reconcile compare declarations with Rulefloor's logical diff
   help          show this help
 `
+
+// scopedCommandHelp documents side effects and exit semantics at the command.
+var scopedCommandHelp = map[string]string{
+	"wiki check": `
+wiki check [--only freshness,derive] [--repo NAME]... [--exclude NAME=REASON]... [--json]
+Without --only both checks run; --only selects check names, not repository names.
+--repo selects repository pages to judge; other pages are NOT judged and named.
+--exclude requires a reason, reported for each NOT judged page in every selected check.
+Unknown, duplicate or conflicting selectors exit 2 before judging. Without repository
+selectors all pages are judged. Selected judgements are unchanged: 0 pass, 1 fail,
+2 cannot_evaluate. --wiki-dir is a global option, before wiki.
+`,
+	"wiki freshness": `
+wiki freshness [--repo NAME] [--strict | --report-only] [--json]
+Enforcing by default (--strict is accepted): drift exits 1; unavailable evidence
+exits 2. --report-only explicitly reports its mode, retains drift status, and
+exits 0 for evaluated drift; unavailable evidence still exits 2. No files written.
+`,
+	"wiki derive": `
+wiki derive [--check | --write | --print REPOSITORY] [--json]
+Default and --check preview changed pages with before/after bytes; no files written.
+A stale preview exits 1, unchanged exits 0, unavailable evidence exits 2.
+--write applies blocks and names updated pages; --print prints one generated block.
+The three explicit modes are mutually exclusive. Headers name Achta and its version.
+`,
+	"wiki pin": `
+wiki pin REPOSITORY --sha FULL_HEAD_SHA --verified YYYY-MM-DD --attest-reviewed [--check] [--json]
+Moves verified_against, verified and updated together. Adds updated if absent.
+Preserves DERIVED content, lead text and other bytes. A new front lead is the PM's
+ to write. --check writes nothing (1 would_change, 0 unchanged); missing attestation
+or an already-current write exits 1; unavailable or malformed input exits 2.
+`,
+	"recipe check": `
+recipe check --makefile PATH --target NAME [--expect-line TEXT]... [--expect-file PATH] [--expect-order] [--forbid-noop] [--json]
+Read-only. Expectations are byte-exact membership by default. --expect-order
+requires them as an ordered subsequence, matching each occurrence once (repeatable
+--expect-line values first, then file lines). Other recipe lines remain checked.
+Reordered or absent expectations and neutralizers exit 1; unavailable/invalid
+input exits 2. --expect-order without expectations is invalid.
+`,
+}
