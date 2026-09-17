@@ -2,7 +2,7 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.5.10 — 2026-09-17
 
 - Scope `wiki check` with repeatable `--repo NAME` and `--exclude NAME=REASON`;
   explicitly report NOT judged pages without changing selected judgements.

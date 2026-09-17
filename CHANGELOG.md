@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v0.5.10 — 2026-09-17
+
+- Release the scoped wiki checks, enforcing freshness, read-only derive previews,
+  metadata-only pin edits and opt-in ordered recipes from b56021a.
+- Advance the source version and exact version fixtures; retain all 49 armed
+  rules and the repository's existing release and Homebrew cask process.
+
 ## v0.5.9 — 2026-09-08
 
 - Fixed the v0.5.8 `hook cd` defect that classified every output-redirection

@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.9.
+- Current release line: v0.5.10.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -34,7 +34,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
   checks under the unchanged exit contract; an empty, unknown, or repeated name
   is exit 2 with nothing evaluated. `achta.wiki-check.v1` names the resolved
   `wiki_dir`.
-- Unreleased: `wiki check --repo NAME` and `--exclude NAME=REASON` scope both
+- Since v0.5.10: `wiki check --repo NAME` and `--exclude NAME=REASON` scope both
   checks with explicit NOT judged evidence. Freshness enforces by default;
   `--report-only` labels non-enforcement while retaining drift and unavailable
   evidence statuses. Derive defaults to a read-only before/after preview;
@@ -171,3 +171,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-08 | `co-versioned` | Add and release v0.5.8 `hook cd` with its committed writer table, 46-case verdict contract, stable capability, and mutation-proved floor 49. |
 | 2026-09-08 | `co-versioned` | Correct v0.5.8 redirect false positives, add eight target-aware verdict cases, rehash HOOK-CD-WORKDIR-1, and release v0.5.9 with floor 49 unchanged. |
 | 2026-09-17 | `co-versioned` | THE-WIKI-TOOL-THAT-SAYS-WHAT-IT-DOES: explicit per-repository scope, enforcing freshness, read-only derive previews, metadata-only pins, ordered recipes and selected-wiki isolation proofs. |
+| 2026-09-17 | `co-versioned` | Release v0.5.10 from b56021a: advance source and exact version fixtures; owner-authorized annotated tag, fast-forward publication, workflow-owned cask update and local installation verification. |

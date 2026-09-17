@@ -603,3 +603,15 @@ wiki for writes. Regression fixtures retain those truths. Existing expectations
 for rewriting DERIVED Repo HEAD and naming a retired script are replaced with
 byte-preservation and current-producer assertions. Detailed red/green evidence,
 assertion counts, and open boundaries are recorded in docs/wiki-behavior.md.
+
+
+## [2026-09-17] release | v0.5.10
+
+The owner authorized the next patch from b56021a: annotated tag, fast-forward
+main/tag push, repository Release workflow, archive checksum verification and
+Homebrew upgrade with installed-byte comparison. Source and exact version
+fixtures advance to v0.5.10; the Unreleased notes become this release's notes.
+The existing workflow publishes and verifies only Casks/achta.rb in the tap,
+including its single commit and ordinary main push. The release requires full
+local validation before publication and comparison of the installed executable
+with its published archive. No consumer repository is part of this release.
