@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.9 release specification
+Status: v0.5.11 release specification
 
 Project name: Achta
 
@@ -459,7 +459,7 @@ It cannot prove that review actually occurred or that the page is true.
 ```text
 achta decision add \
   --title TEXT \
-  --body-file PATH \
+  --body-file PATH|- \
   [--register wiki/platform/decisions.md] \
   [--prefix P] [--check] [--json]
 ```
@@ -473,7 +473,12 @@ Behavior:
    second-level section, then insert at that section's boundary.
 4. Reject duplicates, malformed IDs, ambiguous sections, empty or multiline
    titles, and unsupported prefixes.
-5. Read the body from one bounded, confined, non-secret regular file.
+5. Read the body from one bounded, confined regular file that passes the
+   secret-like filename check, or from stdin with `--body-file -`. Stdin reads
+   at most MaxBody + 1 bytes so oversized input is refused without an unbounded
+   allocation. Both forms use the same 65536-byte body limit and validation;
+   empty or whitespace-only input is refused. An outside-workspace file remains
+   refused, with a diagnostic naming stdin as the alternative.
 6. Insert one heading and body at the measured canonical location. The caller
    supplies the complete title, including any desired date; Achta does not add
    one.
@@ -484,6 +489,11 @@ Behavior:
    `status=would_change` and leaves the register byte-identical.
 
 Achta does not generate decision prose or decide whether a decision is correct.
+`--prefix` selects the ID series and its existing section, not Platform alone:
+D selects Identity when that section holds D decisions, and P selects Platform
+when that section holds P decisions. The mapping is measured from the register.
+Capabilities name `--body-file PATH` and `--body-file -` in the decision-add
+command's optional `input_forms` array; the existing schema identifier remains.
 
 ### 7.6 Witness summary
 

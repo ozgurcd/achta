@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const testVersion = "v0.5.10"
+const testVersion = "v0.5.11"
 
 func TestVersionJSONIsSingleDocument(t *testing.T) {
 	var stdout, stderr bytes.Buffer
@@ -87,6 +87,12 @@ func TestHelpAfterCommandNeedsNoWorkspace(t *testing.T) {
 		var stdout, stderr bytes.Buffer
 		if code := Run(args, &stdout, &stderr, "v0.2.0"); code != 0 {
 			t.Fatalf("Run(%q) code=%d stderr=%q", args, code, stderr.String())
+		}
+		if args[0] == "decision" {
+			if !strings.HasPrefix(stdout.String(), helpText) || !strings.Contains(stdout.String(), "--body-file -") || !strings.Contains(stdout.String(), "--prefix") || stderr.Len() != 0 {
+				t.Fatalf("Run(%q) stdout=%q stderr=%q", args, stdout.String(), stderr.String())
+			}
+			continue
 		}
 		if stdout.String() != helpText || stderr.Len() != 0 {
 			t.Fatalf("Run(%q) stdout=%q stderr=%q", args, stdout.String(), stderr.String())

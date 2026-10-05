@@ -615,3 +615,34 @@ The existing workflow publishes and verifies only Casks/achta.rb in the tap,
 including its single commit and ordinary main push. The release requires full
 local validation before publication and comparison of the installed executable
 with its published archive. No consumer repository is part of this release.
+
+
+## [2026-10-05] release preparation | ACHTA-0.5.11
+
+Prepare bounded stdin decision bodies, prefix help, and capability input forms
+for v0.5.11. The baseline de3395b returned a missing-file error for stdin;
+new regressions reproduce it and pass with the change. A disabled stdin branch
+turns four success/check cases red again; restoration is green. Rulefloor owns
+the new DECISION-STDIN-1 row (50 armed, mutation-proved rules). Owner RESUME 2 authorizes the release testVersion and four version/capability
+fixtures to advance to v0.5.11, and only the decision-help case to check the
+global help prefix and required flags. Other existing test cases stay unchanged.
+The first full verification failed on these now-authorized expectations; this
+is retained as a measured failure, not a successful verification. Source Version
+is v0.5.11.
+
+See docs/achta-0.5.11.md for measurements, invocation corrections and the complete
+read-only consumer-reference census. No consumer pin is moved. Filing those
+references in the read-only parent queue is declined because this brief permits
+writes only in Achta; the open list remains in that evidence document. The
+existing outside-path and filename restrictions remain; stdin shares the existing
+body validator, not a new secret-content classifier. The stale v0.5.9 specification
+status is corrected to this release. Full repository verification precedes the
+commit, annotated tag, single tag-triggered Release workflow and cask installation.
+
+
+Owner RESUME 3 authorized one compliant retry after the identity-read hook
+refusal; it succeeded. Verification after RESUME 2 exited 0, including all
+50 Rulefloor bindings and owned wiki checks. The parent-only postcheck is not
+applicable to this independently owned wiki: its required parent page/log would
+violate Achta's AGENTS.md, so no duplicate record is created. Release completion
+still requires published-archive and installed-binary evidence in the final report.

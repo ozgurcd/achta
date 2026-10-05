@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v0.5.11 — 2026-10-05
+
+- Accept bounded decision bodies from stdin, preserve file confinement, and
+  document how prefixes select existing decision sections.
+- Advertise stdin in capabilities and add regression coverage; the armed,
+  mutation-proved rule floor increases from 49 to 50.
+
 ## v0.5.10 — 2026-09-17
 
 - Release the scoped wiki checks, enforcing freshness, read-only derive previews,

@@ -2,6 +2,19 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.11 — 2026-10-05
+
+- Read decision bodies from stdin with `decision add --body-file -`, using the
+  same size limit and body checks as files. Empty input is refused and `--check`
+  still writes nothing. Outside-workspace body files remain refused; the error
+  points callers to stdin.
+- Explain that `--prefix` selects an ID series and the section already holding
+  it, including Identity and Platform examples. Help, README and capabilities
+  now name stdin input.
+- Add regression tests and a mutation-proved rule. Update release version
+  fixtures and the decision-help expectation; decision allocation and insertion
+  rules remain unchanged.
+
 ## v0.5.10 — 2026-09-17
 
 - Scope `wiki check` with repeatable `--repo NAME` and `--exclude NAME=REASON`;

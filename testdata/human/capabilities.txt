@@ -1,10 +1,12 @@
-Achta v0.5.10 capabilities
+Achta v0.5.11 capabilities
   amendments declare
   amendments rebase
   amendments reconcile
   capabilities
   count check
   decision add
+    --body-file PATH
+    --body-file -
   declared-route check
   floor census
   hook cd

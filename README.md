@@ -218,6 +218,24 @@ impossible self-referential SHA pin and are committed atomically with source.
 inserts caller-written prose at the measured section boundary. The caller owns
 the complete title; Achta invents neither dates nor content.
 
+`--prefix` selects the ID series and the section that already holds it; this is
+not limited to Platform decisions. For a register whose D series is in Identity
+and P series is in Platform:
+
+```sh
+achta decision add --prefix D --title "Identity choice" --body-file - < identity-body.md
+achta decision add --prefix P --title "Platform choice" --body-file platform-body.md
+```
+
+`--body-file -` reads stdin. File paths must stay inside the workspace and pass
+the existing secret-like filename checks; stdin has no filename. Both forms use
+the same body validation: non-whitespace text, at most 65536 bytes, no NUL or
+carriage return, and no second- or third-level register headings. Empty stdin is
+refused. `--check` validates without writing and exits 1 for `would_change`;
+a successful write exits 0, and invalid input exits 2. Prefixes and sections
+come from the register, not a built-in mapping. `capabilities --json` advertises
+both forms in the decision-add command's `input_forms` field.
+
 `wiki freshness`, `wiki derive`, `wiki unpushed`, and `wiki check` reproduce the
 workspace's mechanical page checks from local Git and filesystem facts.
 `wiki unpushed` deliberately uses only the local upstream tracking ref and does

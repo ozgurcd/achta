@@ -3,8 +3,8 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-09-17
-verified: 2026-09-17
+updated: 2026-10-05
+verified: 2026-10-05
 co_versioned: true
 ---
 
@@ -16,7 +16,11 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.10.
+- Current release line: v0.5.11.
+- `decision add --body-file -` reads bounded stdin through the same body
+  validator as file input; check mode writes nothing. File confinement stays
+  enforced. `--prefix` selects an ID series and its existing section; help and
+  capabilities name the stdin form.
 - Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
@@ -109,7 +113,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 49 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 50 armed, mutation-proved invariants on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
 
@@ -172,3 +176,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-08 | `co-versioned` | Correct v0.5.8 redirect false positives, add eight target-aware verdict cases, rehash HOOK-CD-WORKDIR-1, and release v0.5.9 with floor 49 unchanged. |
 | 2026-09-17 | `co-versioned` | THE-WIKI-TOOL-THAT-SAYS-WHAT-IT-DOES: explicit per-repository scope, enforcing freshness, read-only derive previews, metadata-only pins, ordered recipes and selected-wiki isolation proofs. |
 | 2026-09-17 | `co-versioned` | Release v0.5.10 from b56021a: advance source and exact version fixtures; owner-authorized annotated tag, fast-forward publication, workflow-owned cask update and local installation verification. |
+| 2026-10-05 | `co-versioned` | Prepare v0.5.11 with bounded decision stdin, prefix help and capability input forms, owner-authorized release and help expectations, and mutation-proved DECISION-STDIN-1. |

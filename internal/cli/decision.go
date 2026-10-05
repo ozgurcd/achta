@@ -18,16 +18,16 @@ type decisionAddDocument struct {
 	Changed       bool   `json:"changed"`
 }
 
-func runDecision(args []string, stdout, stderr io.Writer, opts globalOptions) int {
+func runDecision(args []string, stdin io.Reader, stdout, stderr io.Writer, opts globalOptions) int {
 	rest, err := requireSubcommand(args, "add")
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, decisionAddSchema, err)
 	}
 	set := flagSet("decision add")
 	title := set.String("title", "", "complete one-line decision title")
-	bodyValue := set.String("body-file", "", "decision body file")
+	bodyValue := set.String("body-file", "", "decision body file, or - for stdin")
 	registerValue := set.String("register", "wiki/platform/decisions.md", "decision register path")
-	prefix := set.String("prefix", "P", "decision ID prefix")
+	prefix := set.String("prefix", "P", "decision ID series and its existing section")
 	check := set.Bool("check", false, "validate and report without writing")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
 	if err := parseFlags(set, rest); err != nil {
@@ -49,19 +49,31 @@ func runDecision(args []string, stdout, stderr io.Writer, opts globalOptions) in
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, decisionAddSchema, err)
 	}
-	bodyPath, err := confinedPath(ws, *bodyValue)
-	if err != nil {
-		return renderError(stdout, stderr, opts.json, decisionAddSchema, err)
+	bodyPath := ""
+	if *bodyValue != "-" {
+		bodyPath, err = confinedPath(ws, *bodyValue)
+		if err != nil {
+			return renderError(stdout, stderr, opts.json, decisionAddSchema, invalid("%v; use --body-file - to read the body from stdin", err))
+		}
 	}
 	register, err := safefile.Read(ws.Root, registerPath, decision.MaxRegister)
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, decisionAddSchema, invalid("read decision register: %v", err))
 	}
-	body, err := safefile.Read(ws.Root, bodyPath, decision.MaxBody)
-	if err != nil {
-		return renderError(stdout, stderr, opts.json, decisionAddSchema, invalid("read decision body: %v", err))
+	var body []byte
+	if *bodyValue == "-" {
+		body, err = io.ReadAll(io.LimitReader(stdin, decision.MaxBody+1))
+		if err != nil {
+			return renderError(stdout, stderr, opts.json, decisionAddSchema, invalid("read decision body from stdin: %v", err))
+		}
+	} else {
+		file, err := safefile.Read(ws.Root, bodyPath, decision.MaxBody)
+		if err != nil {
+			return renderError(stdout, stderr, opts.json, decisionAddSchema, invalid("read decision body: %v", err))
+		}
+		body = file.Data
 	}
-	result, err := decision.Add(register.Data, *prefix, *title, body.Data)
+	result, err := decision.Add(register.Data, *prefix, *title, body)
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, decisionAddSchema, invalid("add decision: %v", err))
 	}

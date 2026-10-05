@@ -147,7 +147,7 @@ func dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseV
 	case "amendments":
 		return runAmendments(rest, stdout, stderr, opts)
 	case "decision":
-		return runDecision(rest, stdout, stderr, opts)
+		return runDecision(rest, stdin, stdout, stderr, opts)
 	case "slice":
 		return runSlice(rest, stdout, stderr, opts)
 	case "recipe":
@@ -305,12 +305,13 @@ func normalizeVersion(value string) string {
 }
 
 type capabilityCommand struct {
-	Name              string `json:"name"`
-	Reads             bool   `json:"reads"`
-	Writes            bool   `json:"writes"`
-	ExecutesExternal  bool   `json:"executes_external"`
-	RequiresGit       bool   `json:"requires_git"`
-	RequiresWorkspace bool   `json:"requires_workspace"`
+	Name              string   `json:"name"`
+	Reads             bool     `json:"reads"`
+	Writes            bool     `json:"writes"`
+	ExecutesExternal  bool     `json:"executes_external"`
+	RequiresGit       bool     `json:"requires_git"`
+	RequiresWorkspace bool     `json:"requires_workspace"`
+	InputForms        []string `json:"input_forms,omitempty"`
 }
 
 type capabilitiesDocument struct {
@@ -337,7 +338,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "capabilities"},
 		{Name: "count check", Reads: true, RequiresWorkspace: true},
 		{Name: "declared-route check", Reads: true, RequiresWorkspace: true},
-		{Name: "decision add", Reads: true, Writes: true, RequiresWorkspace: true},
+		{Name: "decision add", Reads: true, Writes: true, RequiresWorkspace: true, InputForms: []string{"--body-file PATH", "--body-file -"}},
 		{Name: "reachability classify", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "recipe check", Reads: true, RequiresWorkspace: true},
 		{Name: "replacement check", Reads: true, RequiresWorkspace: true},
@@ -385,6 +386,9 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 	fmt.Fprintf(stdout, "Achta %s capabilities\n", doc.Version)
 	for _, command := range doc.Commands {
 		fmt.Fprintf(stdout, "  %s\n", command.Name)
+		for _, form := range command.InputForms {
+			fmt.Fprintf(stdout, "    %s\n", form)
+		}
 	}
 	return 0
 }
@@ -461,7 +465,7 @@ Commands:
   capabilities report supported machine interfaces and operations
   count check   reconcile caller-declared breakdown totals and claim citations
   declared-route check enforce caller-declared alternatives, bans, and a YAML-scoped key
-  decision add  allocate and insert an explicit platform decision
+  decision add  allocate and insert an explicit decision
   reachability classify decide REQUIRED or SKIPPABLE from changed paths and declared no-reach patterns
   slice check   audit a landed slice from Git and wiki evidence
   recipe check  refuse neutralized make recipe lines; --expect-line is byte-exact
@@ -493,6 +497,18 @@ Commands:
 
 // scopedCommandHelp documents side effects and exit semantics at the command.
 var scopedCommandHelp = map[string]string{
+	"decision add": `
+decision add --title TITLE --body-file PATH|- [--prefix PREFIX] [--register PATH] [--check] [--json]
+--body-file - reads the body from stdin; PATH must remain inside the workspace.
+Bodies must contain non-whitespace text, at most 65536 bytes, and no register headings.
+--prefix selects the ID series and the section that already holds it (default P).
+For a register with D decisions in Identity and P decisions in Platform:
+  achta decision add --prefix D --title "Identity choice" --body-file -
+  achta decision add --prefix P --title "Platform choice" --body-file body.md
+Sections come from the existing register; the prefix does not create a section.
+--register defaults to wiki/platform/decisions.md. --check validates without writing
+and exits 1 for would_change; a successful write exits 0, invalid input exits 2.
+`,
 	"wiki check": `
 wiki check [--only freshness,derive] [--repo NAME]... [--exclude NAME=REASON]... [--json]
 Without --only both checks run; --only selects check names, not repository names.
