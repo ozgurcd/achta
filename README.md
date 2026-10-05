@@ -257,7 +257,10 @@ remains accepted; use `--report-only` for an explicitly labelled report with exi
 `wiki derive` and `wiki derive --check` preview before/after content per changed
 page without writing (exit 1 when stale). Apply with `wiki derive --write`, which
 names updated pages. `--print NAME` prints a block. The explicit modes are
-mutually exclusive. Generated headers identify Achta and its version. Pinning
+mutually exclusive. Generated headers identify Achta and its version. `wiki check`
+reports header-only generator version drift as a note rather than a failure;
+any other derived content drift still fails. Derive previews remain byte-exact,
+and `--write` updates the header to the running version. Pinning
 does not regenerate blocks and reports that a new front lead is the PM's to write.
 All selectors are resolved from global `--wiki-dir WORKSPACE/wiki`, which must
 precede the command, for both reads and writes; the working directory is not a

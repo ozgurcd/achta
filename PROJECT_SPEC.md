@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.12 release specification
+Status: v0.5.13 release specification
 
 Project name: Achta
 
@@ -683,7 +683,12 @@ closed statuses are `published`, `unpushed`, `behind`, and `diverged`.
 
 `wiki check` composes strict freshness and derived-block checks, exposes both
 results separately, and preserves `cannot_evaluate`; a green aggregate never
-hides a skipped or unevaluated component. `--only NAME[,NAME...]` selects the
+hides a skipped or unevaluated component. A difference confined to the canonical
+generator header's version token is informational: the page reports
+`version_drift` with a reason naming both versions, and human output prints a
+NOTE. All other derived-block differences still fail. `wiki derive` previews
+remain byte-exact and `--write` still writes the running version.
+`--only NAME[,NAME...]` selects the
 checks to evaluate from `freshness` and `derive`: the selected checks are the
 only ones evaluated and the only ones in `checks[]`, in canonical order, and
 the exit contract applies unchanged to that selection. The selection is a set,

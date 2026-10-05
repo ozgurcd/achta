@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.5.13 — 2026-10-05
+
+Treat generator-header version-only drift as an explicit wiki-check note; retain strict content checks and exact derive writes.
+
 ## v0.5.12 — 2026-10-05
 
 - Use public release downloads without installer tokens in the Homebrew cask;

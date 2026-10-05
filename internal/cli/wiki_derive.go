@@ -137,7 +137,7 @@ func runWikiCheck(args []string, stdout, stderr io.Writer, opts globalOptions) i
 				document.Status, code = "fail", 1
 			}
 		case "derive":
-			derived, deriveErr := achtawiki.DeriveSelected(ws.Root, true, scope)
+			derived, deriveErr := achtawiki.CheckDerivedSelected(ws.Root, scope)
 			if deriveErr != nil {
 				document.Status, code = "cannot_evaluate", 2
 				document.Checks = append(document.Checks, wikiCheckItem{Name: "derive", Status: "cannot_evaluate", Detail: boundedCLIError(deriveErr)})
@@ -179,6 +179,9 @@ func runWikiCheck(args []string, stdout, stderr io.Writer, opts globalOptions) i
 			}
 		case achtawiki.DeriveResult:
 			for _, page := range detail.Pages {
+				if page.Status == "version_drift" {
+					fmt.Fprintf(stdout, "NOTE %s %s (derive): %s\n", page.Repository, page.Page, page.Reason)
+				}
 				if page.Status == "not_judged" {
 					fmt.Fprintf(stdout, "NOT judged %s %s (%s): %s\n", page.Repository, page.Page, check.Name, page.Reason)
 				}

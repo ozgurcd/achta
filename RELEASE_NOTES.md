@@ -2,6 +2,10 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.13 — 2026-10-05
+
+Wiki checks now report a changed Achta version in a generated header as a note when all other bytes match. Changed facts, wording, spacing, and malformed versions still fail. Derive previews remain exact, and explicit writes use the running version.
+
 ## v0.5.12 — 2026-10-05
 
 - Install or upgrade Achta with Homebrew without a GitHub token. The cask now

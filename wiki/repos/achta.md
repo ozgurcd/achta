@@ -16,7 +16,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.12.
+- Current release line: v0.5.13.
+- `wiki check` reports generator-header version-only drift as an explicit note;
+  other derived changes fail, and `wiki derive --write` retains the running version.
 - `decision add --body-file -` reads bounded stdin through the same body
   validator as file input; check mode writes nothing. File confinement stays
   enforced. `--prefix` selects an ID series and its existing section; help and
@@ -115,7 +117,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 50 armed invariants with recorded red proofs on the current
+- `RULE-FLOOR.md` carries 51 armed invariants with recorded red proofs on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
 
@@ -178,3 +180,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-17 | `co-versioned` | Release v0.5.10 from b56021a: advance source and exact version fixtures; owner-authorized annotated tag, fast-forward publication, workflow-owned cask update and local installation verification. |
 | 2026-10-05 | `co-versioned` | Prepare v0.5.11 with bounded decision stdin, prefix help and capability input forms, owner-authorized release and help expectations, and mutation-proved DECISION-STDIN-1. |
 | 2026-10-05 | `co-versioned` | Release v0.5.12 with public header-free Homebrew downloads, an explicit version URL template, generated-cask refusal checks, and unchanged publication safeguards. |
+| 2026-10-05 | `co-versioned` | Release v0.5.13: explicit header-only generator drift notes, exact content and write controls, WIKI-DERIVE-HEADER-VERSION-1 red/green proof; public Homebrew publication and installation authorized. |

@@ -672,3 +672,18 @@ census records those deletions. Hook refusals were resumed or retried only in
 owner-authorized compliant forms. Full make verify precedes the commit; the
 annotated tag triggers one release workflow, whose publication and local brew
 installation evidence belong in the final report. No adjacent item is deferred.
+
+## [2026-10-05] release | ACHTA-0.5.13 generator header comparison
+
+The CLI fixture fails on 602769e v0.5.12 with exit=1 want=0 and derive fail
+for LF and CRLF version-only drift. The check-only wrapper reports both versions
+as an explicit note; fact, wording, spacing and invalid-version controls remain
+red, while exact derive previews and running-version writes are preserved.
+WIKI-DERIVE-HEADER-VERSION-1 adds the observed red proof; existing tests change
+only their release-version constant. Full verification precedes publication.
+The source and four version/capability fixtures advance to v0.5.13.
+
+The parent wiki is read-only. Its make check records GATE-RUN.txt on a clean
+tree, so its proof requires the existing dirty-tree non-minting path or an
+owner-authorized read-only alternative. No parent wiki content is changed here.
+Lictor consumer pins are a separately authorized follow-up after installation.
