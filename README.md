@@ -5,8 +5,8 @@ updates a closed set of canonical artifacts, summarizes gate witnesses, and
 reconciles explicit ledger amendments with Rulefloor's logical diff. It does
 not decide whether human claims are true.
 
-This is a private project. Source, releases, checksums, and CI output are for
-authorized users only.
+Achta is public. Release archives and checksums can be downloaded without
+GitHub credentials.
 
 ## Install
 
@@ -434,17 +434,17 @@ Published-fix vulnerability policy remains in dedicated analyzers.
 The v0.4.0 release makes repository-owned wiki authority directly selectable
 with the fail-closed global `--wiki-dir` option.
 
-Authorized users can install a released build with:
+Install a released build without a GitHub token:
 
 ```sh
-HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install --cask ozgurcd/tap/achta
+brew install --cask ozgurcd/tap/achta
 ```
 
-Achta releases remain private. Set `HOMEBREW_GITHUB_API_TOKEN` to a GitHub token
-that can read `ozgurcd/achta` before installation. Tap publication separately
-uses the repository secret `HOMEBREW_TAP_GITHUB_TOKEN`; neither token is stored
-in the generated Cask. Configure the repository secret before pushing a release
-tag; the workflow verifies its tap push permission before creating the release.
+The cask downloads public GitHub release archives without Authorization or
+Accept headers. The release check refuses API asset URLs and installer-token
+lookups, and verifies the cask version and archive hashes against checksums.txt.
+Tap publication uses the repository secret `HOMEBREW_TAP_GITHUB_TOKEN`;
+the workflow verifies its tap push permission before creating the release.
 Release tags are annotated objects; the workflow refuses a lightweight tag
 before building or publishing artifacts.
 

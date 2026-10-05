@@ -646,3 +646,29 @@ refusal; it succeeded. Verification after RESUME 2 exited 0, including all
 applicable to this independently owned wiki: its required parent page/log would
 violate Achta's AGENTS.md, so no duplicate record is created. Release completion
 still requires published-archive and installed-binary evidence in the final report.
+
+## [2026-10-05] release | ACHTA-0.5.12 public Homebrew downloads
+
+Owner-authorized v0.5.12 replaces private API download rewriting with public
+release URLs and removes installer headers. An anonymous v0.5.11 checksum
+download returned HTTP 200. The helper remains necessary for structured
+postflight conversion and now refuses headers, API URLs, and missing, duplicate
+or foreign downloads. Existing checksum, version, downgrade, idempotency and
+remote-copy publication checks remain.
+
+The public contract tests failed on the previous configuration and passed after
+the change. A real GoReleaser snapshot initially exposed a configuration gap:
+its version was 0.5.11-SNAPSHOT-3f2bae2 but its URLs used the literal v0.5.11 tag.
+Owner RESUME 1 authorized repair. An explicit url.template now preserves Ruby's
+version interpolation; the rebuilt snapshot passed all four URL/checksum pairs,
+and the old token cask remained refused. Rulefloor amendments preserve all 50
+rows and supersede changed proofs with measured observations.
+
+Source version, the CLI test constant and four version/capability fixtures move
+only from v0.5.11 to v0.5.12. Live private-distribution claims are corrected;
+historical entries remain. Gograph individual reviews passed; whole-change
+review cannot traverse deleted declarations, so its complete historical change
+census records those deletions. Hook refusals were resumed or retried only in
+owner-authorized compliant forms. Full make verify precedes the commit; the
+annotated tag triggers one release workflow, whose publication and local brew
+installation evidence belong in the final report. No adjacent item is deferred.

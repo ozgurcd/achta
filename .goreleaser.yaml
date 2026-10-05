@@ -43,8 +43,8 @@ release:
 
 homebrew_casks:
   - name: achta
-    # The release workflow rewrites these generated browser URLs to the private
-    # release asset API, then publishes and verifies the exact tap copy.
+    # The release workflow checks public URLs, prepares structured postflight
+    # steps, then publishes and verifies the exact tap copy.
     skip_upload: true
     repository:
       owner: ozgurcd
@@ -55,9 +55,7 @@ homebrew_casks:
     binaries:
       - achta
     url:
-      headers:
-        - "Accept: application/octet-stream"
-        - "Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\", \"\")}"
+      template: "https://github.com/ozgurcd/achta/releases/download/v#{version}/{{ .ArtifactName }}"
     hooks:
       post:
         install: |

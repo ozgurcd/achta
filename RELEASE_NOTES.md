@@ -2,6 +2,14 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.12 — 2026-10-05
+
+- Install or upgrade Achta with Homebrew without a GitHub token. The cask now
+  downloads all macOS and Linux archives from public release links.
+- Reject download headers and private API links before publishing the cask.
+  Keep checks for the version, archive checksums, older versions, and the copy
+  published in the tap. Keep the macOS quarantine step in Homebrew's current format.
+
 ## v0.5.11 — 2026-10-05
 
 - Read decision bodies from stdin with `decision add --body-file -`, using the

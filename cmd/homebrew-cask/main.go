@@ -8,21 +8,16 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 3 {
-		fmt.Fprintln(os.Stderr, "usage: homebrew-cask RELEASE_JSON GENERATED_CASK")
+	if len(os.Args) != 2 {
+		fmt.Fprintln(os.Stderr, "usage: homebrew-cask GENERATED_CASK")
 		os.Exit(2)
 	}
-	releaseJSON, err := os.ReadFile(os.Args[1])
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "read release metadata: %v\n", err)
-		os.Exit(1)
-	}
-	cask, err := os.ReadFile(os.Args[2])
+	cask, err := os.ReadFile(os.Args[1])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "read generated cask: %v\n", err)
 		os.Exit(1)
 	}
-	rewritten, err := homebrewcask.Rewrite(cask, releaseJSON)
+	rewritten, err := homebrewcask.Rewrite(cask)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "rewrite generated cask: %v\n", err)
 		os.Exit(1)

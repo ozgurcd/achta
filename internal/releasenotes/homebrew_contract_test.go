@@ -26,10 +26,10 @@ func TestReleaseUsesCurrentHomebrewCaskPublishing(t *testing.T) {
 				"name: homebrew-tap",
 				"HOMEBREW_TAP_GITHUB_TOKEN",
 				"binaries:",
-				"Authorization: Bearer #{ENV.fetch",
+				`template: "https://github.com/ozgurcd/achta/releases/download/v#{version}/{{ .ArtifactName }}"`,
 				"com.apple.quarantine",
 			},
-			forbidden: []string{"\nbrews:", "directory: Formula"},
+			forbidden: []string{"\nbrews:", "directory: Formula", "Authorization", "Accept:", "api.github.com", "HOMEBREW_GITHUB_API_TOKEN"},
 		},
 		{
 			path: ".github/workflows/release.yml",
@@ -38,18 +38,15 @@ func TestReleaseUsesCurrentHomebrewCaskPublishing(t *testing.T) {
 				".permissions.push",
 				"dist/homebrew/Casks/achta.rb",
 				"secrets.HOMEBREW_TAP_GITHUB_TOKEN",
-				"SOURCE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}",
-				"repos/ozgurcd/achta/releases/tags/$GITHUB_REF_NAME",
 				"go run ./cmd/homebrew-cask",
-				"https://api.github.com/repos/ozgurcd/achta/releases/assets/",
-				"retains a private release browser URL",
+				"https://github.com/ozgurcd/achta/releases/download/v#{version}/$asset",
 				"gh auth setup-git",
 				"gh repo clone ozgurcd/homebrew-tap",
 				"refusing to downgrade Homebrew",
 				"git -C \"$tap_dir\" diff --cached --quiet",
 				"repos/ozgurcd/homebrew-tap/contents/Casks/achta.rb",
 			},
-			forbidden: []string{"dist/homebrew/Formula/achta.rb"},
+			forbidden: []string{"dist/homebrew/Formula/achta.rb", "SOURCE_GITHUB_TOKEN", "release_json", "https://api.github.com/repos/ozgurcd/achta/releases/assets/"},
 		},
 	}
 	for _, test := range tests {
@@ -73,11 +70,11 @@ func TestReleaseUsesCurrentHomebrewCaskPublishing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	githubRelease := strings.Index(string(workflow), "- name: Publish private GitHub release")
+	githubRelease := strings.Index(string(workflow), "- name: Publish public GitHub release")
 	credentialCheck := strings.Index(string(workflow), "- name: Verify Homebrew tap credential")
 	homebrewRelease := strings.Index(string(workflow), "- name: Publish and verify Homebrew cask")
 	if credentialCheck < 0 || githubRelease < 0 || homebrewRelease < 0 || credentialCheck >= githubRelease || githubRelease >= homebrewRelease {
-		t.Fatal("tap credential verification, private GitHub release, and Homebrew publication are out of order")
+		t.Fatal("tap credential verification, public GitHub release, and Homebrew publication are out of order")
 	}
 }
 
@@ -142,9 +139,10 @@ func TestHomebrewCaskTokenLookupIsNonThrowing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const required = `Authorization: Bearer #{ENV.fetch(\"HOMEBREW_GITHUB_API_TOKEN\", \"\")}`
-	if !strings.Contains(string(data), required) {
-		t.Fatalf(".goreleaser.yaml must use a non-throwing installer-token lookup %q", required)
+	for _, forbidden := range []string{"Authorization", "Accept:", "api.github.com", "HOMEBREW_GITHUB_API_TOKEN"} {
+		if strings.Contains(string(data), forbidden) {
+			t.Errorf(".goreleaser.yaml must not require installer authentication: found %q", forbidden)
+		}
 	}
 }
 

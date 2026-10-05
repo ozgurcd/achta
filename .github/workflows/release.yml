@@ -69,7 +69,7 @@ jobs:
           test "$(gh api repos/ozgurcd/homebrew-tap --jq '.permissions.push')" = true
       - name: Select version release notes
         run: make release-notes-check RELEASE_NOTES_OUTPUT="$RUNNER_TEMP/release-notes.md"
-      - name: Publish private GitHub release
+      - name: Publish public GitHub release
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7
         with:
           distribution: goreleaser
@@ -81,7 +81,6 @@ jobs:
       - name: Publish and verify Homebrew cask
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
-          SOURCE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -89,11 +88,8 @@ jobs:
           test -s "$cask_path"
           desired_version="${GITHUB_REF_NAME#v}"
           grep -Fq "version \"$desired_version\"" "$cask_path"
-          release_json="$RUNNER_TEMP/release.json"
-          GH_TOKEN="$SOURCE_GITHUB_TOKEN" gh api \
-            "repos/ozgurcd/achta/releases/tags/$GITHUB_REF_NAME" > "$release_json"
           rewritten_cask="$RUNNER_TEMP/achta-rewritten.rb"
-          go run ./cmd/homebrew-cask "$release_json" "$cask_path" > "$rewritten_cask"
+          go run ./cmd/homebrew-cask "$cask_path" > "$rewritten_cask"
           mv "$rewritten_cask" "$cask_path"
           for asset in \
             achta_Darwin_arm64.tar.gz \
@@ -103,12 +99,8 @@ jobs:
             expected_hash="$(awk -v name="$asset" '$2 == name { print $1 }' dist/checksums.txt)"
             test -n "$expected_hash"
             test "$(grep -Fc "sha256 \"$expected_hash\"" "$cask_path")" = 1
+            test "$(grep -Fc "https://github.com/ozgurcd/achta/releases/download/v#{version}/$asset" "$cask_path")" = 1
           done
-          test "$(grep -Fc 'https://api.github.com/repos/ozgurcd/achta/releases/assets/' "$cask_path")" = 4
-          if grep -Fq 'https://github.com/ozgurcd/achta/releases/download/' "$cask_path"; then
-            echo "rewritten Homebrew cask retains a private release browser URL" >&2
-            exit 1
-          fi
           tap_dir="$RUNNER_TEMP/homebrew-tap"
           gh auth setup-git
           gh repo clone ozgurcd/homebrew-tap "$tap_dir"

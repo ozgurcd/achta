@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.11 release specification
+Status: v0.5.12 release specification
 
 Project name: Achta
 
@@ -12,7 +12,7 @@ Intended location: `/Users/odemir/Development/identuum/achta`
 
 Git remote: `git@github.com:ozgurcd/achta.git`
 
-Repository visibility: private
+Repository visibility: public
 
 Go module path: `github.com/ozgurcd/achta`
 
@@ -1799,15 +1799,12 @@ credential-backed calls.
 
 ## 18. Distribution
 
-Achta is a private project. Its source, CI logs, release artifacts, checksums,
-and documentation must remain within access-controlled locations. Nothing in
-this specification authorizes making the repository or its artifacts public.
+Achta is a public project. Release archives and checksums are available through
+public GitHub release URLs without installer credentials.
 
-Initial development may use `go run` or a local build from the private
-repository. Once the command and machine schemas are stable enough for shared
-use by authorized workspace users:
+Development may use `go run` or a local build. Release publication must:
 
-- publish checksum-addressed binaries to private GitHub releases for Linux and
+- publish checksum-addressed binaries to public GitHub releases for Linux and
   macOS on amd64 and arm64;
 - build with `CGO_ENABLED=0`;
 - use GoReleaser or an equivalently reproducible checked-in release workflow;
@@ -1815,20 +1812,20 @@ use by authorized workspace users:
 - stamp the release version while also reporting Go build metadata;
 - create annotated semantic-version tags and make the release workflow refuse
   a lightweight tag before validation or publication;
-- publish an `achta` Homebrew cask to `ozgurcd/homebrew-tap` after the private
-  GitHub release succeeds; installation still requires authorized access to
-  the private release assets through `HOMEBREW_GITHUB_API_TOKEN`;
-- allow Homebrew to evaluate the cask during update and discovery when the
-  installer token is absent, without weakening authenticated asset downloads;
-- rewrite every generated browser download URL to the unique numeric GitHub
-  release-asset API URL assigned after publication, retain the binary Accept
-  and bearer-token headers, and refuse missing, duplicate, or foreign URLs;
+- publish an `achta` Homebrew cask to `ozgurcd/homebrew-tap` after the public
+  GitHub release succeeds; installation needs no GitHub token;
+- preserve exactly one public URL per archive in the form
+  `https://github.com/ozgurcd/achta/releases/download/v#{version}/<archive>`;
+- refuse Authorization or Accept headers, installer-token lookups, API asset
+  URLs, and missing, duplicate, or foreign download URLs before publishing;
+- retain `cmd/homebrew-cask` to enforce those checks and convert GoReleaser's
+  legacy postflight block to Homebrew's structured postflight steps;
 - use GoReleaser's current `homebrew_casks` support rather than its deprecated
   `brews` configuration, verify tap push access before creating the release,
   refuse tap downgrades, and verify the published cask.
 
 A release is complete only after its source commit is pushed, its tag and
-private release are published, the matching Homebrew cask is committed and
+public release are published, the matching Homebrew cask is committed and
 pushed to the tap, and that cask is installed through Homebrew. Completion is
 proved by the installed binary reporting the release version and advertising
 the newly shipped capability; a local commit or green build is not a release.

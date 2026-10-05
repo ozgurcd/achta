@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.5.12 — 2026-10-05
+
+- Use public release downloads without installer tokens in the Homebrew cask;
+  reject private API URLs and headers while retaining publication checks.
+
 ## v0.5.11 — 2026-10-05
 
 - Accept bounded decision bodies from stdin, preserve file confinement, and

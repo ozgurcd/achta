@@ -10,13 +10,13 @@ co_versioned: true
 
 # Achta
 
-Achta is the private, fail-closed Go CLI for deterministic workspace
+Achta is the public, fail-closed Go CLI for deterministic workspace
 bookkeeping. It edits only explicitly selected canonical artifacts and does not
 infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.11.
+- Current release line: v0.5.12.
 - `decision add --body-file -` reads bounded stdin through the same body
   validator as file input; check mode writes nothing. File confinement stays
   enforced. `--prefix` selects an ID series and its existing section; help and
@@ -25,9 +25,11 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
   parity, amendment workflows, and landed-slice checks.
-- Private GitHub releases publish checksummed macOS and Linux archives for
-  amd64 and arm64. The public Homebrew tap contains metadata only; downloading
-  private assets requires authorized GitHub access.
+- Public GitHub releases publish checksummed macOS and Linux archives for
+  amd64 and arm64. Homebrew downloads those public release URLs without headers
+  or installer tokens. The release helper rejects API URLs and prepares
+  structured postflight steps; publication still checks version and checksums,
+  refuses downgrades, and verifies the remote cask copy.
 - A release is complete only after source push, tag and release publication,
   Homebrew cask commit and push, and installation through Homebrew prove the
   installed version and newly shipped capability. Release tags are annotated;
@@ -113,7 +115,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 50 armed, mutation-proved invariants on the current
+- `RULE-FLOOR.md` carries 50 armed invariants with recorded red proofs on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
 
@@ -123,8 +125,6 @@ infer prose, execute generic gates, fetch, or mutate Git.
   author honesty.
 - It does not run arbitrary commands, create product commits, fetch remotes, or
   replace product-specific analyzers.
-- Homebrew installation requires `HOMEBREW_GITHUB_API_TOKEN` with read access
-  to the private repository.
 - Co-versioned pages have no external SHA pin; the containing checkout is their
   version boundary, while `verified:` records the last claim review.
 
@@ -177,3 +177,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-09-17 | `co-versioned` | THE-WIKI-TOOL-THAT-SAYS-WHAT-IT-DOES: explicit per-repository scope, enforcing freshness, read-only derive previews, metadata-only pins, ordered recipes and selected-wiki isolation proofs. |
 | 2026-09-17 | `co-versioned` | Release v0.5.10 from b56021a: advance source and exact version fixtures; owner-authorized annotated tag, fast-forward publication, workflow-owned cask update and local installation verification. |
 | 2026-10-05 | `co-versioned` | Prepare v0.5.11 with bounded decision stdin, prefix help and capability input forms, owner-authorized release and help expectations, and mutation-proved DECISION-STDIN-1. |
+| 2026-10-05 | `co-versioned` | Release v0.5.12 with public header-free Homebrew downloads, an explicit version URL template, generated-cask refusal checks, and unchanged publication safeguards. |
