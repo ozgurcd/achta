@@ -2,6 +2,13 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.15 — 2026-10-06
+
+Read Git settings, request Achta help, and preview wiki changes without a
+working-directory refusal. Commands that change files still need an explicit
+location. The release configuration check now runs the exact GoReleaser version
+used by the release workflow through Go, without a separate global install.
+
 ## v0.5.14 — 2026-10-06
 
 Claim a checkout before you write, so another slice can see who holds it and

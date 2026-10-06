@@ -37,6 +37,8 @@ jobs:
         run: make install-tools
       - name: Verify
         run: make verify
+      - name: Check pinned release configuration
+        run: make release-check
       - name: Select version release notes
         run: make release-notes-check RELEASE_NOTES_OUTPUT="$RUNNER_TEMP/release-notes.md"
       - name: Validate release artifacts

@@ -16,7 +16,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.14.
+- Current release line: v0.5.15.
 - `claim take/status/check/release` coordinates a local checkout through private
   per-worktree Git metadata, reports tracked paths and local upstream commits,
   preserves forced-release actor/reason history, and supports `achta.claim.v1`.
@@ -107,6 +107,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
   unparseable input warns and allows. File-descriptor duplication and exact
   `/dev/null` output are read-only, while numeric and combined redirects to
   files remain writes. Its stable contract is `achta.hook-cd.v1`.
+  Git config reads, Achta help flags and derive previews need no selector;
+  config writes, explicit derive writes, redirects and chained writes retain
+  their write checks. Help-looking option values remain data.
 
 ## Verification surface
 
@@ -120,7 +123,9 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 52 armed invariants with recorded red proofs on the current
+- `make release-check` invokes GoReleaser v2.17.0 through `go run`, matching
+  the release workflow pin; the workflow uses that same configuration check.
+- `RULE-FLOOR.md` carries 54 armed invariants with recorded red proofs on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
 
@@ -185,3 +190,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-10-05 | `co-versioned` | Release v0.5.12 with public header-free Homebrew downloads, an explicit version URL template, generated-cask refusal checks, and unchanged publication safeguards. |
 | 2026-10-05 | `co-versioned` | Release v0.5.13: explicit header-only generator drift notes, exact content and write controls, WIKI-DERIVE-HEADER-VERSION-1 red/green proof; public Homebrew publication and installation authorized. |
 | 2026-10-06 | `co-versioned` | Release v0.5.14 checkout claims with fixed-clock ownership, worktree, concurrency and state-report tests; CLAIM-OWNERSHIP-1 raises the armed floor to 52; public cask publication and installation authorized. |
+| 2026-10-06 | `co-versioned` | ACHTA-0.5.15: allow proven read-only hook forms, retain write checks, and run the workflow-pinned GoReleaser check through Go; two red-proved invariants raise the floor to 54; authorized release and Homebrew installation. |

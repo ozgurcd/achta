@@ -728,3 +728,45 @@ The first full verification passed tests and vet, then staticcheck reported
 `internal/gitstate/checkout.go:28:15: error strings should not be capitalized
 (ST1005)`. Lowercasing that new error message is an in-scope correction under
 P-076; staticcheck and the full gate are rerun before publication.
+
+## [2026-10-06] release | ACHTA-0.5.15
+
+Baseline `9eee610` matched origin/main and was clean; installed Achta was
+v0.5.14 with module agreement pass. The new read-only fixture failed on the
+old classifier: `verdict=deny want=allow; statement 1 (git config)` for reads,
+with equivalent denials for Achta help and derive previews. All 54 original
+verdict-table cases, including its 30 denial cases, remain unchanged. The
+advertised-writer fixture now supplies `wiki derive --write` so it continues
+to exercise the actual writer. Git config mutations, redirects, pipelines,
+chained writers, and help-looking option values remain refused without a
+selector. The additional preserved-write fixture passed on the old logic too.
+
+The old release command failed with `zsh:2: command not found: goreleaser`.
+TestPinnedReleaseCheck then failed with `No rule to make target release-check`.
+The new shared Make target runs GoReleaser v2.17.0 through Go, matching
+release.yml:12, and the workflow invokes it before artifact creation.
+The real invocation reported `1 configuration file(s) validated`.
+HOOK-CD-READS-1 and RELEASE-PINNED-CHECK-1 record these red observations;
+Rulefloor's armed floor increases from 52 to 54 without removing any rule.
+
+The source version, CLI test constant and four exact fixtures change only
+v0.5.14 to v0.5.15: testdata/human/version.txt, human/capabilities.txt,
+machine/version.json and machine/capabilities.json. The release recipe,
+README, specification and current local wiki claims describe the new behavior.
+The README and specification writer lists had omitted claim take/release,
+although hookcd.go already classified both; their live lists are corrected.
+
+Gograph source calls initially omitted the active session's required intention;
+each returned `requires an intention. Please supply the --intention (-i) flag
+stating your technical rationale.` Corrected calls succeeded. No permission,
+owner or PreToolUse hook refused an action. Whole-change review and session
+audit precede full verification. The authorized annotated tag triggers one
+release workflow; published artifact, cask and installed-hook proofs are
+reported at the close. Lictor's pin update is separately authorized; no claims
+are taken and no other checkout is written. The parent pin check passed with
+its existing v0.4.4-behind-v0.4.5 warning. Filing that warning again is declined:
+the parent wiki is read-only and the consumer pins are outside this brief.
+
+Brief detail: the existing repository has no release-check target or documented
+bare goreleaser recipe; the PATH-dependent check was the measured prior manual
+command. The new Make target and documented release procedure close that gap.

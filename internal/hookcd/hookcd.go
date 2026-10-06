@@ -418,9 +418,13 @@ func segmentWritingVerb(tokens []string) string {
 	command, args := invocation(tokens)
 	switch command {
 	case "git":
-		if subcommand := subcommand(args, map[string]bool{"-C": true, "-c": true, "--git-dir": true, "--work-tree": true, "--namespace": true, "--exec-path": true}); subcommand != "" {
-			if _, ok := gitWriteVerbs[subcommand]; ok {
-				return "git " + subcommand
+		name, rest := subcommandArguments(args, map[string]bool{"-C": true, "-c": true, "--git-dir": true, "--work-tree": true, "--namespace": true, "--exec-path": true})
+		if name == "config" && gitConfigReadOnly(rest) {
+			return ""
+		}
+		if name != "" {
+			if _, ok := gitWriteVerbs[name]; ok {
+				return "git " + name
 			}
 		}
 	case "go":
@@ -443,7 +447,13 @@ func segmentWritingVerb(tokens []string) string {
 			return "rulefloor rehash"
 		}
 	case "achta":
+		if achtaHelpRequested(args) {
+			return ""
+		}
 		if name := achtaCommand(args); name != "" {
+			if name == "wiki derive" && !flagPresent(args, "--write") {
+				return ""
+			}
 			if _, ok := achtaWriteCommands[name]; ok {
 				return "achta " + name
 			}
@@ -494,6 +504,11 @@ func isAssignment(token string) bool {
 }
 
 func subcommand(args []string, valueFlags map[string]bool) string {
+	name, _ := subcommandArguments(args, valueFlags)
+	return name
+}
+
+func subcommandArguments(args []string, valueFlags map[string]bool) (string, []string) {
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
 		if valueFlags[arg] {
@@ -503,9 +518,61 @@ func subcommand(args []string, valueFlags map[string]bool) string {
 		if strings.HasPrefix(arg, "-") {
 			continue
 		}
-		return filepath.Base(arg)
+		return filepath.Base(arg), args[index+1:]
 	}
-	return ""
+	return "", nil
+}
+
+// Only known read actions/modifiers exempt config from the writer table.
+// Unknown options and any write action retain the existing write verdict.
+func gitConfigReadOnly(args []string) bool {
+	readAction, operands := false, 0
+	for index := 0; index < len(args); index++ {
+		arg, _, hasValue := strings.Cut(args[index], "=")
+		switch arg {
+		case "--get", "--get-all", "--get-regexp", "--list", "-l":
+			readAction = true
+		case "--show-origin", "--show-scope", "--global", "--local", "--system", "--worktree",
+			"--includes", "--no-includes", "--null", "-z", "--name-only",
+			"--bool", "--int", "--bool-or-int", "--path", "--expiry-date":
+		case "--file", "-f", "--blob", "--type", "--default":
+			if !hasValue {
+				index++
+				if index >= len(args) {
+					return false
+				}
+			}
+		case "--":
+			operands += len(args) - index - 1
+			return readAction || operands == 1
+		default:
+			if strings.HasPrefix(arg, "-") {
+				return false
+			}
+			operands++
+		}
+	}
+	return readAction || operands == 1
+}
+
+// A flag value named --help is data, not a help request. Achta's boolean
+// options consume no following value; other options use a value or =value.
+func achtaHelpRequested(args []string) bool {
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--":
+			return false
+		case "--help", "-h":
+			return true
+		case "--json", "--quiet", "--timing", "--check", "--write", "--force":
+		default:
+			if strings.HasPrefix(arg, "-") && !strings.Contains(arg, "=") {
+				index++
+			}
+		}
+	}
+	return false
 }
 
 func achtaCommand(args []string) string {

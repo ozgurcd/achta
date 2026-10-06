@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.5.15 — 2026-10-06
+
+Allow read-only Git config, Achta help and derive previews through hook cd;
+check release configuration with the workflow-pinned GoReleaser through Go.
+
 ## v0.5.14 — 2026-10-06
 
 Add checkout claims with take, status, check and release commands, local change

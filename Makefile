@@ -1,11 +1,13 @@
 SHELL := /bin/sh
 
-.PHONY: help build test test-fuzz fmt-check wiki-check replacement-check release-notes-check verify rulefloor-static install-tools
+.PHONY: help build test test-fuzz fmt-check wiki-check replacement-check release-notes-check release-check verify rulefloor-static install-tools
 
 FUZZTIME ?= 5s
 RELEASE_NOTES_OUTPUT ?= /dev/null
+GORELEASER_VERSION := v2.17.0
 
 help:
+	@printf '%s\n' '  release-check       check configuration with the workflow-pinned GoReleaser via go run'
 	@printf '%s\n' 'Targets:' '  build               build ./cmd/achta' '  test                run unit tests' '  test-fuzz           fuzz every narrow parser for FUZZTIME each' '  fmt-check           fail on unformatted Go files' '  wiki-check          validate the co-versioned repository wiki' '  replacement-check   require cited replay for named script replacement claims' '  release-notes-check run the release extractor for the source version' '  verify              run the complete local verification gate' '  rulefloor-static    validate the ledger without executing bindings' '  install-tools       install pinned verification tools'
 
 build:
@@ -32,6 +34,9 @@ replacement-check:
 
 release-notes-check:
 	go run ./cmd/release-notes RELEASE_NOTES.md > "$(RELEASE_NOTES_OUTPUT)"
+
+release-check:
+	go run github.com/goreleaser/goreleaser/v2@$(GORELEASER_VERSION) check
 
 verify: fmt-check release-notes-check
 	go version

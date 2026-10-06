@@ -187,8 +187,18 @@ The committed writer vocabulary is:
   targeting output redirection with `>` or `>>`, `gofmt -w`, `sed -i`, `go mod`, `go get`,
   `go install`, `go generate`, and `rulefloor rehash`.
 - Achta writers: `amendments declare`, `amendments rebase`, `decision add`,
-  `parts lock`, `wiki derive`, `wiki pin`, `witness finalize`, `witness init`,
-  and `witness step`.
+  `claim take`, `claim release`, `parts lock`, `wiki derive --write`, `wiki pin`,
+  `witness finalize`, `witness init`, and `witness step`.
+
+Git config reads (`--get`, `--get-all`, `--get-regexp`, `--list`/`-l`, and
+a single key without a value) need no selector. Read modifiers such as
+`--show-origin` retain that behavior. Setting a value, adding, replacing,
+unsetting, editing, renaming or removing a section still requires a selector.
+Achta `--help`/`-h` flags are reads; an option value spelled `--help` is data.
+`wiki derive` previews are reads unless `--write` is present. Redirects and
+other commands in a pipeline or chain retain their own write checks.
+For example, `git config --show-origin user.name` and
+`achta decision add --help` pass; `git config user.name Example` needs a selector.
 
 The stable hook contract is `achta.hook-cd.v1`. A Claude Code owner can add
 this object to the existing `hooks.PreToolUse` array in the machine-local
@@ -578,3 +588,9 @@ one exact `## vMAJOR.MINOR.PATCH — YYYY-MM-DD` heading and publishes only the
 section matching the release tag. One optional leading `## Unreleased` section
 must contain content; remove the heading after folding its entries. Local
 `make verify` and both release stages run the same `release-notes-check` target.
+
+Before releasing, run `make release-check` and `make verify`. The release-check
+recipe runs `go run github.com/goreleaser/goreleaser/v2@v2.17.0 check`, at the
+exact version pinned by the release workflow. It needs Go, not a globally
+installed `goreleaser`. The workflow runs the same target before building
+release artifacts, and a regression test refuses a mismatched tool version.

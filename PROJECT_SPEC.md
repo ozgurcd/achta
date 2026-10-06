@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.14 release specification
+Status: v0.5.15 release specification
 
 Project name: Achta
 
@@ -1260,10 +1260,19 @@ The committed writer vocabulary is closed. Git writers are `add`, `am`,
 `submodule`, `switch`, `tag`, and `worktree`. Other writers are `make`, `go
 mod`, `go get`, `go install`, `go generate`, `gofmt -w`, `sed -i`, `mv`, `cp`,
 `rm`, `mkdir`, `touch`, `tee`, `>` or `>>`, and `rulefloor rehash`. Achta
-writers are `amendments declare`, `amendments rebase`, `decision add`, `parts
-lock`, `wiki derive`, `wiki pin`, `witness finalize`, `witness init`, and
+writers are `amendments declare`, `amendments rebase`, `claim take`, `claim
+release`, `decision add`, `parts lock`, `wiki derive --write`, `wiki pin`, `witness finalize`, `witness init`, and
 `witness step`. Unknown verbs are not writes. This table is the contract, not
 an inference from help output or command names.
+
+Git `config` is read-only for `--get`, `--get-all`, `--get-regexp`, `--list`/`-l`,
+or one key operand without a value. Read modifiers, including `--show-origin`,
+do not change that verdict. Explicit write actions and unknown options retain
+the write verdict, including setting, `--add`, `--replace-all`, `--unset*`,
+`--edit`, `--rename-section`, `--remove-section`, and a key plus value.
+Achta `--help`/`-h` flags are read-only; option values with those spellings are
+data. Derive without `--write` is a read-only preview. These exceptions apply
+only to the invocation; file redirects and other writing commands still deny.
 
 `achta.hook-cd.v1` names the stable stdin, verdict, diagnostic, and exit
 contract. The command emits no success output and requires neither a workspace
@@ -1811,6 +1820,7 @@ govulncheck ./...
 go mod tidy -diff
 gograph build . --precise
 make release-notes-check
+make release-check
 make replacement-check
 rulefloor check --repo . --run-profile unit --timings
 ```

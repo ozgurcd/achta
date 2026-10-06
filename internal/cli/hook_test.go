@@ -74,7 +74,11 @@ func TestHookCDTracksAdvertisedAchtaWriters(t *testing.T) {
 			continue
 		}
 		t.Run(command.Name, func(t *testing.T) {
-			payload, err := json.Marshal(map[string]any{"tool_input": map[string]any{"command": "achta " + command.Name}})
+			invocation := "achta " + command.Name
+			if command.Name == "wiki derive" {
+				invocation += " --write"
+			}
+			payload, err := json.Marshal(map[string]any{"tool_input": map[string]any{"command": invocation}})
 			if err != nil {
 				t.Fatal(err)
 			}
