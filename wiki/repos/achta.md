@@ -3,8 +3,8 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-10-05
-verified: 2026-10-05
+updated: 2026-10-06
+verified: 2026-10-06
 co_versioned: true
 ---
 
@@ -16,7 +16,10 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 ## Canonical facts
 
-- Current release line: v0.5.13.
+- Current release line: v0.5.14.
+- `claim take/status/check/release` coordinates a local checkout through private
+  per-worktree Git metadata, reports tracked paths and local upstream commits,
+  preserves forced-release actor/reason history, and supports `achta.claim.v1`.
 - `wiki check` reports generator-header version-only drift as an explicit note;
   other derived changes fail, and `wiki derive --write` retains the running version.
 - `decision add --body-file -` reads bounded stdin through the same body
@@ -117,7 +120,7 @@ infer prose, execute generic gates, fetch, or mutate Git.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
-- `RULE-FLOOR.md` carries 51 armed invariants with recorded red proofs on the current
+- `RULE-FLOOR.md` carries 52 armed invariants with recorded red proofs on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
 
@@ -181,3 +184,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-10-05 | `co-versioned` | Prepare v0.5.11 with bounded decision stdin, prefix help and capability input forms, owner-authorized release and help expectations, and mutation-proved DECISION-STDIN-1. |
 | 2026-10-05 | `co-versioned` | Release v0.5.12 with public header-free Homebrew downloads, an explicit version URL template, generated-cask refusal checks, and unchanged publication safeguards. |
 | 2026-10-05 | `co-versioned` | Release v0.5.13: explicit header-only generator drift notes, exact content and write controls, WIKI-DERIVE-HEADER-VERSION-1 red/green proof; public Homebrew publication and installation authorized. |
+| 2026-10-06 | `co-versioned` | Release v0.5.14 checkout claims with fixed-clock ownership, worktree, concurrency and state-report tests; CLAIM-OWNERSHIP-1 raises the armed floor to 52; public cask publication and installation authorized. |

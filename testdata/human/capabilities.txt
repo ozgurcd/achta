@@ -1,8 +1,12 @@
-Achta v0.5.13 capabilities
+Achta v0.5.14 capabilities
   amendments declare
   amendments rebase
   amendments reconcile
   capabilities
+  claim check
+  claim release
+  claim status
+  claim take
   count check
   decision add
     --body-file PATH

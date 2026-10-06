@@ -2,6 +2,15 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.14 — 2026-10-06
+
+Claim a checkout before you write, so another slice can see who holds it and
+how long it has been held. Claims stay in the checkout's Git directory and
+work separately for linked worktrees. Status lists changed tracked files and
+local commits that are not on the local upstream branch, without file contents
+or a network call. Check before writing, release your claim when done, or record
+a reason when you force another slice's release. All four commands support JSON.
+
 ## v0.5.13 — 2026-10-05
 
 Wiki checks now report a changed Achta version in a generated header as a note when all other bytes match. Changed facts, wording, spacing, and malformed versions still fail. Derive previews remain exact, and explicit writes use the running version.

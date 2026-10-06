@@ -47,6 +47,8 @@ var gitWriteVerbs = map[string]struct{}{
 var achtaWriteCommands = map[string]struct{}{
 	"amendments declare": {},
 	"amendments rebase":  {},
+	"claim take":         {},
+	"claim release":      {},
 	"decision add":       {},
 	"parts lock":         {},
 	"wiki derive":        {},

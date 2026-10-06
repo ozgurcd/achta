@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.13 release specification
+Status: v0.5.14 release specification
 
 Project name: Achta
 
@@ -360,6 +360,40 @@ achta version --json
 achta capabilities
 achta capabilities --json
 ```
+
+### 7.1.1 Checkout claims
+
+`claim take --repo ABS --slice NAME [--note TEXT]`, `claim status --repo ABS`,
+`claim check --repo ABS --slice NAME`, and `claim release --repo ABS --slice NAME
+[--force --reason TEXT]` are workspace-independent, local-only operations.
+They expose `achta.claim.v1` through `--json`. They do not fetch or alter Git
+history, refs, index or tracked files. Claims are advisory caller assertions,
+not authentication or a filesystem write barrier, and have no automatic expiry.
+
+Take records slice, UTC time and note in mode-0600 `achta-claim.json` inside the
+checkout's own Git directory (`achta.claim-state.v1`). Linked worktrees use
+distinct Git directories. A different holder refuses with its name and age;
+the same holder's repeated take preserves the original time and note.
+Writers use a nonblocking OS lock on `achta-claim.lock` and atomic state writes.
+Status and check never create state or locks. Malformed state is never replaced.
+
+Status reports the holder or none, sorted tracked-change filenames and count,
+and the count of commits absent from the local upstream plus the union of their
+filenames, including reverted paths. Renames count both old and new paths;
+untracked files are excluded. A missing upstream is explicit, with a null
+unpushed count, not an invented zero. Check passes only for the holder, or when
+there is no claim and both measured counts are zero with an available upstream.
+Other evaluated states refuse with exit 1. Missing or unsafe evidence exits 2.
+
+Release requires the holder, except that an explicit `--force --reason TEXT`
+allows the named releasing slice to release another. Every release retains the
+previous holder, releasing slice, time, forced flag and reason in the same atomic
+state document. No claim means there is nothing to release and exits 1. State
+and history together are bounded to 1 MiB; a full history refuses further writes.
+Notes and reasons are bounded to 4096 bytes, names to 128. Secret-like inputs,
+URL-shaped inputs, controls and linked claim files are refused without echo.
+Git checkout override environment variables are refused to keep the selected
+checkout unambiguous. The command does not install hooks or change consumer gates.
 
 ### 7.2 Version
 

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.5.14 — 2026-10-06
+
+Add checkout claims with take, status, check and release commands, local change
+and unpushed-commit reports, JSON output, and recorded forced releases.
+
 ## v0.5.13 — 2026-10-05
 
 Treat generator-header version-only drift as an explicit wiki-check note; retain strict content checks and exact derive writes.

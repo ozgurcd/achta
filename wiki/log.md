@@ -687,3 +687,44 @@ The parent wiki is read-only. Its make check records GATE-RUN.txt on a clean
 tree, so its proof requires the existing dirty-tree non-minting path or an
 owner-authorized read-only alternative. No parent wiki content is changed here.
 Lictor consumer pins are a separately authorized follow-up after installation.
+
+## [2026-10-06] release | ACHTA-CLAIM
+
+Baseline `5407b0a` was clean, equal to origin/main, and reported v0.5.13.
+The new CLI fixture first failed with `claim check exit=2 want=0: achta:
+unknown command "claim"`; help lacked the explicit checkout selector. The
+implemented take, status, check and release lifecycle now passes. Fixed-clock
+fixtures cover holder/age refusal, retained forced-release actor and reason,
+tracked paths with and without claims, reverted local commits, missing upstream,
+worktree isolation, concurrent takes and safe refusal without state changes.
+
+New safety tests first found `malformed state accepted`, `linked Git directory
+accepted for claim writes`, and `filename changed: ["leading newline.txt"]`.
+The corrected decoder, metadata check and NUL-delimited diff-tree reader pass.
+Disabling the other-holder guard made TestOwnershipAtFixedClock fail with
+`take: status=pass error=<nil> reason=`; restoration passed. Rulefloor records
+CLAIM-OWNERSHIP-1, increasing its armed, proved rows from 51 to 52. The existing
+advertised-writer test exposed missing take/release entries in the hook's table;
+adding those entries passes without altering the existing rules.
+
+The source version, CLI test constant and four exact version/capability fixtures
+advance from v0.5.13 to v0.5.14. Capability fixtures additionally enumerate the
+four new commands and their two schemas. The old human fixture failed with
+`want: achta v0.5.13` versus `got: achta v0.5.14`; revised fixtures pass.
+Race-enabled claim and CLI tests pass. Complete verification precedes the release
+commit; the annotated tag triggers publication once. The installed-binary proof
+reuses the lifecycle and input-refusal tests through ACHTA_CLAIM_BINARY.
+
+Claims are advisory, have no expiry and remain in private per-worktree Git
+metadata. A missing upstream is unknown and refuses an unclaimed check; no fetch
+or tracked-file write is performed. Release history is retained within the
+bounded state artifact. All claim writes in this work use temporary fixtures.
+No consumer gate or parent wiki is changed. The brief's baseline is correct;
+no adjacent item is deferred. The release pin check's existing v0.4.4 consumer
+warning is outside this task's scope; filing a duplicate parent queue entry is
+declined because the parent wiki is read-only here.
+
+The first full verification passed tests and vet, then staticcheck reported
+`internal/gitstate/checkout.go:28:15: error strings should not be capitalized
+(ST1005)`. Lowercasing that new error message is an in-scope correction under
+P-076; staticcheck and the full gate are rerun before publication.

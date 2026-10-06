@@ -18,7 +18,7 @@ go install ./cmd/achta
 
 ## Commands
 
-`version`, `capabilities`, and the Bash PreToolUse hook are
+`version`, `capabilities`, `claim`, and the Bash PreToolUse hook are
 workspace-independent:
 
 ```sh
@@ -473,6 +473,48 @@ facts, decisions, and history. This wiki is co-versioned with the source and is
 the only home for that information; the parent workspace wiki must not
 duplicate it. `make verify` runs the repository-owned wiki check.
 
+## Checkout claims
+
+Claims let cooperating slices announce that they are writing one checkout.
+They are advisory: they do not prevent an editor or Git from writing files.
+They have no expiry; a crashed slice leaves its claim visible until release.
+The explicit `--repo` must be an absolute checkout root. No wiki is required.
+
+```sh
+achta claim take --repo /work/project --slice schema-change --note 'database work'
+achta claim check --repo /work/project --slice docs-change
+achta claim status --repo /work/project --json
+achta claim release --repo /work/project --slice schema-change
+achta claim take --repo /work/project --slice docs-change
+```
+
+The second command refuses and names `schema-change` and its age. Repeating
+`take` as the holder succeeds without renewing its time or changing its note.
+`check` passes for the holder, or for an unclaimed checkout with no tracked
+changes and no commits ahead of its locally available upstream. Without a
+resolvable upstream, unclaimed `check` refuses; `status` reports the commit
+count as unknown. Neither command fetches. Untracked files are not counted.
+Changed tracked paths include staged changes, unstaged changes and both names
+of a rename. Local commit paths include changes later reverted by another local
+commit; they are not just the net diff. Output contains filenames, not contents.
+
+All four commands accept `--json` (`achta.claim.v1`). Evaluated refusals exit 1;
+invalid inputs or unavailable evidence exit 2. Status lists changes and commits
+whether or not a claim exists. `release --slice docs-change --force --reason
+'owner handoff'` can release another holder; the private history retains the
+previous holder, releasing slice, time, force flag and reason. The slice name
+is a caller assertion, not an authenticated identity.
+
+The state is `achta-claim.json` in the checkout's Git directory, with mode 0600;
+a linked worktree uses its own Git directory, not the shared one. The adjacent
+`achta-claim.lock` serializes writers without waiting and survives as a private
+lock file. Status and check create no files. State replacement is atomic and
+bounded to 1 MiB, including release history. Notes and reasons allow at most
+4096 bytes, slice names 128 bytes. Secret-like words, URL-shaped input, control
+characters, malformed state, linked metadata files and Git checkout override
+environment variables are refused without echoing the input. Claims coordinate
+one local checkout only; they do not coordinate separate clones or machines.
+
 ## Exit contract
 
 - `0`: operation or evaluation succeeded.
@@ -496,7 +538,8 @@ the selected binary without exposing environment variables. Every Git call uses
 `--no-optional-locks` so status checks cannot refresh repository index metadata.
 Mutation inputs and
 targets must be bounded regular files inside the
-canonical workspace; linked target components, traversal, concurrent changes,
+canonical workspace (claims explicitly select a checkout's Git directory);
+linked target components, traversal, concurrent changes,
 and secret-like input paths are refused. Writes use a same-directory temporary
 file, sync, identity recheck, rename, and directory sync.
 

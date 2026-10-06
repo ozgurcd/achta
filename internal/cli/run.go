@@ -132,6 +132,8 @@ func dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseV
 		return runVersion(rest, stdout, stderr, opts, releaseVersion)
 	case "capabilities":
 		return runCapabilities(rest, stdout, stderr, opts, releaseVersion)
+	case "claim":
+		return runClaim(rest, stdout, stderr, opts)
 	case "count":
 		return runCount(rest, stdout, stderr, opts)
 	case "declared-route":
@@ -336,6 +338,10 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		{Name: "amendments rebase", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "amendments reconcile", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "capabilities"},
+		{Name: "claim take", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true},
+		{Name: "claim status", Reads: true, ExecutesExternal: true, RequiresGit: true},
+		{Name: "claim check", Reads: true, ExecutesExternal: true, RequiresGit: true},
+		{Name: "claim release", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true},
 		{Name: "count check", Reads: true, RequiresWorkspace: true},
 		{Name: "declared-route check", Reads: true, RequiresWorkspace: true},
 		{Name: "decision add", Reads: true, Writes: true, RequiresWorkspace: true, InputForms: []string{"--body-file PATH", "--body-file -"}},
@@ -380,6 +386,8 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 			"no Git mutation",
 		},
 	}
+	doc.MachineInterfaces = append(doc.MachineInterfaces, "achta.claim.v1")
+	doc.ArtifactSchemas = append(doc.ArtifactSchemas, "achta.claim-state.v1")
 	if opts.json {
 		return writeJSON(stdout, stderr, doc)
 	}
@@ -463,6 +471,10 @@ Global options:
 Commands:
   version       report release and Go module versions
   capabilities report supported machine interfaces and operations
+  claim take --repo ABS --slice NAME [--note TEXT] claim a checkout
+  claim status --repo ABS report its holder, tracked changes and local commits
+  claim check --repo ABS --slice NAME check before writing
+  claim release --repo ABS --slice NAME [--force --reason TEXT] release a claim
   count check   reconcile caller-declared breakdown totals and claim citations
   declared-route check enforce caller-declared alternatives, bans, and a YAML-scoped key
   decision add  allocate and insert an explicit decision
@@ -493,6 +505,15 @@ Commands:
   amendments rebase move a manifest to an accepted witness commit
   amendments reconcile compare declarations with Rulefloor's logical diff
   help          show this help
+
+Claims are advisory and local; no expiry or network calls. All four accept --json.
+Example with two slices:
+  achta claim take --repo /work/project --slice first --note 'database work'
+  achta claim check --repo /work/project --slice second
+  achta claim release --repo /work/project --slice first
+The second call refuses with the holder and age. --force requires --reason TEXT
+and records the releasing slice. Status lists tracked changes and local commits;
+an unavailable upstream is unknown and an unclaimed check refuses it.
 `
 
 // scopedCommandHelp documents side effects and exit semantics at the command.
