@@ -6,7 +6,7 @@ Project name: Achta
 
 Executable: `achta`
 
-Language: Go 1.27.1 or newer
+Language: Go 1.27.2 or newer
 
 Intended location: `/Users/odemir/Development/identuum/achta`
 

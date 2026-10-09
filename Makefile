@@ -55,7 +55,7 @@ rulefloor-static:
 	rulefloor check --repo .
 
 install-tools:
-	go install honnef.co/go/tools/cmd/staticcheck@v0.8.0
+	@staticcheck --version | grep -F "staticcheck 2026.2.1 (0.8.1)"
 	go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
 	go install github.com/ozgurcd/rulefloor@v0.9.1
 	go install github.com/ozgurcd/gograph/cmd/gograph@v1.6.10

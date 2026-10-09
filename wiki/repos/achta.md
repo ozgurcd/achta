@@ -29,7 +29,7 @@ commands, whose own effects remain the caller's responsibility.
   validator as file input; check mode writes nothing. File confinement stays
   enforced. `--prefix` selects an ID series and its existing section; help and
   capabilities name the stdin form.
-- Module: `github.com/ozgurcd/achta`; Go 1.27.1; `CGO_ENABLED=0` release builds.
+- Module: `github.com/ozgurcd/achta`; Go 1.27.2; `CGO_ENABLED=0` release builds.
 - Stable command families cover version/capabilities, wiki pin/status/derive,
   decision insertion, witness recording/checking, reachability, toolchain
   parity, amendment workflows, and landed-slice checks.
@@ -195,3 +195,4 @@ commands, whose own effects remain the caller's responsibility.
 | 2026-10-06 | `co-versioned` | Release v0.5.14 checkout claims with fixed-clock ownership, worktree, concurrency and state-report tests; CLAIM-OWNERSHIP-1 raises the armed floor to 52; public cask publication and installation authorized. |
 | 2026-10-06 | `co-versioned` | ACHTA-0.5.15: allow proven read-only hook forms, retain write checks, and run the workflow-pinned GoReleaser check through Go; two red-proved invariants raise the floor to 54; authorized release and Homebrew installation. |
 | 2026-10-09 | `co-versioned` | ACHTA-GATE-RUN: private gate logs, bounded summaries, child exits and retention; GATE-RUN-LOG-1 raises the armed floor to 55; chained absolute-cd claim regression already passes on v0.5.15; prepare authorized v0.5.16 release. |
+| 2026-10-09 | `co-versioned` | ACHTA-JOURNAL-2 toolchain: Go 1.27.2 and checksum-pinned Homebrew-equivalent Staticcheck 2026.2.1 with export-data support. |

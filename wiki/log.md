@@ -803,3 +803,13 @@ testdata/human/version.txt and testdata/machine/version.json. The two capability
 fixtures also add gate run and its schema and clarify the explicit-child limit.
 Release publication, cask verification and installed proofs remain required
 and are reported separately after the authorized annotated tag.
+
+## [2026-10-09] toolchain | ACHTA-JOURNAL-2
+
+Advance Go to 1.27.2 in the module and both workflows. CI installs the
+Homebrew-equivalent Staticcheck 2026.2.1 source plus the two checksum-pinned
+patches from the OSS CI recipe at af46403; no OSS file changes. Local
+Staticcheck reports Go 1.27.2 and x/tools v0.51.0. The install-tools recipe
+checks that version instead of replacing it with incompatible v0.8.0.
+TestGo1272ToolchainPins was red on the prior module directive and is the
+regression for the new pins. This commit contains no journal implementation.
