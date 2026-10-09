@@ -7,7 +7,7 @@ import (
 )
 
 func TestGo1272ToolchainPins(t *testing.T) {
-	for _, path := range []string{"../../go.mod", "../../.github/workflows/release.yml", "../../.github/workflows/verify.yml"} {
+	for _, path := range []string{"../../go.mod"} {
 		data, err := os.ReadFile(path)
 		if err != nil || !strings.Contains(string(data), "1.27.2") {
 			t.Fatalf("Go 1.27.2 missing in %s", path)
@@ -18,9 +18,17 @@ func TestGo1272ToolchainPins(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, pin := range []string{"2026.2.1", "8d807cd909f4481d6777f7707e5ae75dcc399e14d68ff14a3c814731826e0dfc", "19f123d3f405f779e82a739d3d6e7e3b289659b496ac82bd699586465b06ecc4", "52ce80f83d597020938bb7c463070f3c133802995029faeb632e3fc385fb4d8a", "sha256sum -c -", "./cmd/staticcheck"} {
-			if !strings.Contains(string(data), pin) {
-				t.Fatalf("missing Staticcheck recipe pin in %s", path)
+		want := 1
+		if strings.HasSuffix(path, "release.yml") {
+			want = 2
+		}
+		const action = "uses: ozgurcd/lictor/.github/actions/go-toolchain@d35a8ad07dc59bd76153f0ed7d3b1ade22c6cf04"
+		if got := strings.Count(string(data), action); got != want {
+			t.Errorf("%s has %d shared toolchain steps, want %d", path, got, want)
+		}
+		for _, duplicate := range []string{"actions/setup-go@", "GO_VERSION:", "STATICCHECK_TAG:", "go install honnef.co/go/tools"} {
+			if strings.Contains(string(data), duplicate) {
+				t.Errorf("duplicate toolchain setup %q in %s", duplicate, path)
 			}
 		}
 	}
