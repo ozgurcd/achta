@@ -62,12 +62,40 @@ func Freshness(root, filter string) (FreshnessResult, error) {
 }
 
 func FreshnessSelected(root, filter string, selection Selection) (FreshnessResult, error) {
+	return freshnessDirectory(root, filter, selection, "wiki")
+}
+
+// FreshnessRepository prefers a repository's own co-versioned page. An
+// unreadable or ambiguous owned page never falls back to a parent record.
+func FreshnessRepository(root, repository string) (FreshnessResult, error) {
+	name := filepath.Base(repository)
+	selected := ""
+	for _, directory := range []string{"wiki", "llm-wiki"} {
+		_, err := os.Lstat(filepath.Join(repository, directory, "repos", name+".md"))
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return FreshnessResult{}, err
+		}
+		if selected != "" {
+			return FreshnessResult{}, errors.New("ambiguous repository-owned wiki pages")
+		}
+		selected = directory
+	}
+	if selected != "" {
+		return freshnessDirectory(repository, name, nil, selected)
+	}
+	return Freshness(root, name)
+}
+
+func freshnessDirectory(root, filter string, selection Selection, wikiDirectory string) (FreshnessResult, error) {
 	result := FreshnessResult{SchemaVersion: FreshnessSchema, Status: "pass", Pages: []FreshnessPage{}}
 	if filter != "" && !repoPattern.MatchString(filter) {
 		return result, errors.New("invalid repository filter")
 	}
 	boundary := workspace.Workspace{Root: root}
-	directory, err := boundary.Confine(filepath.Join("wiki", "repos"))
+	directory, err := boundary.Confine(filepath.Join(wikiDirectory, "repos"))
 	if err != nil {
 		return result, fmt.Errorf("confine wiki repository pages: %w", err)
 	}
@@ -89,7 +117,7 @@ func FreshnessSelected(root, filter string, selection Selection) (FreshnessResul
 			continue
 		}
 		matched = true
-		page := FreshnessPage{Repository: repoName, Page: filepath.ToSlash(filepath.Join("wiki", "repos", entry.Name()))}
+		page := FreshnessPage{Repository: repoName, Page: filepath.ToSlash(filepath.Join(wikiDirectory, "repos", entry.Name()))}
 		if reason := selection[repoName]; reason != "" {
 			page.Status, page.Problem = "not_judged", reason
 			result.Skipped++

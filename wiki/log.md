@@ -850,3 +850,9 @@ The live brief exposed a missing make-check witness; TestJournalCheckWitness
 was red before adding a journal-only history lookup and green after it.
 Existing gate acceptance remains unchanged. The toolchain commit is pushed
 separately before the journal release, as the owner requested.
+
+## [2026-10-09] maintenance | TOOL-WIKI-1
+
+Close TOOLCHAIN-1 records: `e699a0c` asserts immutable shared-action references, and `fb57ba6` uses the action in verification and both release stages. CI 37955896206 passed. Caller go.mod owns Go; action `d35a8ad` owns checksum-verified Staticcheck setup.
+
+TOOL-WIKI-1 also prepares v0.5.18: TestSliceOwnedWiki was red on the original lookup for both owned layouts, then green with malformed metadata and linked-page refusal controls. Existing slice/freshness tests remain unchanged. No gate result is bypassed. Release and installed proof are reported at close.

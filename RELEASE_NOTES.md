@@ -2,6 +2,10 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.18 — 2026-10-09
+
+Slice checks find repository-owned wiki and llm-wiki records before parent records. They keep the same pin, co-versioned metadata, append-only log, identity and clean-tree checks. Ambiguous or unreadable local pages are refused.
+
 ## v0.5.17 — 2026-10-09
 
 Read `achta journal brief` after a session resumes. It shows current claims,

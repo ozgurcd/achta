@@ -20,7 +20,7 @@ commands, whose own effects remain the caller's responsibility.
 - Journal briefs report live claim and repository evidence in seven lines; private
   claim-owned notes retain 200 lines and the resume hook is silent on errors.
 
-- Current release line: v0.5.17.
+- Current release line: v0.5.18.
 - `gate run` captures complete output in private per-checkout Git metadata,
   retains 20 logs, prints a bounded summary and preserves the child's exit code.
 - `claim take/status/check/release` coordinates a local checkout through private
@@ -200,3 +200,11 @@ commands, whose own effects remain the caller's responsibility.
 | 2026-10-09 | `co-versioned` | ACHTA-GATE-RUN: private gate logs, bounded summaries, child exits and retention; GATE-RUN-LOG-1 raises the armed floor to 55; chained absolute-cd claim regression already passes on v0.5.15; prepare authorized v0.5.16 release. |
 | 2026-10-09 | `co-versioned` | ACHTA-JOURNAL-2 toolchain: Go 1.27.2 and checksum-pinned Homebrew-equivalent Staticcheck 2026.2.1 with export-data support. |
 | 2026-10-09 | `co-versioned` | ACHTA-JOURNAL-2: v0.5.17 live journal, private notes and silent resume hook; three baseline-red journal rules raise the armed floor to 58. |
+
+## Shared CI toolchain (2026-10-09)
+
+Verification and both release stages use `ozgurcd/lictor/.github/actions/go-toolchain@d35a8ad07dc59bd76153f0ed7d3b1ade22c6cf04`; caller go.mod owns Go, and Staticcheck build inputs are checksum verified. TOOLCHAIN-1 changed the workflow test in `e699a0c` and the workflows in `fb57ba6` (CI 37955896206).
+
+| Date | Commit | Change |
+|---|---|---|
+| 2026-10-09 | co-versioned | TOOL-WIKI-1: close TOOLCHAIN-1 records for `e699a0c` and `fb57ba6`. |

@@ -199,7 +199,7 @@ func Run(options Options) Result {
 		add("log-append", status, detail)
 	}
 
-	freshness, freshnessErr := achtawiki.Freshness(options.Workspace, result.Repository)
+	freshness, freshnessErr := achtawiki.FreshnessRepository(options.Workspace, options.Repository)
 	if freshnessErr != nil {
 		add("wiki-pin", "cannot_evaluate", freshnessErr.Error())
 	} else if freshness.Status == "pass" && freshness.Fresh == 1 {
@@ -246,7 +246,7 @@ func moduleBoundary(repo string, paths []string) (string, error) {
 }
 
 func repositoryLog(repo string) (string, error) {
-	for _, relative := range []string{filepath.Join("wiki", "log.md"), "log.md"} {
+	for _, relative := range []string{filepath.Join("wiki", "log.md"), filepath.Join("llm-wiki", "log.md"), "log.md"} {
 		path := filepath.Join(repo, relative)
 		info, err := os.Lstat(path)
 		if errors.Is(err, os.ErrNotExist) {
