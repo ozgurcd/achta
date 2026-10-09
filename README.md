@@ -631,3 +631,24 @@ recipe runs `go run github.com/goreleaser/goreleaser/v2@v2.17.0 check`, at the
 exact version pinned by the release workflow. It needs Go, not a globally
 installed `goreleaser`. The workflow runs the same target before building
 release artifacts, and a regression test refuses a mismatched tool version.
+
+## Short status after compaction
+
+Run `achta journal brief --workspace /work` to read current claims, HEADs,
+local-origin ahead/behind counts, dirty counts, gate results, witness commits,
+today's UTC decision IDs and the last three owner notes per claimed checkout.
+The text has seven category lines; `--json` emits achta.journal-brief.v1.
+Unavailable evidence stays explicit. The command does not fetch or judge gates.
+
+Record an answer with `achta journal note --workspace /work --slice change-name
+'Owner approved the revised scope'` (one shell line; flags before the text).
+Without --workspace, it discovers the enclosing workspace. The note goes to
+each claimed checkout's Git metadata, never its working tree. Notes are private,
+limited to 1024 bytes, reject secret-like input, and retain the newest 200 lines.
+Each append is atomic; a later repository failure does not undo earlier notes.
+Never put credentials or sensitive values in notes.
+
+An optional SessionStart command, `achta hook journal`, adds this context only
+for compact or resume. It is silent on errors and always exits zero, with a
+two-second work bound. Register it yourself with matcher compact|resume and a
+five-second harness timeout. Achta does not change your harness settings.

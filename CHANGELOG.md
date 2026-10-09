@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.5.17 — 2026-10-09
+
+Add live journal briefs, private claim-owned notes and a silent resume hook.
+Use Go 1.27.2 and compatible Staticcheck in CI.
+
 ## v0.5.16 — 2026-10-09
 
 Add explicit gate execution with private logs, bounded summaries and child exit

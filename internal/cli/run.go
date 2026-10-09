@@ -67,8 +67,20 @@ func Run(args []string, stdout, stderr io.Writer, releaseVersion string) int {
 }
 
 func runWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseVersion string) int {
+	if len(args) >= 2 && args[0] == "hook" && args[1] == "journal" {
+		if len(args) != 2 {
+			return 0
+		}
+		return runJournalHook(stdin, stdout)
+	}
 	started := time.Now()
 	opts, command, rest, err := parseGlobal(args)
+	if command == "hook" && len(rest) > 0 && rest[0] == "journal" {
+		if err != nil || len(rest) != 1 {
+			return 0
+		}
+		return runJournalHook(stdin, stdout)
+	}
 	if command == "gate" && err == nil {
 		if commandHelpRequested(rest) {
 			fmt.Fprintln(stdout, "gate run --repo ABS [--json] -- COMMAND [ARG...]\nKeeps 20 private Git-directory logs; prints at most 25 lines; returns the command exit code.")
@@ -141,6 +153,8 @@ func dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseV
 		return runCapabilities(rest, stdout, stderr, opts, releaseVersion)
 	case "claim":
 		return runClaim(rest, stdout, stderr, opts)
+	case "journal":
+		return runJournal(rest, stdout, stderr, opts)
 	case "count":
 		return runCount(rest, stdout, stderr, opts)
 	case "declared-route":
@@ -341,6 +355,9 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		return renderError(stdout, stderr, opts.json, capabilitiesSchema, err)
 	}
 	commands := []capabilityCommand{
+		{Name: "journal brief", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "journal note", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
+		{Name: "hook journal", Reads: true, ExecutesExternal: true, RequiresGit: true},
 		{Name: "gate run", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true},
 		{Name: "amendments declare", Reads: true, Writes: true, RequiresWorkspace: true},
 		{Name: "amendments rebase", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
@@ -396,6 +413,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 	}
 	doc.MachineInterfaces = append(doc.MachineInterfaces, "achta.claim.v1")
 	doc.MachineInterfaces = append(doc.MachineInterfaces, gateSchema)
+	doc.MachineInterfaces = append(doc.MachineInterfaces, journalSchema, journalNoteSchema)
 	doc.ArtifactSchemas = append(doc.ArtifactSchemas, "achta.claim-state.v1")
 	if opts.json {
 		return writeJSON(stdout, stderr, doc)
@@ -479,6 +497,9 @@ Global options:
 
 Commands:
   gate run --repo ABS [--json] -- COMMAND [ARG...] keep a private log and short summary
+  journal brief --workspace ABS [--json] show live claims, evidence and recent notes
+  journal note --slice NAME TEXT [--workspace ABS] record an owner answer in Git metadata
+  hook journal  add a brief on compact/resume; errors are silent and exit 0
   version       report release and Go module versions
   capabilities report supported machine interfaces and operations
   claim take --repo ABS --slice NAME [--note TEXT] claim a checkout
@@ -528,6 +549,8 @@ an unavailable upstream is unknown and an unclaimed check refuses it.
 
 // scopedCommandHelp documents side effects and exit semantics at the command.
 var scopedCommandHelp = map[string]string{
+	"journal brief": "\njournal brief --workspace ABS [--json]\nSeven live category lines; local origin refs only, dirty includes untracked files.\n",
+	"journal note":  "\njournal note [--workspace ABS] --slice NAME TEXT\nFlags precede TEXT. Writes each claimed checkout's private Git journal; retains 200 lines.\n",
 	"decision add": `
 decision add --title TITLE --body-file PATH|- [--prefix PREFIX] [--register PATH] [--check] [--json]
 --body-file - reads the body from stdin; PATH must remain inside the workspace.

@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.16 release specification
+Status: v0.5.17 release specification
 
 Project name: Achta
 
@@ -2328,3 +2328,35 @@ artifact remains reviewable in Git.
 The measure is not the number of scripts deleted. It is fewer malformed edits,
 fewer stale witnesses and baselines, fewer working-directory mistakes, and no
 loss of the fail-closed safeguards those scripts currently provide.
+
+## Journal status and owner notes
+
+`journal brief --workspace ABS [--json]` reads the root checkout and direct,
+non-hidden, non-linked child checkouts. Only active claims appear. It prints
+seven category lines or one `achta.journal-brief.v1` document. Each checkout
+includes its HEAD, counts against the local origin branch (no fetch), and dirty
+porcelain entry count including untracked files, excluding ignored files;
+a rename counts once. Missing origin evidence is null, not zero.
+
+Each root GATE-RUN*.txt uses the existing witness parser; unavailable or
+malformed records are named unavailable, never green. The last accepted witness
+commit is selected by the existing witness-history contract for each record.
+Today's decision IDs are extracted from dated third-level headings in
+wiki/platform/decisions.md, using UTC, without returning their bodies.
+
+`journal note [--workspace ABS] --slice NAME TEXT` stores one bounded nonblank
+line in each matching checkout's Git directory, achta/journal/NAME.log. Without
+an explicit workspace, discovery uses the outermost enclosing wiki workspace.
+Names are safe filename components. Notes use the claim secret-like/control
+validator, are at most 1024 bytes, and retain the newest 200 lines; the brief
+shows the last three per checkout. Directories are 0700, files 0600, linked
+paths refused, and writes share the claim lock and recheck ownership. Each
+checkout append is independently atomic; a later checkout failure does not
+roll back an already recorded note. No working-tree file is written.
+The success machine document is achta.journal-note.v1.
+
+`hook journal` consumes a bounded SessionStart JSON payload. Only compact and
+resume sources produce hookSpecificOutput.additionalContext. Input errors,
+unavailable evidence and timeouts produce nothing and exit zero. All work is
+bounded to two seconds. This context is reported evidence, not new authority.
+The hook is opt-in; Achta never modifies harness settings.

@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const testVersion = "v0.5.16"
+const testVersion = "v0.5.17"
 
 func TestVersionJSONIsSingleDocument(t *testing.T) {
 	var stdout, stderr bytes.Buffer

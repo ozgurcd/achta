@@ -813,3 +813,40 @@ Staticcheck reports Go 1.27.2 and x/tools v0.51.0. The install-tools recipe
 checks that version instead of replacing it with incompatible v0.8.0.
 TestGo1272ToolchainPins was red on the prior module directive and is the
 regression for the new pins. This commit contains no journal implementation.
+
+## [2026-10-09] release | ACHTA-JOURNAL-2
+
+Resume the uncommitted ACHTA-JOURNAL work on c2df508. The failed evidence test
+used result PASS; the existing witness grammar accepts green or red. Correct
+that fixture and its expectation, preserving the production parser. The owner
+clarifies that failures in the slice's own new tests are development, not a stop.
+
+TestJournalBriefLive, TestJournalNoteRetention and TestJournalHookSilent were
+red on c2df508 before implementation and are green after it. Additional tests
+cover fixed-date decision IDs, witness identity, both claimed linked worktrees
+and linked-note refusal. The suite can run the same CLI proofs through
+ACHTA_JOURNAL_BINARY against the installed release. The three journal rule
+bindings carry those observed baseline reds; existing assertions stay intact.
+
+Decisions: seven category lines preserve the selected repository set; origin
+means local remote-tracking refs; dirty counts include untracked entries; dates
+use UTC; note appends share ownership locks; hook work is bounded to two seconds
+and publishes only complete context. Notes are independent atomic appends, not
+a multi-repository transaction. No settings file is changed.
+
+Version-only fixtures: internal/cli/run_test.go testVersion,
+testdata/human/version.txt and testdata/machine/version.json. Capabilities
+fixtures also advertise the new commands and schemas. No release history is
+rewritten. Source push, annotated v0.5.17 tag, workflow cask and installed proof
+are authorized and are reported after publication. Lictor and parent wiki work
+is conditional on their claims; no other claim is disturbed.
+
+The repository page's armed-floor claim was stale at 54 while the baseline
+ledger carried 55; this release updates the live count to 58. Queue filing for
+the fixture failure is declined because it is corrected here, not open work.
+
+ACHTA-JOURNAL-3 resumes publication independently of the parent wiki close.
+The live brief exposed a missing make-check witness; TestJournalCheckWitness
+was red before adding a journal-only history lookup and green after it.
+Existing gate acceptance remains unchanged. The toolchain commit is pushed
+separately before the journal release, as the owner requested.

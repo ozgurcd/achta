@@ -2,6 +2,15 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.17 — 2026-10-09
+
+Read `achta journal brief` after a session resumes. It shows current claims,
+repository state, gate results, witness commits, today's decision IDs and recent
+owner notes. Save an answer with `achta journal note`; notes stay in private Git
+metadata, with the newest 200 retained. The optional `achta hook journal` adds
+the brief on compact or resume and stays silent on errors. Build with Go 1.27.2
+and a checksum-pinned Staticcheck build that reads its export data.
+
 ## v0.5.16 — 2026-10-09
 
 Run a long check with `achta gate run`. Keep its full output in a private log

@@ -17,7 +17,10 @@ commands, whose own effects remain the caller's responsibility.
 
 ## Canonical facts
 
-- Current release line: v0.5.16.
+- Journal briefs report live claim and repository evidence in seven lines; private
+  claim-owned notes retain 200 lines and the resume hook is silent on errors.
+
+- Current release line: v0.5.17.
 - `gate run` captures complete output in private per-checkout Git metadata,
   retains 20 logs, prints a bounded summary and preserves the child's exit code.
 - `claim take/status/check/release` coordinates a local checkout through private
@@ -128,7 +131,7 @@ commands, whose own effects remain the caller's responsibility.
   per-file append-only heading history.
 - `make release-check` invokes GoReleaser v2.17.0 through `go run`, matching
   the release workflow pin; the workflow uses that same configuration check.
-- `RULE-FLOOR.md` carries 54 armed invariants with recorded red proofs on the current
+- `RULE-FLOOR.md` carries 58 armed invariants with recorded red proofs on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
 
@@ -196,3 +199,4 @@ commands, whose own effects remain the caller's responsibility.
 | 2026-10-06 | `co-versioned` | ACHTA-0.5.15: allow proven read-only hook forms, retain write checks, and run the workflow-pinned GoReleaser check through Go; two red-proved invariants raise the floor to 54; authorized release and Homebrew installation. |
 | 2026-10-09 | `co-versioned` | ACHTA-GATE-RUN: private gate logs, bounded summaries, child exits and retention; GATE-RUN-LOG-1 raises the armed floor to 55; chained absolute-cd claim regression already passes on v0.5.15; prepare authorized v0.5.16 release. |
 | 2026-10-09 | `co-versioned` | ACHTA-JOURNAL-2 toolchain: Go 1.27.2 and checksum-pinned Homebrew-equivalent Staticcheck 2026.2.1 with export-data support. |
+| 2026-10-09 | `co-versioned` | ACHTA-JOURNAL-2: v0.5.17 live journal, private notes and silent resume hook; three baseline-red journal rules raise the armed floor to 58. |
