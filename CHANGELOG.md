@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.5.16 — 2026-10-09
+
+Add explicit gate execution with private logs, bounded summaries and child exit
+codes. Preserve the accepted absolute-cd chained claim form in regression tests.
+
 ## v0.5.15 — 2026-10-06
 
 Allow read-only Git config, Achta help and derive previews through hook cd;

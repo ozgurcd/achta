@@ -770,3 +770,36 @@ the parent wiki is read-only and the consumer pins are outside this brief.
 Brief detail: the existing repository has no release-check target or documented
 bare goreleaser recipe; the PATH-dependent check was the measured prior manual
 command. The new Make target and documented release procedure close that gap.
+
+## [2026-10-09] release | ACHTA-GATE-RUN
+
+Prepare v0.5.16 with explicit gate output capture. Make and CI keep their plans
+and verdicts; gate run keeps the full combined log inside checkout Git metadata,
+retains 20 logs, preserves child exit codes and returns one bounded summary or
+one versioned JSON document. Arguments and potentially sensitive lines are
+withheld. The full log remains private raw output. Linked worktrees retain their
+own logs, and concurrent runs refuse rather than delete an active log.
+
+Red at cd1bfef: TestGateRunFullLogAndExit (exit 2 instead of 7),
+TestGateRunSummaryAndRetention (exit 2 instead of 3),
+TestGateRunChildFlagsAndWorktree and TestGateRunHelpAndCapabilities failed.
+The focused tests then passed, including fresh-record preference, stale-record
+fallback and linked-directory refusal. GATE-RUN-LOG-1 records the observed red.
+The baseline hook package passed 171 tests, including 54 original verdict cases.
+No original hook verdict changes; the newly advertised gate writer is guarded.
+
+Brief correction: the exact absolute-cd && claim command already passes on
+v0.5.15, as does its newline form. Regression coverage preserves both; there
+is no justified parser relaxation. A separate help-only rulefloor rehash call
+was denied by achta hook cd; its named absolute-cd retry was used.
+
+Decisions: arguments are withheld rather than echoed, log directories are 0700
+and logs 0600, summaries ignore unchanged records, and a nonblocking checkout
+lock protects active logs during retention. The explicit child may have the
+effects the caller authorizes; the wrapper does not mint a witness.
+
+Version-only fixtures: internal/cli/run_test.go testVersion,
+testdata/human/version.txt and testdata/machine/version.json. The two capability
+fixtures also add gate run and its schema and clarify the explicit-child limit.
+Release publication, cask verification and installed proofs remain required
+and are reported separately after the authorized annotated tag.

@@ -50,6 +50,7 @@ var achtaWriteCommands = map[string]struct{}{
 	"claim take":         {},
 	"claim release":      {},
 	"decision add":       {},
+	"gate run":           {},
 	"parts lock":         {},
 	"wiki derive":        {},
 	"wiki pin":           {},

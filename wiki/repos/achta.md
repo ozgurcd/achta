@@ -3,8 +3,8 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-10-06
-verified: 2026-10-06
+updated: 2026-10-09
+verified: 2026-10-09
 co_versioned: true
 ---
 
@@ -12,11 +12,14 @@ co_versioned: true
 
 Achta is the public, fail-closed Go CLI for deterministic workspace
 bookkeeping. It edits only explicitly selected canonical artifacts and does not
-infer prose, execute generic gates, fetch, or mutate Git.
+infer prose, fetch, or mutate Git. Explicit `gate run` wraps caller-authorized
+commands, whose own effects remain the caller's responsibility.
 
 ## Canonical facts
 
-- Current release line: v0.5.15.
+- Current release line: v0.5.16.
+- `gate run` captures complete output in private per-checkout Git metadata,
+  retains 20 logs, prints a bounded summary and preserves the child's exit code.
 - `claim take/status/check/release` coordinates a local checkout through private
   per-worktree Git metadata, reports tracked paths and local upstream commits,
   preserves forced-release actor/reason history, and supports `achta.claim.v1`.
@@ -133,8 +136,8 @@ infer prose, execute generic gates, fetch, or mutate Git.
 
 - Achta establishes structural consistency and freshness, not prose truth or
   author honesty.
-- It does not run arbitrary commands, create product commits, fetch remotes, or
-  replace product-specific analyzers.
+- Outside explicit `gate run`, it does not run arbitrary commands, create
+  product commits or fetch remotes. It does not replace product-specific analyzers.
 - Co-versioned pages have no external SHA pin; the containing checkout is their
   version boundary, while `verified:` records the last claim review.
 
@@ -191,3 +194,4 @@ infer prose, execute generic gates, fetch, or mutate Git.
 | 2026-10-05 | `co-versioned` | Release v0.5.13: explicit header-only generator drift notes, exact content and write controls, WIKI-DERIVE-HEADER-VERSION-1 red/green proof; public Homebrew publication and installation authorized. |
 | 2026-10-06 | `co-versioned` | Release v0.5.14 checkout claims with fixed-clock ownership, worktree, concurrency and state-report tests; CLAIM-OWNERSHIP-1 raises the armed floor to 52; public cask publication and installation authorized. |
 | 2026-10-06 | `co-versioned` | ACHTA-0.5.15: allow proven read-only hook forms, retain write checks, and run the workflow-pinned GoReleaser check through Go; two red-proved invariants raise the floor to 54; authorized release and Homebrew installation. |
+| 2026-10-09 | `co-versioned` | ACHTA-GATE-RUN: private gate logs, bounded summaries, child exits and retention; GATE-RUN-LOG-1 raises the armed floor to 55; chained absolute-cd claim regression already passes on v0.5.15; prepare authorized v0.5.16 release. |

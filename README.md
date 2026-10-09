@@ -525,6 +525,41 @@ characters, malformed state, linked metadata files and Git checkout override
 environment variables are refused without echoing the input. Claims coordinate
 one local checkout only; they do not coordinate separate clones or machines.
 
+## Gate logs
+
+Run a long gate without flooding the terminal:
+
+```sh
+achta gate run --repo /work/project -- make verify-parallel
+achta gate run --repo /work/project --json -- make verify
+```
+
+The command runs directly in that checkout, with its inherited environment.
+Achta adds no shell and makes no gate plan. Only run commands you authorize.
+The child may change files or use the network just as a direct invocation can.
+It has no automatic timeout; interrupt or termination cancels its process group.
+Child arguments after `--`, including `--json` and `--help`, stay child arguments.
+
+Combined stdout and stderr go to a mode-0600 log under the checkout Git directory:
+`achta/logs/<UTC time>-<command>-<unique suffix>.log`. Linked worktrees use their
+own Git directory. The directories are mode 0700. The newest 20 logs remain;
+another run in the same checkout refuses immediately while the log lock is held.
+Logs contain full raw output: keep them private and inspect before sharing.
+
+The summary has at most 24 lines: executable (arguments withheld), exit code,
+duration, log path, and up to 20 failure lines. Changed `GATE-RUN*.txt` records
+take precedence: only evidence for nonzero targets is selected. Unchanged
+records are ignored. Otherwise the last error/failure/refusal lines in the last
+64 KiB of the log are selected. Oversized or secret-shaped lines, URLs and
+assignment-bearing lines are withheld with a pointer to the private log.
+No environment is dumped. Gate arguments are never echoed.
+`--quiet` and `--timing` do not alter this already bounded gate summary.
+
+`--json` emits one `achta.gate-run.v1` document with `command`, `exit_code`,
+`duration_ms`, `log_path` and `failures`. The exit code is the child's code;
+signals use 128 plus the signal number. Failure to start is 127. Invalid inputs
+or unavailable log storage are exit 2. This command is not a witness operation.
+
 ## Exit contract
 
 - `0`: operation or evaluation succeeded.
@@ -535,12 +570,14 @@ one local checkout only; they do not coordinate separate clones or machines.
 
 JSON mode writes exactly one versioned document to stdout. Successful JSON
 commands write no prose to stderr.
+`gate run` is the explicit child-exit exception described above.
 `--quiet` suppresses successful human detail while preserving failures, JSON,
 and an explicitly requested `--timing` line.
 
 ## Security and trust boundaries
 
-Achta never invokes a shell and never performs Git mutations. Its Git and
+Outside the explicit `gate run` child, Achta never invokes a shell and never
+performs Git mutations. Its Git and
 Rulefloor subprocesses are bounded, timed, and invoked with explicit argument
 vectors. Executables are resolved before invocation; Rulefloor reconciliation
 reports the selected absolute binary, while Git failures identify discovery or

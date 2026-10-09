@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.15 release specification
+Status: v0.5.16 release specification
 
 Project name: Achta
 
@@ -107,8 +107,10 @@ Achta must provide these guarantees:
    replacement. A failed command leaves canonical files byte-identical.
 3. **No implicit repository mutation.** Achta never invokes `git commit`,
    `git tag`, `git push`, `git reset`, `git clean`, or an equivalent operation.
-4. **No shell execution.** External programs are invoked directly with argument
-   vectors and bounded contexts.
+4. **No implicit shell execution.** External programs use argument vectors.
+   Governance subprocesses have bounded contexts. The explicit `gate run`
+   child has no automatic timeout and is cancelled on interrupt or termination.
+   Its caller chooses and authorizes its effects, including any explicit shell.
 5. **Path confinement.** Reads and writes stay within the canonical selected
    workspace and reject linked or special target files.
 6. **Stable defaults.** Existing Markdown, amendment JSON, and witness record
@@ -140,11 +142,22 @@ Achta must provide these guarantees:
 | Gate-witness records | Achta | Parse, validate, summarize, and eventually write |
 | Amendment manifest lifecycle | Achta | Author explicit declarations, rebase, and reconcile |
 | Product-specific wire, route, link, or clock checks | Dedicated analyzers | Keep external |
-| Repository compilation and test suites | Make/CI | Achta may inspect records but must not become their runner |
+| Repository compilation and test suites | Make/CI | `gate run` wraps an explicit command and captures output; Make/CI still owns the plan and verdict |
 | Agent prompt injection and source-navigation hooks | Agent harness | Keep external |
 | Bash working-directory write guard | Achta | Classify a committed writer vocabulary and enforce explicit absolute repository selection without executing the command |
 
 ## 6. Canonical artifacts
+
+### Explicit gate output capture
+
+`gate run --repo ABS [--json] -- COMMAND [ARG...]` is the explicit exception to
+the non-runner boundary. It wraps only the caller's command, with no inferred
+plan, witness or Git operation. Its contract is the Gate logs section of README:
+private per-checkout Git-directory output, 20-log retention, bounded summaries,
+fresh failed-target evidence, unchanged child arguments, and child exit status.
+The full log is raw evidence, not a safe publication artifact. Summary fields
+withhold arguments and potentially sensitive lines. Gate execution has no
+automatic timeout; signals cancel the child process group.
 
 Achta operates on existing artifacts. It does not replace them with private
 storage.
@@ -800,10 +813,9 @@ record changes. The stable schemas are `achta.witness-operation.v1` and
 `achta.witness-check.v1`. Earned-cycle output uses
 `achta.witness-earned.v1`.
 
-There is intentionally no `witness run`. Make or CI owns command execution and
-passes measured outcomes to `witness step`. Adding an arbitrary executor would
-contradict Achta's no-shell, non-runner boundary and would make a locally
-writable witness appear stronger than it is.
+There is intentionally no `witness run`. Make or CI owns the plan and passes
+measured outcomes to `witness step`. `gate run` captures an explicit command's
+output; it neither mints a witness nor strengthens a locally writable record.
 
 ### 7.13 Slice check
 

@@ -1,4 +1,4 @@
-Achta v0.5.15 capabilities
+Achta v0.5.16 capabilities
   amendments declare
   amendments rebase
   amendments reconcile
@@ -13,6 +13,7 @@ Achta v0.5.15 capabilities
     --body-file -
   declared-route check
   floor census
+  gate run
   hook cd
   ledger census
   ledger rows

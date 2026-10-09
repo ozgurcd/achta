@@ -69,6 +69,13 @@ func Run(args []string, stdout, stderr io.Writer, releaseVersion string) int {
 func runWithInput(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseVersion string) int {
 	started := time.Now()
 	opts, command, rest, err := parseGlobal(args)
+	if command == "gate" && err == nil {
+		if commandHelpRequested(rest) {
+			fmt.Fprintln(stdout, "gate run --repo ABS [--json] -- COMMAND [ARG...]\nKeeps 20 private Git-directory logs; prints at most 25 lines; returns the command exit code.")
+			return 0
+		}
+		return runGate(rest, stdout, stderr, opts)
+	}
 	jsonMode := jsonRequested(args)
 	if !opts.timing && (!opts.quiet || jsonMode) {
 		return dispatch(args, stdin, stdout, stderr, releaseVersion, opts, command, rest, err)
@@ -334,6 +341,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		return renderError(stdout, stderr, opts.json, capabilitiesSchema, err)
 	}
 	commands := []capabilityCommand{
+		{Name: "gate run", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true},
 		{Name: "amendments declare", Reads: true, Writes: true, RequiresWorkspace: true},
 		{Name: "amendments rebase", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "amendments reconcile", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
@@ -382,11 +390,12 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		SupportedOS:       []string{"darwin", "linux"},
 		Limitations: []string{
 			"local filesystem only",
-			"no shell execution",
-			"no Git mutation",
+			"no implicit shell execution; gate run executes only caller-supplied argv",
+			"no Git mutation except effects of the explicit gate run child",
 		},
 	}
 	doc.MachineInterfaces = append(doc.MachineInterfaces, "achta.claim.v1")
+	doc.MachineInterfaces = append(doc.MachineInterfaces, gateSchema)
 	doc.ArtifactSchemas = append(doc.ArtifactSchemas, "achta.claim-state.v1")
 	if opts.json {
 		return writeJSON(stdout, stderr, doc)
@@ -469,6 +478,7 @@ Global options:
   --help           show this help without requiring a workspace
 
 Commands:
+  gate run --repo ABS [--json] -- COMMAND [ARG...] keep a private log and short summary
   version       report release and Go module versions
   capabilities report supported machine interfaces and operations
   claim take --repo ABS --slice NAME [--note TEXT] claim a checkout

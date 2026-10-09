@@ -2,6 +2,14 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.16 — 2026-10-09
+
+Run a long check with `achta gate run`. Keep its full output in a private log
+inside Git metadata and read a short result in the terminal. The last 20 logs
+remain. The command keeps the check's exit code and supports JSON output.
+The existing absolute `cd` followed by a chained claim command is covered by
+a regression test; it already passes on v0.5.15.
+
 ## v0.5.15 — 2026-10-06
 
 Read Git settings, request Achta help, and preview wiki changes without a
