@@ -215,3 +215,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-09 | co-versioned | TOOL-WIKI-1: close TOOLCHAIN-1 records for `e699a0c` and `fb57ba6`. |
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: accept independently anchored writers, reject cd escapes and selector laundering, add retry guidance and baseline-red rules; owned wiki selection re-measured. |
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: advance source and exact fixtures to v0.5.19, with changelog and release notes; publish through the annotated-tag cask workflow without installing. |
+| 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: remove the unused aggregate classifier reported by Staticcheck; per-writer checks retain classification and denial behavior. |

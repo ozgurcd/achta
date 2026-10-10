@@ -906,3 +906,15 @@ the owner's later upgrade. No new automation or release targets are added.
 The full local gate and release configuration check run on the final committed
 tree; CI and release pipeline IDs are reported at close. Release publication
 uses the existing workflow and does not persist local authentication settings.
+
+## [2026-10-10] fix | ACHTA-HOOK-CD-2 validation
+
+The first full gate failed the unchanged safefile mode test because the launch
+shell has umask 077: os.WriteFile requested 0640 and created 0600. No safefile
+source or assertions changed. A command-local umask 022 passed that test in
+20261010T110108.661665000Z-go-3362243901. The following full suite passed tests
+and vet, then Staticcheck found the old writingVerb classifier unused (U1000)
+in 20261010T110109.052031000Z-make-2942311757. Remove that unused helper in this
+separate local fix; unanchoredWriter owns the complete per-writer check now.
+No gate or assertion changes. End the new Gograph fix session before rerunning
+the native full gate. The prior session ended before gates by contract.

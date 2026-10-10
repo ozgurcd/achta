@@ -395,34 +395,6 @@ func firstStatementIsAbsoluteCD(statement string) bool {
 	return isAbsoluteSelector(tokens[1])
 }
 
-func writingVerb(tokens []string) string {
-	for index, token := range tokens {
-		verb := ""
-		switch token {
-		case redirectOutputToken:
-			verb = ">"
-		case redirectAppendToken:
-			verb = ">>"
-		default:
-			continue
-		}
-		if index+1 >= len(tokens) {
-			continue
-		}
-		target := tokens[index+1]
-		if target == "/dev/null" || strings.HasPrefix(target, "&") {
-			continue
-		}
-		return verb
-	}
-	for _, segment := range pipelineSegments(tokens) {
-		if verb := segmentWritingVerb(segment); verb != "" {
-			return verb
-		}
-	}
-	return ""
-}
-
 func segmentWritingVerb(tokens []string) string {
 	command, args := invocation(tokens)
 	switch command {
