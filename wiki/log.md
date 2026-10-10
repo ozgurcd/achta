@@ -892,3 +892,17 @@ No selection fix is needed. Further harness investigation and unrelated
 lictor/gograph state are declined for this code goal: they belong to their
 owners, and the known lictor dirtiness is already recorded in TOOL_IMPROVEMENTS.
 No sibling repository or live installation changes.
+
+## [2026-10-10] release | ACHTA-HOOK-CD-2
+
+Prepare v0.5.19 after implementation ee06f73. Update the source Version,
+CLI testVersion and the four exact human/machine version and capability
+fixtures. CHANGELOG and RELEASE_NOTES describe the new anchored-writer checks
+and the measured existing owned-page selection. The documented package is a
+Homebrew cask, rather than a formula. The brief explicitly forbids installation;
+source, annotated tag, release and cask publication are judged separately from
+the owner's later upgrade. No new automation or release targets are added.
+
+The full local gate and release configuration check run on the final committed
+tree; CI and release pipeline IDs are reported at close. Release publication
+uses the existing workflow and does not persist local authentication settings.

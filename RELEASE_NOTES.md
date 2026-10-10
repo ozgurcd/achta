@@ -2,6 +2,18 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.19 — 2026-10-10
+
+Use an absolute file target, `git -C`, `make -C`, or a writer's `--repo` selector
+when the harness removes a redundant cd. Intact absolute-cd chains also work
+with exports, claims and heredocs. Each redirect and pipeline writer needs its
+own anchor; explicit targets outside a leading cd are refused. Denials name
+a working retry. A stripped cd followed only by a relative target still needs
+an explicit location. The hook never infers that missing instruction.
+
+Repository-owned wiki selection was re-measured for lictor, scrinium, legattus
+and gograph on v0.5.18 and passes; no selection change is required.
+
 ## v0.5.18 — 2026-10-09
 
 Slice checks find repository-owned wiki and llm-wiki records before parent records. They keep the same pin, co-versioned metadata, append-only log, identity and clean-tree checks. Ambiguous or unreadable local pages are refused.

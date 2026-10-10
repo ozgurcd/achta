@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.18 release specification
+Status: v0.5.19 release specification
 
 Project name: Achta
 

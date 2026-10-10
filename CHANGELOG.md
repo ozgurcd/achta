@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## v0.5.19 — 2026-10-10
+
+Accept absolute repository selectors and file targets for each Bash writer.
+Preserve anchored cd/export/heredoc chains, reject writes outside a leading cd,
+and check redirects and pipeline writers separately. Denials name a working
+retry. Repository-owned wiki selection already passes on v0.5.18.
 
 ## v0.5.17 — 2026-10-09
 

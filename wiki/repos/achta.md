@@ -20,7 +20,7 @@ commands, whose own effects remain the caller's responsibility.
 - Journal briefs report live claim and repository evidence in seven lines; private
   claim-owned notes retain 200 lines and the resume hook is silent on errors.
 
-- Current release line: v0.5.18.
+- Current release line: v0.5.19.
 - `gate run` captures complete output in private per-checkout Git metadata,
   retains 20 logs, prints a bounded summary and preserves the child's exit code.
 - `claim take/status/check/release` coordinates a local checkout through private
@@ -214,3 +214,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 |---|---|---|
 | 2026-10-09 | co-versioned | TOOL-WIKI-1: close TOOLCHAIN-1 records for `e699a0c` and `fb57ba6`. |
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: accept independently anchored writers, reject cd escapes and selector laundering, add retry guidance and baseline-red rules; owned wiki selection re-measured. |
+| 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: advance source and exact fixtures to v0.5.19, with changelog and release notes; publish through the annotated-tag cask workflow without installing. |
