@@ -96,22 +96,29 @@ func Evaluate(payload []byte) Result {
 	if len(statements) == 0 {
 		return Result{Verdict: Allow}
 	}
-	if firstStatementIsAbsoluteCD(statements[0]) {
-		return Result{Verdict: Allow}
-	}
-
+	anchor, directory := "", ""
 	for index, statement := range statements {
 		tokens, err := lex(statement)
 		if err != nil {
 			return warning(err.Error())
 		}
-		verb := writingVerb(tokens)
-		if verb != "" && !hasAbsoluteC(tokens) {
+		if index == 0 && firstStatementIsAbsoluteCD(statement) {
+			anchor = literalPath(tokens[1])
+			directory = anchor
+			continue
+		}
+		if len(tokens) > 0 && tokens[0] == "cd" {
+			directory = ""
+			if len(tokens) == 2 && anchoredPath(tokens[1], "", anchor) && anchor != "" {
+				directory = literalPath(tokens[1])
+			}
+		}
+		if verb := unanchoredWriter(tokens, directory, anchor); verb != "" {
 			return Result{
 				Verdict:   Deny,
 				Statement: index + 1,
 				Verb:      verb,
-				Reason:    "writing statement has neither a leading absolute cd nor an absolute -C selector",
+				Reason:    "a write lacks an absolute anchor or escapes the leading cd",
 			}
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// RULE: HOOK-CD-RETRY-1
 func TestHookCDPreToolUseContract(t *testing.T) {
 	t.Parallel()
 
@@ -21,6 +22,18 @@ func TestHookCDPreToolUseContract(t *testing.T) {
 			payload:    `{"tool_input":{"command":"make verify"}}`,
 			wantCode:   2,
 			wantStderr: "statement 1 (make)",
+		},
+		{
+			name:       "deny names newline cd retry",
+			payload:    `{"tool_input":{"command":"cat > relative-file"}}`,
+			wantCode:   2,
+			wantStderr: "put the absolute cd on its own line",
+		},
+		{
+			name:       "deny names git selector retry",
+			payload:    `{"tool_input":{"command":"git fetch origin"}}`,
+			wantCode:   2,
+			wantStderr: "use git -C <abs>",
 		},
 		{
 			name:     "leading absolute cd allows",

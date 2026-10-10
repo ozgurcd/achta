@@ -72,8 +72,8 @@ func TestPreservedWriteForms(t *testing.T) {
 		"achta wiki derive | tee out",
 		"achta wiki derive --write=true",
 		"achta decision add --title --help --body-file body.md",
-		"achta claim take --repo /repo --slice first --note -h",
-		"achta claim release --repo /repo --slice second --force --reason --help",
+		"achta claim take --repo repo --slice first --note -h",
+		"achta claim release --repo repo --slice second --force --reason --help",
 		"achta wiki pin -- --help",
 	} {
 		t.Run(command, func(t *testing.T) { assertHookCommand(t, command, Deny) })

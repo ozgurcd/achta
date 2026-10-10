@@ -1248,12 +1248,18 @@ document from stdin. It evaluates only the string at `tool_input.command` and
 never executes that command. Heredoc bodies are stripped before statements are
 split on newline, semicolon, `&&`, or `||`; pipes stay within their statement.
 
-A writing command is allowed only when the first statement is exactly `cd`
-plus one absolute, `~`, `$HOME`, or `${HOME}` path before any assignment, or
-when every writing statement has `-C` plus one of those absolute path forms.
-Relative paths do not satisfy either condition. A denial is exit 2 and its
-bounded stderr identifies the statement ordinal, classified verb, and both
-fixes. Empty, malformed, oversized, command-substituting, or otherwise
+A writing command needs a first-statement exact `cd` plus an absolute, `~`,
+`$HOME`, or `${HOME}` path, its own absolute `-C` for Git/Go/Make, an absolute
+`--repo` for Achta/Rulefloor, or absolute file targets. Each pipeline invocation
+and redirect is evaluated independently; a program's selector cannot anchor
+the shell's redirect or a neighbouring writer. A leading cd confines explicit
+write targets lexically, including normalized traversal, to that anchor.
+Later relative or outside cd statements lose the anchor for relative writes.
+The hook reads no environment or Git and does not resolve symlinks. It cannot
+infer a cd removed by a harness; an absolute writer selector or file target
+survives that transformation. A denial is exit 2 and bounded stderr identifies
+the statement ordinal, classified verb and a working newline-cd or git -C retry.
+Empty, malformed, oversized, command-substituting, or otherwise
 unparseable input warns on stderr and allows with exit 0 because a PreToolUse
 parser may not convert uncertainty into an invented write classification.
 
@@ -1263,7 +1269,7 @@ the exact `/dev/null` target is a non-file sink; neither is classified as a
 write. A numeric descriptor or combined-output prefix does not exempt a file
 target, so `N>file`, `&>file`, and `N>>file` remain writes. Multiple redirects
 are evaluated independently, and any file target makes the statement a write.
-This refinement does not change the first-statement `cd` rule.
+Every file target still needs its own anchor or the shell's leading cd.
 
 The committed writer vocabulary is closed. Git writers are `add`, `am`,
 `apply`, `bisect`, `branch`, `checkout`, `cherry-pick`, `clean`, `clone`,

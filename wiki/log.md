@@ -856,3 +856,39 @@ separately before the journal release, as the owner requested.
 Close TOOLCHAIN-1 records: `e699a0c` asserts immutable shared-action references, and `fb57ba6` uses the action in verification and both release stages. CI 37955896206 passed. Caller go.mod owns Go; action `d35a8ad` owns checksum-verified Staticcheck setup.
 
 TOOL-WIKI-1 also prepares v0.5.18: TestSliceOwnedWiki was red on the original lookup for both owned layouts, then green with malformed metadata and linked-page refusal controls. Existing slice/freshness tests remain unchanged. No gate result is bypassed. Release and installed proof are reported at close.
+
+## [2026-10-10] fix | ACHTA-HOOK-CD-2
+
+The intact cd/redirect, cd/claim, cd/export/fetch and cd/heredoc forms already
+pass the baseline 2fb02db parser. The live hook denied a standalone absolute
+claim selector; its named newline-cd retry succeeded. The hook cannot infer a
+cd that the harness removes. Absolute file targets and writer-owned selectors
+now survive that removal; an unanchored relative heredoc still denies.
+
+TestAnchoredWriteChains and the retry assertions were red before implementation
+in private log 20261010T105024.885442000Z-go-3278206316. Extended formatter/copy
+controls were red in 20261010T105253.523345000Z-go-85384589. Relative selectors
+under an absolute cd and trailing Make selectors were red in
+20261010T105658.145052000Z-go-283142435. The final affected suites passed in
+20261010T105711.170112000Z-go-3483477852. Existing writer denial cases remain;
+the help-looking claim value controls use relative --repo values so they still
+prove denial. Their absolute counterparts now have explicit acceptance tests.
+Rulefloor alone amended the old rule and armed the two baseline-red rules;
+FLOOR and RED-PROOFS are both 60.
+
+Decisions: check redirects and pipeline writers independently, normalize paths
+lexically without environment/Git/symlink reads, and confine explicit writes to
+the initial cd. Relative or outside later cd loses the relative-write anchor.
+Keep first-statement, unknown-verb and warning contracts; do not trust an absent
+cd or a selector embedded in another command's argument value.
+
+On installed v0.5.18, repository page selection passed for lictor ebc66a5,
+scrinium 50418a9, legattus deb94b5 and gograph 5759fc8 (private log
+20261010T105039.280711000Z-zsh-1037870598). The parent postcheck passed for
+scrinium and legattus; lictor failed only clean-tree (owner PROJECT_DESC.md),
+in 20261010T105626.046822000Z-zsh-3517573184. Gograph's last commit appended
+no log heading, so the one-entry full check fails independently of selection.
+No selection fix is needed. Further harness investigation and unrelated
+lictor/gograph state are declined for this code goal: they belong to their
+owners, and the known lictor dirtiness is already recorded in TOOL_IMPROVEMENTS.
+No sibling repository or live installation changes.

@@ -3,8 +3,8 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-10-09
-verified: 2026-10-09
+updated: 2026-10-10
+verified: 2026-10-10
 co_versioned: true
 ---
 
@@ -108,8 +108,13 @@ commands, whose own effects remain the caller's responsibility.
   attestations and candidates make no claim.
 - `hook cd` is a workspace-independent Bash PreToolUse guard. It strips
   heredoc bodies, keeps pipelines together, and denies committed-table writes
-  unless the first statement is an absolute or home `cd`, or every writing
-  statement has an absolute or home `-C`. Unknown verbs are not writes;
+  unless each writer has a leading absolute/home `cd`, its own absolute
+  repository selector, or absolute file targets. Redirects and pipeline writers
+  are checked independently; explicit targets cannot escape a leading cd.
+  Relative or outside cd loses that anchor. Paths are checked lexically without
+  Git, environment reads or symlink resolution. A stripped cd is never inferred;
+  use an absolute writer selector or target. Denials name a working retry.
+  Unknown verbs are not writes;
   unparseable input warns and allows. File-descriptor duplication and exact
   `/dev/null` output are read-only, while numeric and combined redirects to
   files remain writes. Its stable contract is `achta.hook-cd.v1`.
@@ -131,7 +136,7 @@ commands, whose own effects remain the caller's responsibility.
   per-file append-only heading history.
 - `make release-check` invokes GoReleaser v2.17.0 through `go run`, matching
   the release workflow pin; the workflow uses that same configuration check.
-- `RULE-FLOOR.md` carries 58 armed invariants with recorded red proofs on the current
+- `RULE-FLOOR.md` carries 60 armed invariants with recorded red proofs on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
 
@@ -208,3 +213,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | Date | Commit | Change |
 |---|---|---|
 | 2026-10-09 | co-versioned | TOOL-WIKI-1: close TOOLCHAIN-1 records for `e699a0c` and `fb57ba6`. |
+| 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: accept independently anchored writers, reject cd escapes and selector laundering, add retry guidance and baseline-red rules; owned wiki selection re-measured. |

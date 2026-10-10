@@ -165,11 +165,17 @@ go run ./cmd/achta --wiki-dir ./wiki wiki check --json
 `hook cd` reads one PreToolUse JSON document from stdin and evaluates
 `tool_input.command`. It removes heredoc bodies, splits statements on newline,
 `;`, `&&`, and `||`, and keeps pipelines together. A command containing a
-writing statement is allowed only when its first statement is an exact `cd` to
-an absolute, `~`, `$HOME`, or `${HOME}` path before any assignment, or when
-every writing statement contains `-C` with one of those absolute path forms.
-Relative `cd` and `-C` paths do not count. Denial is exit 2 and names the
-statement number, classified verb, and both fixes. Input that cannot be parsed
+writing statement needs a leading exact `cd` to an absolute, `~`, `$HOME`, or
+`${HOME}` path, its own absolute `-C` (Git, Go or Make), an absolute `--repo`
+(Achta or Rulefloor), or absolute file targets. Each redirect and pipeline
+writer is checked separately. A leading cd anchors subsequent writes within
+that directory; changing to a relative or outside directory loses that anchor.
+Explicit targets outside the anchor, including `..` traversal, deny. Relative
+paths without a leading absolute cd do not count. Denial is exit 2 and names the
+statement number and a working retry. If a harness strips a redundant cd, use
+the writer's own absolute selector or target; the hook never infers a missing cd.
+Path checks are lexical; they do not resolve symlinks or inspect Git repositories.
+Input that cannot be parsed
 warns on stderr and allows with exit 0; unknown verbs are read-only by contract.
 An unquoted `>` or `>>` is a write only when its next token is a file target.
 Targets beginning with `&` are file-descriptor duplication, and the exact
