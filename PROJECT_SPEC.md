@@ -145,7 +145,7 @@ ambiguity, substitution or unavailable evidence.
 Nuntius owns workflow, scheduling and the integration queue. Lictor owns native
 profile observation and resource admission; native Makefiles retain gate plans
 and verdicts. ISO owns host isolation, mediation and signing custody. Achta
-owns no Git management or execution authority. General expressions, implicit
+owns no Git management or execution authority. General expressions, queue management, implicit
 execution and inference of prose truth remain forbidden. Existing explicit
 `gate run` behavior is unchanged: caller argv and effects require their own
 authority; this exception supplies none.

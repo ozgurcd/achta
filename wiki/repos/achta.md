@@ -229,3 +229,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: advance source and exact fixtures to v0.5.19, with changelog and release notes; publish through the annotated-tag cask workflow without installing. |
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: remove the unused aggregate classifier reported by Staticcheck; per-writer checks retain classification and denial behavior. |
 | 2026-10-14 | `co-versioned` | TOOLS-MW-W0-CHARTER: record owner R3 Q2(a), 12:20Z, as the closed future charter exception; implementation deferred until independent final-SHA approval and separate grants. |
+| 2026-10-14 | `co-versioned` | agent-tools-mw-a1-r4: append verbatim owner record and explicit queue-management ban from W0 review F1/F2; record pre-edit A1 census. |

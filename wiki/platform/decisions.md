@@ -506,3 +506,11 @@ charter at its final SHA; unresolved contradiction parks A1. W1 remains a
 separate parent-book change. The owner answer alone is not implementation
 evidence. FINAL-PLAN-R4 Owner decisions/§2 and ROLLOUT-FINAL-R4 W0 are the
 design provenance; all dated prior decisions remain unchanged.
+
+### TOOLS-MW-A1 — W0 review record correction
+
+Verbatim owner record, _judge/JUDGE-RULES.md:39, 2026-10-14 12:20Z:
+"R3 Q2 (a) extend achta (repo settings, writer reservations, verified receipts; no general queue/Git mgmt)"
+This appends the exact record requested by W0 review F1. PROJECT_SPEC.md §3.1
+now explicitly bans queue management as requested by F2. Prior history stays
+unchanged; neither correction adds authority.

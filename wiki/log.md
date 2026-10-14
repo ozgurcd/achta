@@ -949,3 +949,36 @@ doc checks run during drafting; one unchanged make verify runs at the final
 committed HEAD with a recorded 1-minute load below 20. The report records exact
 verdict and evidence IDs; no push or claim release is inferred. No parent wiki,
 foreign repository, PROCESS, settings, memory, code, schema or gate changes.
+
+## [2026-10-14] docs | agent-tools-mw-a1-r4 census and W0 follow-up
+
+E-C1: refreshed clean main bd351192, origin/main a3cec386, ahead 1/behind 0.
+W0 independent charter review APPROVE and bilateral AGREE at bd351192 supply
+the prerequisite. Named dispatch permits unforced handoff; the W0 claim was
+released and agent-tools-mw-a1-r4 taken, without force or push.
+
+Complete A1 discovery census: graph queries for policy/registry returned no
+symbols; the claim/gitstate/CLI/safefile controls returned existing code.
+Legacy claim.Run uses CheckoutGitDir; TestWorktreeIsolation pins different
+Git-directory claims. Neither will change. New registered identity/policy
+code and tests belong in internal/repopolicy; additive dispatch/capabilities
+and offline CLI tests belong in internal/cli/run.go and policy*.go. The two
+capability goldens under testdata/{human,machine} change with that additive
+surface. PROJECT_SPEC.md, README.md, wiki/repos/achta.md, decisions and log
+own documentation. This is the complete planned write set; no floor, gate,
+script, foreign repository, parent wiki, settings or memory edit is planned.
+No integration build-tag literal exists in the enumerated Go source; precise
+graph build passed. No owned queue file exists. Relevant decisions and recent
+claim/hook/charter logs were read before editing.
+
+W0 F1 exact owner record: "R3 Q2 (a) extend achta (repo settings, writer reservations, verified receipts; no general queue/Git mgmt)"
+W0 F2 adds queue management to the spec ban sentence. Append-only history,
+no amend. W0 review F3 establishes that the parent postcheck is a missing
+record, not a wrapper defect; A1 withdraws the prior proposed wrapper delta.
+Parent closure and eventual A1 claim release remain separately authorized.
+
+One help-literal rg inspection was denied by gograph-first as a definition
+question despite its literal-search comment. That inspection is parked with
+no alternate-form resend; existing inspected dispatch/capabilities suffice.
+The full native gate omits race; preserve it and run the full race suite once
+at final close. No runtime activation or real trust custody is authorized.
