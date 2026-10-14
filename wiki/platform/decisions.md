@@ -514,3 +514,16 @@ Verbatim owner record, _judge/JUDGE-RULES.md:39, 2026-10-14 12:20Z:
 This appends the exact record requested by W0 review F1. PROJECT_SPEC.md §3.1
 now explicitly bans queue management as requested by F2. Prior history stays
 unchanged; neither correction adds authority.
+
+### TOOLS-MW-A1 — Read-only identity and policy contract
+
+PROJECT_SPEC.md §7.1.2 owns the closed A1 schema and bounds. A registered
+repository ID is explicit owner vocabulary across registered checkouts;
+legacy claims remain per-worktree Git-directory records. No common-dir,
+branch/Nuntius configuration, same-user file permissions or parsed digest
+creates owner authority. Present projection requires exact-byte verifier
+injection; the CLI deliberately has none. Fixture verifiers are not production
+trust. Missing policy is off, with no registration assertion or created state.
+An injected epoch minimum is only a comparison; protected-history rollback,
+custody, activation, leases and runtime enforcement remain later authorized
+work. No Rulefloor ledger, native gate or legacy claim behavior changes.

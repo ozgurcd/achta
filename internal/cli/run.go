@@ -132,6 +132,9 @@ func dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer, releaseV
 	if err != nil {
 		return renderError(stdout, stderr, opts.json, "achta.error.v1", err)
 	}
+	if command == "policy" {
+		return runPolicy(rest, stdout, stderr, opts)
+	}
 	if command != "" && command != "help" && commandHelpRequested(rest) {
 		fmt.Fprint(stdout, helpText)
 		if len(rest) > 0 {
@@ -355,6 +358,7 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 		return renderError(stdout, stderr, opts.json, capabilitiesSchema, err)
 	}
 	commands := []capabilityCommand{
+		{Name: "policy read", Reads: true, ExecutesExternal: true, RequiresGit: true, InputForms: []string{"--repo ABS --repo-id ID --registry ABS --policy ABS", "--minimum-epoch N (injected floor only)"}},
 		{Name: "journal brief", Reads: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "journal note", Reads: true, Writes: true, ExecutesExternal: true, RequiresGit: true, RequiresWorkspace: true},
 		{Name: "hook journal", Reads: true, ExecutesExternal: true, RequiresGit: true},
@@ -415,6 +419,9 @@ func runCapabilities(args []string, stdout, stderr io.Writer, opts globalOptions
 	doc.MachineInterfaces = append(doc.MachineInterfaces, gateSchema)
 	doc.MachineInterfaces = append(doc.MachineInterfaces, journalSchema, journalNoteSchema)
 	doc.ArtifactSchemas = append(doc.ArtifactSchemas, "achta.claim-state.v1")
+	doc.MachineInterfaces = append(doc.MachineInterfaces, "achta.repo-policy-read.v1")
+	doc.ArtifactSchemas = append(doc.ArtifactSchemas, "achta.repo-registry.v1", "achta.repo-policy.v1")
+	doc.Limitations = append(doc.Limitations, "policy read has no production trust verifier; existing policy refuses; no activation or protected-history rollback")
 	if opts.json {
 		return writeJSON(stdout, stderr, doc)
 	}

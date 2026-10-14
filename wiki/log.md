@@ -982,3 +982,38 @@ question despite its literal-search comment. That inspection is parked with
 no alternate-form resend; existing inspected dispatch/capabilities suffice.
 The full native gate omits race; preserve it and run the full race suite once
 at final close. No runtime activation or real trust custody is authorized.
+
+## [2026-10-14] implementation | agent-tools-mw-a1-r4
+
+E-R1 baseline red: permissive new-reader scaffold failed every TestPolicyRefusals
+case and absent CLI dispatch failed read/help/capability tests. Registered clone
+and missing-off controls and unchanged TestWorktreeIsolation passed. E-R2 exposed
+encoding/json's case-insensitive field matching; exact policy/registry names
+failed before correction. No permissive scaffold is committed.
+
+E-T1 focused package tests passed; E-T2 race passed on changed repopolicy/cli
+and direct consumer cmd/achta, measured with gograph dependents. Added focused
+race controls pass for authenticated schema/identity negatives, all closed
+transition pairs, branch/Nuntius input refusal, and explicit versus absent
+worktree registration despite shared common-dir. Existing claim source/tests
+and all legacy exits are unchanged. Read/refusal snapshots compare complete
+temporary fixture membership, types, modes, size, modification time and regular
+file bytes. The initial CLI read-created-state assertion failed on unavailable
+dispatch, not on a demonstrated historical filesystem mutation; this scope
+of red evidence is explicit. No destructive mutation proof or real custody.
+
+New policy files and additive CLI dispatch/capability goldens implement only
+the measured census. Owned docs record strict shape/limits, exact paths and
+filesystem identity, authentication injection and explicit future holds.
+No floor, Makefile, script, release metadata, parent wiki, foreign repository,
+runtime, protected resource, credential, setting or memory changes. A mistakenly
+typed unused graph help command exited 127; no product evidence depends on it.
+No Legattus project or mint is invented. Native checks prove mechanics and
+tests, not production trust/isolation, protected rollback or prose truth.
+
+One native full gate and one full race run are reserved for the final committed
+code HEAD, with admission load below 20, after Gograph uncommitted review and
+session audit. Exact-final independent review and its bilateral agreement are
+required. Gate/review IDs and raw audit are in the named writer report. Parent
+postcheck closure, publication and claim release remain held for later named
+authority. The W0 wrapper-defect delta is withdrawn per independent W0 F3.

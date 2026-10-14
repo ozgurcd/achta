@@ -23,6 +23,9 @@ Achta v0.5.19 capabilities
   mirror check
   parts lock
   parts verify
+  policy read
+    --repo ABS --repo-id ID --registry ABS --policy ABS
+    --minimum-epoch N (injected floor only)
   reachability classify
   recipe check
   replacement check

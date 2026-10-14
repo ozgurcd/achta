@@ -472,6 +472,58 @@ URL-shaped inputs, controls and linked claim files are refused without echo.
 Git checkout override environment variables are refused to keep the selected
 checkout unambiguous. The command does not install hooks or change consumer gates.
 
+### 7.1.2 Registered repository policy read (A1 source contract)
+
+`policy read --repo ABS --repo-id ID --registry ABS --policy ABS
+[--minimum-epoch N] [--json]` is workspace-independent and read-only. Its
+machine result is `achta.repo-policy-read.v1`. It creates no directory, file,
+claim, lock or repaired input. Missing policy produces desired/effective `off`,
+epoch 0, `registered: false`, `policy_present: false`; it does not authenticate
+or project registry contents in that case. Malformed, unsupported, unsafe,
+substituted or unauthenticated present evidence is exit 2, `cannot_evaluate`,
+without an authoritative projection. There is no setter or activation command.
+
+The new internal `repopolicy` contract is separate from `claim` and never reads
+or writes legacy claim state. The closed `achta.repo-registry.v1` object has
+exactly `schema_version`, `repo_id`, and `checkouts`. Each checkout has exactly
+`path`, `git_dir`, `path_identity`, `git_identity`. Paths are canonical absolute
+paths with exact case and no linked components. Identities are decimal
+filesystem device/inode pairs separated by `:`. Selected checkout root and
+per-worktree Git directory must match the authenticated registration exactly.
+One authenticated ID can register independent clones or linked worktrees;
+sharing a common-dir does not register either. IDs are opaque owner-assigned
+lowercase ASCII identifiers, not paths, remote URLs or inferred clone identity.
+
+The closed `achta.repo-policy.v1` object requires exactly `schema_version`,
+`repo_id`, `registry_sha256`, `desired_mode`, `effective_mode`, `epoch`,
+`writer_limit`, `path_keys`, `semantic_keys`, `eligible_runners`, `capability`,
+`native_profile`, `owner_action`. The registry digest binds exact registry
+bytes. Desired/effective pairs are `off/off`, `on/enabling`, `on/on`,
+`off/disabling`. Epoch is a positive uint64; writer limit is 1–64. Each key list
+is a present array with at most 128 distinct opaque identifiers; empty lists
+grant no allocation authority. Capability and native profile each require
+exactly an `id` and lowercase 64-hex `sha256` reference. Repo/action/reference
+IDs and keys match `[a-z0-9][a-z0-9._-]{0,127}`. Registry holds 1–128 unique
+checkout paths, Git-directory paths and checkout filesystem identities.
+Every field is required. Unknown, case-folded, duplicate, null, trailing,
+oversized (over 65,536 bytes), or wrongly typed input refuses without repair.
+
+Parsing proves structure only. Present-policy reads require an injected
+verifier authenticating both exact byte sequences with their distinct schema
+identities. Returning success is the trusted caller's responsibility; file
+mode, branch content, Nuntius config and caller-provided paths are not owner
+authentication. A1 supplies only pinned-byte temporary test verifiers. The
+production CLI has no verifier and refuses every present policy, including
+structurally valid `on` files. Provisioning, inaccessible real custody and
+protected-principal mediation remain separate owner-authorized work.
+
+`minimum-epoch` is an injected comparison floor only. It does not prove
+anti-rollback against protected history/tip; A2 owns that requirement. A1
+projects settings but enforces no writer limits, leases, scopes, runners,
+drains, queue, Git operation or host isolation. Read-time identity and byte
+rechecks detect observed substitution; they are not a host mediation claim.
+No production trust root or new floor semantics is introduced.
+
 ### 7.2 Version
 
 ```text

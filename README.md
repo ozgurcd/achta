@@ -27,6 +27,21 @@ is separate. R3 Q1(b) permits approved isolated source-only preparation and
 holds new shared DB/Docker work until safety checks pass. No implementation,
 activation, host setup, installation or publication is authorized here.
 
+## Registered repository policy reader (A1 source)
+
+`policy read` adds a closed, read-only projection contract, documented in
+PROJECT_SPEC.md §7.1.2. `achta policy read --help` lists the exact selectors.
+The owner-registered ID is separate from legacy per-checkout advisory claims.
+Missing policy is off and creates nothing. Present input needs authenticated
+registry and policy bytes plus an exact registered checkout identity.
+
+The A1 CLI has no production trust verifier: it refuses present policy files,
+including valid on-mode branch or Nuntius configuration files. Temporary tests
+inject pinned-byte verifiers and an epoch floor; neither is real owner custody
+or protected-history rollback proof. There is no setter, lease, queue, host
+setup or activation. Existing claim behavior stays unchanged. Future trust,
+anti-rollback and mediation work remains held under separate authority.
+
 ## Install
 
 From an authorized checkout:
@@ -37,7 +52,7 @@ go install ./cmd/achta
 
 ## Commands
 
-`version`, `capabilities`, `claim`, and the Bash PreToolUse hook are
+`version`, `capabilities`, `claim`, `policy read`, and the Bash PreToolUse hook are
 workspace-independent:
 
 ```sh
@@ -47,7 +62,8 @@ achta hook cd
 ```
 
 `--help` and `-h` are also workspace-independent before or after a command
-path; command-local forms emit the same stable top-level help.
+path; legacy command-local forms emit the same stable top-level help.
+`policy read --help` emits its own bounded contract and trust limitation.
 
 Add global `--timing` to report total command elapsed time at the end:
 

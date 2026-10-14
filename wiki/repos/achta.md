@@ -4,7 +4,7 @@ category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
 updated: 2026-10-14
-verified: 2026-10-10
+verified: 2026-10-14
 co_versioned: true
 ---
 
@@ -17,6 +17,11 @@ commands, whose own effects remain the caller's responsibility.
 
 ## Canonical facts
 
+- A1 source adds `policy read` and the closed registered-repository schemas.
+  Missing policy projects off without creating state; present policy requires
+  exact authenticated registry/policy bytes and checkout identity. The CLI has
+  no production verifier and refuses present policy. Legacy per-worktree
+  claims stay unchanged; fixture epoch floors are not protected-history proof.
 - Journal briefs report live claim and repository evidence in seven lines; private
   claim-owned notes retain 200 lines and the resume hook is silent on errors.
 
@@ -146,7 +151,9 @@ commands, whose own effects remain the caller's responsibility.
   exception, PROJECT_SPEC.md §3.1, authorizes future closed registered-repo
   settings, owner-authenticated mode/epoch/drain, fenced writer/resource
   reservations, amendment reconciliation and verified receipt/census bindings.
-  None is a shipped capability. Legacy claims and explicit `gate run` remain
+  A1 implements the read-only source contract in PROJECT_SPEC.md §7.1.2;
+  production trust, setters, reservations and receipts remain unimplemented.
+  No extension is released or activated. Legacy claims and explicit `gate run` remain
   unchanged. Rulefloor owns floor semantics/writing, Nuntius workflow/queue,
   Lictor native observation/admission, and ISO host custody/mediation.
   General expressions, Git/queue management, implicit execution and prose-truth
@@ -230,3 +237,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: remove the unused aggregate classifier reported by Staticcheck; per-writer checks retain classification and denial behavior. |
 | 2026-10-14 | `co-versioned` | TOOLS-MW-W0-CHARTER: record owner R3 Q2(a), 12:20Z, as the closed future charter exception; implementation deferred until independent final-SHA approval and separate grants. |
 | 2026-10-14 | `co-versioned` | agent-tools-mw-a1-r4: append verbatim owner record and explicit queue-management ban from W0 review F1/F2; record pre-edit A1 census. |
+| 2026-10-14 | `co-versioned` | agent-tools-mw-a1-r4: closed registered-repository identity and authenticated read-only policy projection, refusal/clone/worktree fixtures, typed help/capabilities; production trust and activation held. |
