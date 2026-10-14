@@ -918,3 +918,34 @@ in 20261010T110109.052031000Z-make-2942311757. Remove that unused helper in this
 separate local fix; unanchoredWriter owns the complete per-writer check now.
 No gate or assertion changes. End the new Gograph fix session before rerunning
 the native full gate. The prior session ended before gates by contract.
+
+## [2026-10-14] charter | TOOLS-MW-W0-CHARTER
+
+Owner answer R3 Q2(a), 2026-10-14 12:20Z: extend Achta for fixed repository
+settings, writer reservations and verified receipts. W0 lands only the closed
+future charter exception in PROJECT_SPEC.md §3.1 and aligned README/current
+wiki/decision records. No capability is implemented or shipped. R3 Q1(b)
+continues approved isolated source-only preparation and holds new shared
+DB/Docker work until safety checks pass.
+
+The pre-write live-statement census covered PROJECT_SPEC.md, README.md and
+every owned wiki Markdown page. Affected current sites: spec §§1, 3, 6, 9.3;
+README charter summary; repository limitations; decision record. Existing
+database/service bans and dated initial-release/history statements stay intact.
+The future owner-controlled records are bounded, explicit registrations, not a
+database service. The permissive future-Git-mutation sentence is replaced with
+the standing Git-management ban and unchanged explicit gate-run boundary.
+
+Rulefloor alone owns floor semantics/writing, Nuntius workflow/queue, Lictor
+native observation/admission and ISO host custody/mediation. General expressions,
+Git/queue management, implicit execution and prose-truth inference remain
+forbidden. Existing claims, legacy behavior, gates and floors are unchanged.
+Independent final-SHA charter approval precedes A1; unresolved contradiction
+parks A1. W1, implementation, activation, custody, installs, runtime experiments
+and publication remain separately authorized work. Q2 alone is not evidence.
+
+The containing co-versioned commit anchors this entry and ledger row. Native
+doc checks run during drafting; one unchanged make verify runs at the final
+committed HEAD with a recorded 1-minute load below 20. The report records exact
+verdict and evidence IDs; no push or claim release is inferred. No parent wiki,
+foreign repository, PROCESS, settings, memory, code, schema or gate changes.

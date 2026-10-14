@@ -8,6 +8,25 @@ not decide whether human claims are true.
 Achta is public. Release archives and checksums can be downloaded without
 GitHub credentials.
 
+## Authorized future charter scope
+
+The owner selected R3 Q2(a) on 2026-10-14 at 12:20Z: fixed repository settings,
+writer reservations and verified receipts. The single closed exception in
+[`PROJECT_SPEC.md` §3.1](PROJECT_SPEC.md#31-authorized-future-scope--closed-repository-governance)
+defines registered identity/settings, owner-authenticated mode/epoch/drain,
+fenced writer/resource reservations, amendment reconciliation and authenticated
+receipt/census bindings. These are authorized future scope, not shipped
+capabilities. Existing per-checkout advisory claims and `gate run` are unchanged.
+
+Rulefloor alone owns floor semantics/writing; Nuntius owns workflow and queue;
+Lictor owns native observation/admission; ISO owns host custody and mediation.
+General expressions, Git/queue management, implicit execution and prose-truth
+inference remain outside Achta. `gate run` supplies no hidden action authority.
+A1 requires independent approval of this landed charter at its final SHA; W1
+is separate. R3 Q1(b) permits approved isolated source-only preparation and
+holds new shared DB/Docker work until safety checks pass. No implementation,
+activation, host setup, installation or publication is authorized here.
+
 ## Install
 
 From an authorized checkout:

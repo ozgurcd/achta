@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.19 release specification
+Status: v0.5.19 release specification; authorized future scope in §3.1 is not shipped
 
 Project name: Achta
 
@@ -47,6 +47,7 @@ Achta complements existing tools rather than absorbing them:
 
 Achta must not become a generic policy engine, task runner, requirements
 system, documentation platform, source-code analyzer, CI server, or database.
+The sole additional charter exception is the closed future contract in §3.1.
 
 ## 2. Measured problem
 
@@ -95,6 +96,68 @@ Achta is not:
 - A database-backed service, daemon, web service, or network control plane.
 - An LLM-based interpreter, embedding store, semantic search engine, or memory
   system.
+
+### 3.1 Authorized future scope — closed repository governance
+
+The owner answered R3 Q2(a) on 2026-10-14 at 12:20Z: extend Achta for fixed
+repository settings, writer reservations and verified receipts. This is the
+single bounded charter exception. It authorizes future implementation goals,
+not a shipped command, schema, enforcement mechanism or active mode.
+
+The exception permits only these deterministic contracts:
+
+- Closed registered-repository identity and fixed settings, with explicit
+  checkout registrations distinct from legacy per-checkout claims. Missing
+  policy means off; invalid, unsupported, untrusted or rolled-back policy
+  refuses evaluation. No caller-defined expression language is permitted.
+- Owner-authenticated mode changes, monotone epochs, expected-old comparison
+  and swap, rollback detection against independently protected history/tips,
+  and finite drains that block new allocations and scope expansions. A lane
+  name, TTY or same-user file mode is not owner authentication.
+- Fenced writer path/semantic-scope and resource reservations across registered
+  checkouts. Scope expansion acquires the complete revised reservation
+  atomically or parks. Expiry, terminal goal state or a dead PID alone cannot
+  release a reservation; uncertain process/resource settlement retains its
+  fence. Legacy claim release, including force, grants no lease eviction.
+- Explicit amendment-intent reconciliation with Rulefloor-owned machine
+  evidence and consumed receipts. Rulefloor alone owns floor semantics,
+  proof/ratchet rules and canonical floor writing; Achta does not reinterpret
+  or write its ledger.
+- Verification of authenticated, predecessor-linked acceptance receipts and
+  exact census bindings. Bind the candidate/source/review, native profile and
+  observed result, policy/resource fences, sibling inputs and promotion
+  readback. Bind the live wiki tip, all accepted-but-unclosed predecessor
+  census deltas in acceptance order, and the current delta; reject missing,
+  reordered, rejected or unaccepted lineage and broken expected-old continuity.
+  Review reuse requires an identical chain/current delta, complete gate-read
+  path-set/content digest and all other inputs, with verified reanchor evidence
+  for a new tip/request/receipt. Relevant changes or incomplete coverage require
+  fresh review. A recomputable digest or green text alone is not authenticity,
+  execution evidence or prose truth.
+
+Future records may use bounded, explicitly registered owner-controlled local
+stores outside lane write roots, selected and provisioned under separate owner
+authority. This extends the canonical-artifact boundary only for the contracts
+above; it permits no database service, daemon, remote control plane or host
+custody setup by Achta. Registered paths and trust inputs must fail closed on
+ambiguity, substitution or unavailable evidence.
+
+Nuntius owns workflow, scheduling and the integration queue. Lictor owns native
+profile observation and resource admission; native Makefiles retain gate plans
+and verdicts. ISO owns host isolation, mediation and signing custody. Achta
+owns no Git management or execution authority. General expressions, implicit
+execution and inference of prose truth remain forbidden. Existing explicit
+`gate run` behavior is unchanged: caller argv and effects require their own
+authority; this exception supplies none.
+
+The owner also answered R3 Q1(b): continue approved isolated source-only
+preparation; hold new shared DB/Docker work until safety checks pass. W0 changes
+only this charter and owned documentation. A1 follows the landed charter's
+independent final-SHA approval; unresolved contradictions park A1. W1 parent-book
+changes remain separate. Implementation, activation, installation, host setup,
+real key custody, runtime experiments and publication require their own grants
+and evidence. The owner answer alone is not implementation evidence. All
+legacy claims, behavior, gates and floors remain unchanged.
 
 ## 4. Core guarantees
 
@@ -160,7 +223,8 @@ withhold arguments and potentially sensitive lines. Gate execution has no
 automatic timeout; signals cancel the child process group.
 
 Achta operates on existing artifacts. It does not replace them with private
-storage.
+storage. The authorized future records in §3.1 are the sole closed extension;
+they do not change existing artifact formats or storage behavior.
 
 ### 6.1 Wiki repository pages
 
@@ -1357,8 +1421,9 @@ documented transaction or can prove that the files are independently safe.
   not refresh repository index metadata.
 - Do not accept arbitrary command strings from manifests, wiki prose, or
   witness records.
-- Git operations are read-only unless a future command separately documents a
-  narrowly scoped mutation. No initial command needs mutating Git operations.
+- Achta's own Git operations remain read-only. Neither §3.1 nor documentation
+  of a future command authorizes Git management. The explicitly authorized
+  `gate run` child retains its separately caller-authorized effects.
 
 ### 9.4 Secrets and diagnostics
 

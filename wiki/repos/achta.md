@@ -3,7 +3,7 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-10-10
+updated: 2026-10-14
 verified: 2026-10-10
 co_versioned: true
 ---
@@ -142,6 +142,18 @@ commands, whose own effects remain the caller's responsibility.
 
 ## Known limitations
 
+- The owner selected R3 Q2(a) on 2026-10-14 at 12:20Z. The sole charter
+  exception, PROJECT_SPEC.md §3.1, authorizes future closed registered-repo
+  settings, owner-authenticated mode/epoch/drain, fenced writer/resource
+  reservations, amendment reconciliation and verified receipt/census bindings.
+  None is a shipped capability. Legacy claims and explicit `gate run` remain
+  unchanged. Rulefloor owns floor semantics/writing, Nuntius workflow/queue,
+  Lictor native observation/admission, and ISO host custody/mediation.
+  General expressions, Git/queue management, implicit execution and prose-truth
+  inference remain banned. A1 requires independent final-SHA charter approval;
+  W1 is separate. R3 Q1(b) keeps approved isolated source-only prep moving and
+  holds new shared DB/Docker work until safety checks pass. This charter grants
+  no implementation, activation, host setup, installation or publication.
 - Achta establishes structural consistency and freshness, not prose truth or
   author honesty.
 - Outside explicit `gate run`, it does not run arbitrary commands, create
@@ -216,3 +228,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: accept independently anchored writers, reject cd escapes and selector laundering, add retry guidance and baseline-red rules; owned wiki selection re-measured. |
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: advance source and exact fixtures to v0.5.19, with changelog and release notes; publish through the annotated-tag cask workflow without installing. |
 | 2026-10-10 | `co-versioned` | ACHTA-HOOK-CD-2: remove the unused aggregate classifier reported by Staticcheck; per-writer checks retain classification and denial behavior. |
+| 2026-10-14 | `co-versioned` | TOOLS-MW-W0-CHARTER: record owner R3 Q2(a), 12:20Z, as the closed future charter exception; implementation deferred until independent final-SHA approval and separate grants. |

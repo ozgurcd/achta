@@ -2,7 +2,7 @@
 title: Achta Decisions
 category: platform
 status: authoritative
-updated: 2026-09-06
+updated: 2026-10-14
 ---
 
 # Achta Decisions
@@ -481,3 +481,28 @@ fixture g, count-v2's consuming boundary makes the verb report target 22;
 count-v1 and the script report 4. All are red at exit 1. Exit-code parity is the
 replacement contract recorded by the replay; it is not diagnostic parity, and
 the project specification names the human-visible difference.
+
+### TOOLS-MW-W0-CHARTER — Closed future repository governance
+
+Owner answer, 2026-10-14 12:20Z, R3 Q2(a): extend Achta for fixed repository
+settings, writer reservations and verified receipts. PROJECT_SPEC.md §3.1 is
+the single precise live charter exception and owns its complete limits. These
+contracts are authorized future scope, not implemented or shipped capability.
+
+The exception covers closed registered-repo identity/settings, authenticated
+owner mode/epoch/drain, fenced writer/resource reservations, explicit amendment
+reconciliation and authenticated receipts with ordered predecessor census
+bindings. It retains bans on general expressions, queue/Git management,
+implicit execution and prose-truth inference. Rulefloor alone owns floor
+semantics/writing; Nuntius workflow/queue; Lictor native observation/admission;
+ISO host custody/mediation. Existing claims, explicit gate-run behavior and
+all current gates/floors remain unchanged; gate-run grants no hidden authority.
+
+R3 Q1(b), at the same time: continue approved isolated source-only preparation;
+hold new shared DB/Docker work until safety checks pass. W0 does not authorize
+implementation, activation, host setup, key custody, installation, runtime
+experiments or publication. A1 follows independent approval of the landed
+charter at its final SHA; unresolved contradiction parks A1. W1 remains a
+separate parent-book change. The owner answer alone is not implementation
+evidence. FINAL-PLAN-R4 Owner decisions/§2 and ROLLOUT-FINAL-R4 W0 are the
+design provenance; all dated prior decisions remain unchanged.
