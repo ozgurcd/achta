@@ -1079,3 +1079,18 @@ source, floor, gate, release, installation, fetch, push, tag, parent wiki,
 sibling repository, protected resource or credential changes. The previously
 parked parent postcheck remains a separate canonical-checkout close; no new
 adjacent work is proposed.
+
+## [2026-10-20] tests | TOOL-ACHTA-CLAIM-OUTPUT-FIX binding refresh
+
+The first native make verify at f9f2eab passed its build, tests, analyzers and
+wiki checks, then failed the existing CLAIM-COMPACT-OUTPUT-1 binding hash:
+18bc84fd5d3b recorded versus cf07f9ce72a3 after the reviewed test extension.
+E-VERIFY-RED: 20261020T134133.316666000Z-make-1947858329.log in private gate
+metadata. Rulefloor's own rehash command accepts the reviewed test span in this
+separate fix-forward commit. The rule, existing red proof, executable floor,
+assertions and gate commands remain unchanged. Full verify is rerun at this
+commit and its final result is recorded in the requested workspace report.
+
+The cd hook denied a combined help request because rehash lacked an absolute
+anchor; its named retry with an absolute leading cd succeeded. No permission
+refusal, bypass, amendment, fetch, installation, push or tag occurred.
