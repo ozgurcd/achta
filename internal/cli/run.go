@@ -545,6 +545,7 @@ Commands:
   help          show this help
 
 Claims are advisory and local; no expiry or network calls. All four accept --json.
+Human output shows the last release; all four accept --history for full history.
 Example with two slices:
   achta claim take --repo /work/project --slice first --note 'database work'
   achta claim check --repo /work/project --slice second

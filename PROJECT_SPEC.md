@@ -447,6 +447,13 @@ They expose `achta.claim.v1` through `--json`. They do not fetch or alter Git
 history, refs, index or tracked files. Claims are advisory caller assertions,
 not authentication or a filesystem write barrier, and have no automatic expiry.
 
+Human output includes the result, holder or none, holder age/note, tracked
+changes, unpushed commit paths, and the latest release event with actor, time,
+forced flag and reason. All four accept `--history` to display every release
+in recorded order. JSON and stored history always retain every release;
+`--history` changes only human rendering. Human take/release measure checkout
+evidence before mutation and refuse unavailable evidence without writing.
+
 Take records slice, UTC time and note in mode-0600 `achta-claim.json` inside the
 checkout's own Git directory (`achta.claim-state.v1`). Linked worktrees use
 distinct Git directories. A different holder refuses with its name and age;

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ozgurcd/achta/internal/claim"
+	"github.com/ozgurcd/achta/internal/gitstate"
 )
 
 func runClaim(args []string, stdout, stderr io.Writer, opts globalOptions) int {
@@ -19,6 +20,7 @@ func runClaim(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	note := set.String("note", "", "claim note")
 	reason := set.String("reason", "", "forced release reason")
 	force := set.Bool("force", false, "release another slice's claim")
+	history := set.Bool("history", false, "show complete release history in human output")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
 	if err := parseFlags(set, args[1:]); err != nil {
 		return renderError(stdout, stderr, opts.json, claim.Schema, invalid("invalid claim flags"))
@@ -26,6 +28,19 @@ func runClaim(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	opts.json = *jsonMode
 	if err := rejectSecretLikeInput(*repo); err != nil {
 		return renderError(stdout, stderr, opts.json, claim.Schema, err)
+	}
+	// Measure human-only evidence before a mutation, so unavailable evidence
+	// cannot turn a completed take or release into a reported error.
+	var checkout *gitstate.Checkout
+	if !opts.json && (args[0] == "take" || args[0] == "release") {
+		if _, err := gitstate.CheckoutGitDir(*repo); err != nil {
+			return renderError(stdout, stderr, false, claim.Schema, invalid("%v", err))
+		}
+		measured, err := gitstate.InspectCheckout(*repo)
+		if err != nil {
+			return renderError(stdout, stderr, false, claim.Schema, invalid("%v", err))
+		}
+		checkout = &measured
 	}
 	result, err := claim.Run(args[0], claim.Options{Repo: *repo, Slice: *slice, Note: *note, Reason: *reason, Force: *force, Now: time.Now()})
 	if err != nil {
@@ -40,6 +55,9 @@ func runClaim(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 			return 2
 		}
 		return code
+	}
+	if result.Checkout == nil {
+		result.Checkout = checkout
 	}
 	fmt.Fprintf(stdout, "claim %s: %s\n", result.Operation, result.Status)
 	if result.Claim == nil {
@@ -64,7 +82,11 @@ func runClaim(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 			fmt.Fprintf(stdout, "  %q\n", path)
 		}
 	}
-	for _, release := range result.Releases {
+	releases := result.Releases
+	if !*history && len(releases) > 1 {
+		releases = releases[len(releases)-1:]
+	}
+	for _, release := range releases {
 		fmt.Fprintf(stdout, "released %s by %s at %s; forced=%t; reason %s\n", release.Holder, release.By, release.Time.Format(time.RFC3339), release.Forced, release.Reason)
 	}
 	return code

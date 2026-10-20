@@ -1021,3 +1021,31 @@ authority. The W0 wrapper-defect delta is withdrawn per independent W0 F3.
 ## [2026-10-20] maintenance | CI-PIN-ALL-FINISH
 
 Add the `v0.4.6-6-gd35a8ad` source-snapshot comment to the unchanged shared Go toolchain action SHA. It is an untagged action commit, not the v0.4.6 release target. The existing checkout and GoReleaser SHA pins keep their SHAs and now carry the exact release comments `v7.0.0` and `v7.2.3`, verified online by the judge. No product behavior, toolchain inputs, Go code, gate, release metadata, parent wiki or primary checkout changes. make verify is reported at close.
+
+## [2026-10-20] implementation | TOOL-ACHTA-CLAIM-OUTPUT
+
+Human take/status/check/release now show only the latest release by default;
+--history explicitly restores every release in recorded order. Current holder,
+age, note, tracked changes and local unpushed paths remain visible. Human
+writer commands measure paths before mutation. JSON schema/fields and complete
+stored release history are unchanged. README, help and the live specification
+state the display contract; no release version or installed binary changes.
+
+E-RED: after correcting a test-fixture note supplied to release, the old source
+failed every default golden (extra history; absent writer checkout paths) and
+every --history golden (exit 2). E-GREEN: all eight goldens and the JSON/storage,
+no-holder, refusal and unknown-upstream controls pass. CLAIM-COMPACT-OUTPUT-1
+is declared/armed only through Rulefloor, with manual red evidence; its focused
+execute check passes. FLOOR and RED-PROOFS are both 61 (Rulefloor's complete
+ledger row count). Gograph precise build, plan and final uncommitted review
+succeeded; session claimoutput_20261020_141953_ada87687cf0a9b33 audited grade B.
+The ambiguous claim.Run selector was resolved using its exact file selector.
+Initial Rulefloor arm lacked its required RULE comment; the corrected tag armed.
+
+The native make verify runs on this committed tree; its private gate ID and
+result are recorded in reports/TOOL-ACHTA-CLAIM-OUTPUT.txt at workspace scope.
+The work stays on wip/claim-output-compact in the requested isolated worktree.
+No pushes, tags, installation, Docker, protected data, sibling source, owner
+settings or parent-wiki edits are authorized or performed. No adjacent product
+work is proposed. Parent postcheck's extra parent log/ledger requirements are
+outside this local tool delivery; any refusal is disclosed in the report.

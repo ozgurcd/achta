@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+Compact human claim take/status/check/release output to the latest release
+event, preserving its force flag and reason. Add `--history` for complete human
+history and show tracked and unpushed paths for all four commands. Keep the
+full `achta.claim.v1` JSON document and stored history unchanged.
+
 ## v0.5.19 — 2026-10-10
 
 Accept absolute repository selectors and file targets for each Bash writer.

@@ -556,6 +556,15 @@ whether or not a claim exists. `release --slice docs-change --force --reason
 previous holder, releasing slice, time, force flag and reason. The slice name
 is a caller assertion, not an authenticated identity.
 
+Human output shows the result, current holder (or none), holder age and note,
+tracked changes, unpushed commit paths, and only the last release event. That
+event includes its releasing slice, time, force flag and reason, including the
+release just made. Add `--history` to any of the four commands to show the full
+release history in recorded order. JSON always includes the complete history,
+with or without `--history`; compact output never trims stored history.
+Human take/release measure checkout paths before changing the claim and refuse
+unavailable evidence before writing. A missing upstream remains explicitly unknown.
+
 The state is `achta-claim.json` in the checkout's Git directory, with mode 0600;
 a linked worktree uses its own Git directory, not the shared one. The adjacent
 `achta-claim.lock` serializes writers without waiting and survives as a private

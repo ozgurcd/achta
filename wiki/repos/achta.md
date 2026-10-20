@@ -4,7 +4,7 @@ category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
 updated: 2026-10-20
-verified: 2026-10-14
+verified: 2026-10-20
 co_versioned: true
 ---
 
@@ -31,6 +31,8 @@ commands, whose own effects remain the caller's responsibility.
 - `claim take/status/check/release` coordinates a local checkout through private
   per-worktree Git metadata, reports tracked paths and local upstream commits,
   preserves forced-release actor/reason history, and supports `achta.claim.v1`.
+  Human output shows current checkout evidence and only the latest release;
+  `--history` shows all releases. JSON and stored history stay complete.
 - `wiki check` reports generator-header version-only drift as an explicit note;
   other derived changes fail, and `wiki derive --write` retains the running version.
 - `decision add --body-file -` reads bounded stdin through the same body
@@ -141,7 +143,7 @@ commands, whose own effects remain the caller's responsibility.
   per-file append-only heading history.
 - `make release-check` invokes GoReleaser v2.17.0 through `go run`, matching
   the release workflow pin; the workflow uses that same configuration check.
-- `RULE-FLOOR.md` carries 60 armed invariants with recorded red proofs on the current
+- `RULE-FLOOR.md` carries 61 armed invariants with recorded red proofs on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
 
@@ -239,3 +241,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-14 | `co-versioned` | agent-tools-mw-a1-r4: append verbatim owner record and explicit queue-management ban from W0 review F1/F2; record pre-edit A1 census. |
 | 2026-10-14 | `co-versioned` | agent-tools-mw-a1-r4: closed registered-repository identity and authenticated read-only policy projection, refusal/clone/worktree fixtures, typed help/capabilities; production trust and activation held. |
 | 2026-10-20 | `co-versioned` | CI-PIN-ALL-FINISH: document the unchanged shared-action SHA with its exact source snapshot; exact release comments for the checkout v7.0.0 and GoReleaser v7.2.3 SHA pins. |
+| 2026-10-20 | `co-versioned` | TOOL-ACHTA-CLAIM-OUTPUT: compact human claim output, explicit full history, unchanged JSON/storage, checkout evidence on all commands, and red-first golden coverage. |
