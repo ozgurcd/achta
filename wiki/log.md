@@ -1017,3 +1017,7 @@ session audit. Exact-final independent review and its bilateral agreement are
 required. Gate/review IDs and raw audit are in the named writer report. Parent
 postcheck closure, publication and claim release remain held for later named
 authority. The W0 wrapper-defect delta is withdrawn per independent W0 F3.
+
+## [2026-10-20] maintenance | CI-PIN-ALL-FINISH
+
+Add the `v0.4.6-6-gd35a8ad` source-snapshot comment to the unchanged shared Go toolchain action SHA. It is an untagged action commit, not the v0.4.6 release target. The existing checkout and GoReleaser SHA pins keep their SHAs and now carry the exact release comments `v7.0.0` and `v7.2.3`, verified online by the judge. No product behavior, toolchain inputs, Go code, gate, release metadata, parent wiki or primary checkout changes. make verify is reported at close.

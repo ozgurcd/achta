@@ -3,7 +3,7 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-10-14
+updated: 2026-10-20
 verified: 2026-10-14
 co_versioned: true
 ---
@@ -238,3 +238,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-14 | `co-versioned` | TOOLS-MW-W0-CHARTER: record owner R3 Q2(a), 12:20Z, as the closed future charter exception; implementation deferred until independent final-SHA approval and separate grants. |
 | 2026-10-14 | `co-versioned` | agent-tools-mw-a1-r4: append verbatim owner record and explicit queue-management ban from W0 review F1/F2; record pre-edit A1 census. |
 | 2026-10-14 | `co-versioned` | agent-tools-mw-a1-r4: closed registered-repository identity and authenticated read-only policy projection, refusal/clone/worktree fixtures, typed help/capabilities; production trust and activation held. |
+| 2026-10-20 | `co-versioned` | CI-PIN-ALL-FINISH: document the unchanged shared-action SHA with its exact source snapshot; exact release comments for the checkout v7.0.0 and GoReleaser v7.2.3 SHA pins. |
