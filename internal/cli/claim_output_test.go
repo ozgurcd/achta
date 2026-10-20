@@ -15,9 +15,10 @@ import (
 
 // RULE: CLAIM-COMPACT-OUTPUT-1
 func TestClaimOutputGoldens(t *testing.T) {
-	for _, operation := range []string{"take", "status", "check", "release"} {
+	for _, scenario := range []string{"take", "status", "check", "release", "status-forced-release"} {
+		operation := strings.TrimSuffix(scenario, "-forced-release")
 		for _, history := range []bool{false, true} {
-			name := operation
+			name := scenario
 			if history {
 				name += "-history"
 			}
@@ -42,6 +43,11 @@ func TestClaimOutputGoldens(t *testing.T) {
 				if operation != "take" {
 					seed("take", "current")
 				}
+				if scenario == "status-forced-release" {
+					if _, err := claim.Run("release", claim.Options{Repo: repo, Slice: "owner", Force: true, Reason: "owner handoff", Now: fixed}); err != nil {
+						t.Fatal(err)
+					}
+				}
 				writeTestFile(t, filepath.Join(repo, "committed.txt"), "local\n")
 				runGit(t, repo, "add", "committed.txt")
 				runGit(t, repo, "commit", "-m", "local change")
@@ -60,7 +66,7 @@ func TestClaimOutputGoldens(t *testing.T) {
 					args = append(args, "--history")
 				}
 				var out, diagnostics bytes.Buffer
-				if code := Run(args, &out, &diagnostics, testVersion); code != 0 || diagnostics.Len() != 0 {
+				if code := claimTestCommand(args, &out, &diagnostics); code != 0 || diagnostics.Len() != 0 {
 					t.Fatalf("exit=%d diagnostics=%s", code, diagnostics.String())
 				}
 				got := regexp.MustCompile(`age [0-9]+s`).ReplaceAllString(out.String(), "age <AGE>s")
@@ -78,7 +84,7 @@ func TestClaimOutputGoldens(t *testing.T) {
 					t.Fatal(err)
 				}
 				count := 2
-				if operation == "release" {
+				if operation == "release" || scenario == "status-forced-release" {
 					count++
 				}
 				if len(state.Releases) != count || state.Releases[0].Holder != "old" {
@@ -109,36 +115,57 @@ func TestClaimOutputEmptyAndRefusals(t *testing.T) {
 
 func TestClaimHistoryJSONUnchanged(t *testing.T) {
 	for _, operation := range []string{"take", "status", "check", "release"} {
-		t.Run(operation, func(t *testing.T) {
-			repo := claimFixture(t)
-			claimRun(t, repo, 0, "take", "--slice", "older", "--json")
-			claimRun(t, repo, 0, "release", "--slice", "older", "--json")
-			claimRun(t, repo, 0, "take", "--slice", "recent", "--json")
-			claimRun(t, repo, 0, "release", "--slice", "recent", "--json")
-			claimRun(t, repo, 0, "take", "--slice", "current", "--json")
-			args := []string{"--json", "--history"}
-			if operation != "status" {
-				args = append(args, "--slice", "current")
+		for _, history := range []bool{false, true} {
+			name := operation
+			if history {
+				name += "-history"
 			}
-			var result map[string]json.RawMessage
-			if err := json.Unmarshal([]byte(claimRun(t, repo, 0, operation, args...)), &result); err != nil {
-				t.Fatal(err)
-			}
-			var releases []claim.Release
-			wantReleases := 2
-			if operation == "release" {
-				wantReleases++
-			}
-			if err := json.Unmarshal(result["releases"], &releases); err != nil || len(releases) != wantReleases || releases[0].Holder != "older" {
-				t.Fatal("JSON must retain complete history")
-			}
-			wantFields := 6
-			if operation == "status" || operation == "check" {
-				wantFields += 5
-			}
-			if len(result) != wantFields || string(result["schema_version"]) != `"achta.claim.v1"` {
-				t.Fatal("JSON field set or schema changed")
-			}
-		})
+			t.Run(name, func(t *testing.T) {
+				repo := claimFixture(t)
+				claimRun(t, repo, 0, "take", "--slice", "older", "--json")
+				claimRun(t, repo, 0, "release", "--slice", "older", "--json")
+				claimRun(t, repo, 0, "take", "--slice", "recent", "--json")
+				claimRun(t, repo, 0, "release", "--slice", "recent", "--json")
+				claimRun(t, repo, 0, "take", "--slice", "current", "--json")
+				args := []string{"--json"}
+				if history {
+					args = append(args, "--history")
+				}
+				if operation != "status" {
+					args = append(args, "--slice", "current")
+				}
+				output := claimRun(t, repo, 0, operation, args...)
+				var result map[string]json.RawMessage
+				if err := json.Unmarshal([]byte(output), &result); err != nil {
+					t.Fatal(err)
+				}
+				var releases []claim.Release
+				wantReleases := 2
+				if operation == "release" {
+					wantReleases++
+				}
+				if err := json.Unmarshal(result["releases"], &releases); err != nil || len(releases) != wantReleases || releases[0].Holder != "older" {
+					t.Fatal("JSON must retain complete history")
+				}
+				wantFields := 6
+				if operation == "status" || operation == "check" {
+					wantFields += 5
+				}
+				if len(result) != wantFields || string(result["schema_version"]) != `"achta.claim.v1"` {
+					t.Fatal("JSON field set or schema changed")
+				}
+				// Captured independently from origin/main at 0b18a23, before compact output.
+				// Normalize only wall-clock timestamps and elapsed age; compare every other byte.
+				got := regexp.MustCompile(`\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z`).ReplaceAllString(output, "<TIME>")
+				got = regexp.MustCompile(`"age_seconds":[0-9]+`).ReplaceAllString(got, `"age_seconds":0`)
+				want, err := os.ReadFile(filepath.Join("..", "..", "testdata", "json", "claim-"+operation+"-origin-main.json"))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if got != string(want) {
+					t.Fatalf("JSON differs from origin/main fixture\ngot:\n%swant:\n%s", got, want)
+				}
+			})
+		}
 	}
 }

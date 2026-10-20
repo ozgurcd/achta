@@ -1,0 +1,1 @@
+{"schema_version":"achta.claim.v1","operation":"release","status":"pass","claim":null,"age_seconds":0,"releases":[{"holder":"older","by":"older","time":"<TIME>","forced":false,"reason":""},{"holder":"recent","by":"recent","time":"<TIME>","forced":false,"reason":""},{"holder":"current","by":"current","time":"<TIME>","forced":false,"reason":""}]}

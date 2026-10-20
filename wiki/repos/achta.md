@@ -242,3 +242,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-14 | `co-versioned` | agent-tools-mw-a1-r4: closed registered-repository identity and authenticated read-only policy projection, refusal/clone/worktree fixtures, typed help/capabilities; production trust and activation held. |
 | 2026-10-20 | `co-versioned` | CI-PIN-ALL-FINISH: document the unchanged shared-action SHA with its exact source snapshot; exact release comments for the checkout v7.0.0 and GoReleaser v7.2.3 SHA pins. |
 | 2026-10-20 | `co-versioned` | TOOL-ACHTA-CLAIM-OUTPUT: compact human claim output, explicit full history, unchanged JSON/storage, checkout evidence on all commands, and red-first golden coverage. |
+| 2026-10-20 | `co-versioned` | TOOL-ACHTA-CLAIM-OUTPUT-FIX: test-only forced-release status goldens and complete JSON comparisons against independently captured origin/main output; production behavior unchanged. |

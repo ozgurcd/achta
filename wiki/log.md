@@ -1049,3 +1049,33 @@ No pushes, tags, installation, Docker, protected data, sibling source, owner
 settings or parent-wiki edits are authorized or performed. No adjacent product
 work is proposed. Parent postcheck's extra parent log/ledger requirements are
 outside this local tool delivery; any refusal is disclosed in the report.
+
+## [2026-10-20] tests | TOOL-ACHTA-CLAIM-OUTPUT-FIX
+
+F1 adds status goldens after a forced release with two earlier releases: the
+default shows no holder and only the forced release with its owner reason;
+--history retains all releases. The default golden fails against the prior
+origin/main CLI because it prints the two earlier releases. E-F1-RED:
+20261020T134044.028906000Z-env-3407092001.log in private gate metadata.
+
+F2 compares complete JSON output for take/status/check/release, both with and
+without --history, against fixtures independently captured from origin/main
+0b18a235cc7e83189bfbc0ff465607d353e3e551. Only timestamps and elapsed age are
+normalized. Historical CLI replay passes all four fixtures; a temporary
+status-value mutation fails the new comparison and is restored. E-F2-RED:
+20261020T134031.639189000Z-go-1582506726.log in private gate metadata.
+Fixture provenance and capture procedure live in testdata/json/README.md.
+
+The Gograph precise build, both plans, both reviews, final uncommitted review
+and session audit succeeded. Session claimoutputfix_20261020_143804_ffd3f29e4a521b1f
+reports Total Commands 19, Successful 17, Failed 2, Plan Rule Run true,
+Review Rule Run true, Grade C; the failed lookups used non-existent symbol
+selectors and were resolved with indexed names. The native make verify is run
+on this committed tree; its evidence and final result are in the workspace
+report reports/TOOL-ACHTA-CLAIM-OUTPUT-FIX.txt.
+
+Only tests, fixtures and required co-versioned accounting change. No product
+source, floor, gate, release, installation, fetch, push, tag, parent wiki,
+sibling repository, protected resource or credential changes. The previously
+parked parent postcheck remains a separate canonical-checkout close; no new
+adjacent work is proposed.
