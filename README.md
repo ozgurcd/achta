@@ -695,3 +695,7 @@ two-second work bound. Register it yourself with matcher compact|resume and a
 five-second harness timeout. Achta does not change your harness settings.
 
 Repository-owned slice records: `slice check` selects `wiki/repos/<repo>.md` or `llm-wiki/repos/<repo>.md` before the selected workspace page. Local pages use `category: repo`, `co_versioned: true`, a `verified` date and no external self-pin. Both owned pages present is ambiguous and refused. Local log precedence is wiki/log.md, llm-wiki/log.md, then log.md; append-only checks remain.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
