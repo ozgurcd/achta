@@ -2,6 +2,7 @@ package hookcd
 
 import (
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -35,31 +36,89 @@ func anchoredPath(path, directory, anchor string) bool {
 	return anchor == "" || anchor == "/" || path == anchor || strings.HasPrefix(path, anchor+"/")
 }
 
+// scratchRoots are absolute system scratch trees. They are not repositories,
+// so a literal write target beneath one cannot land in a repository through a
+// missing or stripped cd. Selectors (git -C, make -C, --repo) never use them.
+// /var/folders (and its /private form) holds macOS per-user temporary
+// directories, including the default $TMPDIR.
+var scratchRoots = []string{"/tmp", "/private/tmp", "/var/tmp", "/private/var/tmp", "/var/folders", "/private/var/folders"}
+
+// scratchPath reports whether path is a literal absolute path strictly beneath
+// a scratch root. The lexical clean rejects traversal out of the root, and
+// literalPath rejects variables and globs. Symlinks are not resolved.
+func scratchPath(path string) bool {
+	path = literalPath(path)
+	if path == "" || !filepath.IsAbs(path) {
+		return false
+	}
+	for _, root := range scratchRoots {
+		if strings.HasPrefix(path, root+"/") {
+			return true
+		}
+	}
+	return false
+}
+
+// scratchDirectory is scratchPath that also accepts a scratch root itself.
+// A directory such as GOBIN may be the root; a file target never is.
+func scratchDirectory(path string) bool {
+	if scratchPath(path) {
+		return true
+	}
+	return slices.Contains(scratchRoots, literalPath(path))
+}
+
+// anchoredTarget is anchoredPath for file write targets, which may also be
+// scratch paths.
+func anchoredTarget(path, directory, anchor string) bool {
+	return anchoredPath(path, directory, anchor) || scratchPath(path)
+}
+
+// gobinScratch reports whether the effective GOBIN set in the invocation
+// prefix (VAR=value or env VAR=value) is a literal scratch directory.
+func gobinScratch(environment []string) bool {
+	value := ""
+	for _, assignment := range environment {
+		if name, v, _ := strings.Cut(assignment, "="); name == "GOBIN" {
+			value = v
+		}
+	}
+	return value != "" && scratchDirectory(value)
+}
+
 // Check redirects and pipeline invocations independently: -C changes the
 // program's directory, not the shell's redirect or another pipeline writer.
-func unanchoredWriter(tokens []string, directory, anchor string) string {
+// It returns the denied writer and why it is unanchored, without echoing
+// command arguments (HOOK-CD-RETRY-1).
+func unanchoredWriter(tokens []string, directory, anchor string) (string, string) {
 	for index, token := range tokens {
 		if (token == redirectOutputToken || token == redirectAppendToken) && index+1 < len(tokens) {
 			target := tokens[index+1]
-			if target != "/dev/null" && !strings.HasPrefix(target, "&") && !anchoredPath(target, directory, anchor) {
-				return strings.TrimPrefix(token, "\x00")
+			if target != "/dev/null" && !strings.HasPrefix(target, "&") && !anchoredTarget(target, directory, anchor) {
+				verb := strings.TrimPrefix(token, "\x00")
+				return verb, describeTarget("the "+verb+" target", target, anchor)
 			}
 		}
 	}
 	for _, segment := range pipelineSegments(tokens) {
-		if verb := segmentWritingVerb(segment); verb != "" && !anchoredInvocation(segment, directory, anchor) {
-			return verb
+		if verb := segmentWritingVerb(segment); verb != "" {
+			if anchored, target := anchoredInvocation(segment, directory, anchor); !anchored {
+				return verb, target
+			}
 		}
 	}
-	return ""
+	return "", ""
 }
 
-func anchoredInvocation(tokens []string, directory, anchor string) bool {
+// anchoredInvocation reports whether every write of one pipeline segment is
+// anchored. When it is not, it also explains why, without echoing command
+// arguments (HOOK-CD-RETRY-1).
+func anchoredInvocation(tokens []string, directory, anchor string) (bool, string) {
 	command, args := invocation(tokens)
 	selector, selected, valid := invocationSelector(command, args, directory, anchor)
 	if selected {
 		if !valid {
-			return false
+			return false, "the " + selectorFlag(command) + " selector is not an absolute path inside the leading cd"
 		}
 		directory = selector
 	}
@@ -80,12 +139,12 @@ func anchoredInvocation(tokens []string, directory, anchor string) bool {
 				} else {
 					index++
 					if index >= len(args) {
-						return false
+						return false, "the " + command + " target directory is missing"
 					}
 					target = args[index]
 				}
-				if !anchoredPath(target, directory, anchor) {
-					return false
+				if !anchoredTarget(target, directory, anchor) {
+					return false, describeTarget("the "+command+" target directory", target, anchor)
 				}
 				continue
 			}
@@ -114,13 +173,30 @@ func anchoredInvocation(tokens []string, directory, anchor string) bool {
 			}
 		}
 		for _, path := range operands {
-			if !anchoredPath(path, directory, anchor) {
-				return false
+			if !anchoredTarget(path, directory, anchor) {
+				return false, describeTarget("a "+command+" target", path, anchor)
 			}
 		}
-		return len(operands) > 0 || target != "" || directory != ""
+		if len(operands) > 0 || target != "" || directory != "" {
+			return true, ""
+		}
+		return false, "it names no target and the command has no leading absolute cd"
 	}
-	return directory != ""
+	if directory != "" {
+		return true, ""
+	}
+	if selectorFlag(command) == "--repo" || command == "git" || command == "go" || command == "make" {
+		return false, "it has no absolute " + selectorFlag(command) + " selector and the command has no leading absolute cd"
+	}
+	return false, "the command has no leading absolute cd"
+}
+
+// selectorFlag names the absolute-selector flag a repository writer accepts.
+func selectorFlag(command string) string {
+	if command == "achta" || command == "rulefloor" {
+		return "--repo"
+	}
+	return "-C"
 }
 
 func invocationSelector(command string, args []string, directory, anchor string) (string, bool, bool) {
@@ -170,4 +246,20 @@ func invocationSelector(command string, args []string, directory, anchor string)
 		selector = literalPath(path)
 	}
 	return selector, selected, true
+}
+
+// describeTarget explains why a write target is not anchored. It classifies
+// the target and never includes its text (HOOK-CD-RETRY-1).
+func describeTarget(subject, path, anchor string) string {
+	literal := literalPath(path)
+	switch {
+	case literal == "":
+		return subject + " uses a shell variable or glob the hook cannot resolve"
+	case !filepath.IsAbs(literal) && anchor == "":
+		return subject + " is relative and the command has no leading absolute cd"
+	case !filepath.IsAbs(literal):
+		return subject + " is relative to a directory outside the leading cd"
+	default:
+		return subject + " is outside the leading cd and is not a scratch directory (/tmp, /var/tmp, /var/folders)"
+	}
 }

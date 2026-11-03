@@ -1,4 +1,4 @@
-Achta v0.5.20 capabilities
+Achta v0.5.21 capabilities
   amendments declare
   amendments rebase
   amendments reconcile

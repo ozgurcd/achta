@@ -2,6 +2,22 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.21 — 2026-11-03
+
+The cd hook no longer denies commands that cannot write into a repository:
+
+- read-only `git branch` and `git tag` listings, such as `--contains`, `--list`,
+  `--show-current`, `-vv` and a descending `--sort -committerdate`;
+- literal write targets under `/tmp`, `/private/tmp`, `/var/tmp`, and the macOS
+  temporary tree `/var/folders` that holds the default `$TMPDIR`, even after a
+  leading `cd` into a repository;
+- `go install` with a literal scratch `GOBIN`, including `GOBIN=/tmp`.
+
+Writes that can reach a repository are still denied. A denial now adds a `why:`
+line, such as "the > target is relative and the command has no leading
+absolute cd", and names a shell variable it cannot expand. Denials still never
+echo command arguments.
+
 ## v0.5.20 — 2026-11-03
 
 Human `claim take`, `claim status`, `claim check` and `claim release` output now

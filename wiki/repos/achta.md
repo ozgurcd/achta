@@ -3,8 +3,8 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-10-20
-verified: 2026-10-20
+updated: 2026-11-03
+verified: 2026-11-03
 co_versioned: true
 ---
 
@@ -128,6 +128,13 @@ commands, whose own effects remain the caller's responsibility.
   Git config reads, Achta help flags and derive previews need no selector;
   config writes, explicit derive writes, redirects and chained writes retain
   their write checks. Help-looking option values remain data.
+  Literal file targets beneath the scratch roots `/tmp`, `/var/tmp`,
+  `/var/folders` and their `/private` forms are anchored; selectors never use
+  them. Git `branch`/`tag` listing invocations (including a descending
+  `--sort` key) are read-only, and `go install` with a literal scratch `GOBIN`,
+  including a root such as `/tmp`, is not a writer. Denials add a `why:` line
+  classifying the unanchored write and name an unexpandable variable, never
+  echoing command arguments (TOOL-FAULTS-1103 ACH-02).
 
 ## Verification surface
 
@@ -245,3 +252,5 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-20 | `co-versioned` | TOOL-ACHTA-CLAIM-OUTPUT-FIX: test-only forced-release status goldens and complete JSON comparisons against independently captured origin/main output; production behavior unchanged. |
 | 2026-10-20 | `co-versioned` | TOOL-ACHTA-CLAIM-OUTPUT-FIX: refresh the reviewed compact-output test binding through Rulefloor after native verification detected the changed test body; invariant and proof unchanged. |
 | 2026-11-03 | `co-versioned` | ACHTA-V0520-RELEASE-PREP: advance source and exact fixtures to v0.5.20 with changelog and release notes for compact claim output; owner publishes the annotated tag and installs. |
+| 2026-11-03 | `co-versioned` | TOOL-FAULTS-1103 ACH-02: complete the cd hook false-positive fix — scratch GOBIN roots, macOS `/var/folders` temp targets, descending `--sort` listings, and a `why:` denial line that classifies the write without echoing arguments; regression rows prove each case red first. |
+| 2026-11-03 | `co-versioned` | TOOL-FAULTS-1103 ACH-02: advance source and exact fixtures to v0.5.21 with changelog and release notes for the cd hook false-positive fixes; the owner publishes the annotated tag, which releases the Homebrew cask. |
