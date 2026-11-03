@@ -1378,6 +1378,12 @@ and redirect is evaluated independently; a program's selector cannot anchor
 the shell's redirect or a neighbouring writer. A leading cd confines explicit
 write targets lexically, including normalized traversal, to that anchor.
 Later relative or outside cd statements lose the anchor for relative writes.
+A literal write target beneath `/tmp`, `/private/tmp`, `/var/tmp` or
+`/private/var/tmp` is always anchored; selectors never use these roots. Git
+`branch` and `tag` invocations made only of listing options are read-only, and
+`go install` with a literal scratch `GOBIN` and no `-mod`/`-modfile` flag is not
+a writer. A denial caused by a shell variable names the variable and asks for the
+literal absolute path, and never echoes other command arguments.
 The hook reads no environment or Git and does not resolve symlinks. It cannot
 infer a cd removed by a harness; an absolute writer selector or file target
 survives that transformation. A denial is exit 2 and bounded stderr identifies

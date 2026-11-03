@@ -35,13 +35,52 @@ func anchoredPath(path, directory, anchor string) bool {
 	return anchor == "" || anchor == "/" || path == anchor || strings.HasPrefix(path, anchor+"/")
 }
 
+// scratchRoots are absolute system scratch trees. They are not repositories,
+// so a literal write target beneath one cannot land in a repository through a
+// missing or stripped cd. Selectors (git -C, make -C, --repo) never use them.
+var scratchRoots = []string{"/tmp", "/private/tmp", "/var/tmp", "/private/var/tmp"}
+
+// scratchPath reports whether path is a literal absolute path strictly beneath
+// a scratch root. The lexical clean rejects traversal out of the root, and
+// literalPath rejects variables and globs. Symlinks are not resolved.
+func scratchPath(path string) bool {
+	path = literalPath(path)
+	if path == "" || !filepath.IsAbs(path) {
+		return false
+	}
+	for _, root := range scratchRoots {
+		if strings.HasPrefix(path, root+"/") {
+			return true
+		}
+	}
+	return false
+}
+
+// anchoredTarget is anchoredPath for file write targets, which may also be
+// scratch paths.
+func anchoredTarget(path, directory, anchor string) bool {
+	return anchoredPath(path, directory, anchor) || scratchPath(path)
+}
+
+// gobinScratch reports whether the effective GOBIN set in the invocation
+// prefix (VAR=value or env VAR=value) is a literal scratch path.
+func gobinScratch(environment []string) bool {
+	value := ""
+	for _, assignment := range environment {
+		if name, v, _ := strings.Cut(assignment, "="); name == "GOBIN" {
+			value = v
+		}
+	}
+	return value != "" && scratchPath(value)
+}
+
 // Check redirects and pipeline invocations independently: -C changes the
 // program's directory, not the shell's redirect or another pipeline writer.
 func unanchoredWriter(tokens []string, directory, anchor string) string {
 	for index, token := range tokens {
 		if (token == redirectOutputToken || token == redirectAppendToken) && index+1 < len(tokens) {
 			target := tokens[index+1]
-			if target != "/dev/null" && !strings.HasPrefix(target, "&") && !anchoredPath(target, directory, anchor) {
+			if target != "/dev/null" && !strings.HasPrefix(target, "&") && !anchoredTarget(target, directory, anchor) {
 				return strings.TrimPrefix(token, "\x00")
 			}
 		}
@@ -84,7 +123,7 @@ func anchoredInvocation(tokens []string, directory, anchor string) bool {
 					}
 					target = args[index]
 				}
-				if !anchoredPath(target, directory, anchor) {
+				if !anchoredTarget(target, directory, anchor) {
 					return false
 				}
 				continue
@@ -114,7 +153,7 @@ func anchoredInvocation(tokens []string, directory, anchor string) bool {
 			}
 		}
 		for _, path := range operands {
-			if !anchoredPath(path, directory, anchor) {
+			if !anchoredTarget(path, directory, anchor) {
 				return false
 			}
 		}

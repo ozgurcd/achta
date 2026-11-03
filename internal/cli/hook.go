@@ -31,6 +31,9 @@ func runHook(args []string, stdin io.Reader, stderr io.Writer) int {
 		return 0
 	case hookcd.Deny:
 		fmt.Fprintf(stderr, "achta hook cd: DENY — statement %d (%s) may write without an absolute repository selector\n", result.Statement, result.Verb)
+		if result.Hint != "" {
+			fmt.Fprintf(stderr, "hint: %s\n", result.Hint)
+		}
 		fmt.Fprintln(stderr, "fix: put the absolute cd on its own line first; use git -C <abs> or make -C <abs>, --repo <abs> for repository writers, or absolute file targets. Keep every write inside the cd anchor. If the harness strips cd, use the writer's own absolute selector or target.")
 		return 2
 	default:

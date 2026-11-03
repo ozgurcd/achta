@@ -32,6 +32,7 @@ type Result struct {
 	Statement int
 	Verb      string
 	Reason    string
+	Hint      string
 }
 
 var gitWriteVerbs = map[string]struct{}{
@@ -119,10 +120,47 @@ func Evaluate(payload []byte) Result {
 				Statement: index + 1,
 				Verb:      verb,
 				Reason:    "a write lacks an absolute anchor or escapes the leading cd",
+				Hint:      variableHint(tokens),
 			}
 		}
 	}
 	return Result{Verdict: Allow}
+}
+
+// variableHint names the first shell variable the hook cannot expand. Only the
+// variable name is reported, never the argument around it (HOOK-CD-RETRY-1).
+// The home forms are literal to the hook and never reported.
+func variableHint(tokens []string) string {
+	for _, token := range tokens {
+		if name := shellVariable(token); name != "" {
+			return fmt.Sprintf("%s is a shell variable the hook cannot expand; write the literal absolute path instead (cd /abs/repo on its own line, git -C /abs/repo, or an absolute target)", name)
+		}
+	}
+	return ""
+}
+
+// shellVariable returns the first $NAME or ${NAME} in token other than HOME.
+func shellVariable(token string) string {
+	for rest := token; ; {
+		_, after, found := strings.Cut(rest, "$")
+		if !found {
+			return ""
+		}
+		rest = after
+		braced := strings.HasPrefix(after, "{")
+		name := strings.TrimPrefix(after, "{")
+		end := 0
+		for end < len(name) && (name[end] == '_' || unicode.IsLetter(rune(name[end])) || unicode.IsDigit(rune(name[end]))) {
+			end++
+		}
+		if end == 0 || name[:end] == "HOME" {
+			continue
+		}
+		if braced {
+			return "${" + name[:end] + "}"
+		}
+		return "$" + name[:end]
+	}
 }
 
 func warning(reason string) Result {
@@ -396,11 +434,14 @@ func firstStatementIsAbsoluteCD(statement string) bool {
 }
 
 func segmentWritingVerb(tokens []string) string {
-	command, args := invocation(tokens)
+	command, args, environment := invocationEnvironment(tokens)
 	switch command {
 	case "git":
 		name, rest := subcommandArguments(args, map[string]bool{"-C": true, "-c": true, "--git-dir": true, "--work-tree": true, "--namespace": true, "--exec-path": true})
 		if name == "config" && gitConfigReadOnly(rest) {
+			return ""
+		}
+		if gitListingReadOnly(name, rest) {
 			return ""
 		}
 		if name != "" {
@@ -410,6 +451,9 @@ func segmentWritingVerb(tokens []string) string {
 		}
 	case "go":
 		subcommand := subcommand(args, map[string]bool{"-C": true})
+		if subcommand == "install" && gobinScratch(environment) && !goModuleFlagPresent(args) {
+			return ""
+		}
 		if subcommand == "mod" || subcommand == "get" || subcommand == "install" || subcommand == "generate" {
 			return "go " + subcommand
 		}
@@ -448,10 +492,19 @@ func segmentWritingVerb(tokens []string) string {
 }
 
 func invocation(tokens []string) (string, []string) {
+	command, args, _ := invocationEnvironment(tokens)
+	return command, args
+}
+
+// invocationEnvironment also returns the VAR=value assignments that precede
+// the command, in order, whether bare or after env.
+func invocationEnvironment(tokens []string) (string, []string, []string) {
+	var environment []string
 	index := 0
 	for index < len(tokens) {
 		base := filepath.Base(tokens[index])
 		if isAssignment(tokens[index]) {
+			environment = append(environment, tokens[index])
 			index++
 			continue
 		}
@@ -462,13 +515,16 @@ func invocation(tokens []string) (string, []string) {
 		case "env":
 			index++
 			for index < len(tokens) && (strings.HasPrefix(tokens[index], "-") || isAssignment(tokens[index])) {
+				if isAssignment(tokens[index]) {
+					environment = append(environment, tokens[index])
+				}
 				index++
 			}
 			continue
 		}
-		return base, tokens[index+1:]
+		return base, tokens[index+1:], environment
 	}
-	return "", nil
+	return "", nil, environment
 }
 
 func isAssignment(token string) bool {
@@ -534,6 +590,93 @@ func gitConfigReadOnly(args []string) bool {
 		}
 	}
 	return readAction || operands == 1
+}
+
+// listingFlags describes the read-only options of a git listing verb. Any
+// option outside the table, or an operand without a listing option, keeps the
+// write verdict, so `git branch name` and `git tag -d name` stay denied.
+type listingFlags struct {
+	boolean    map[string]bool // options without a value
+	valued     map[string]bool // options whose value is the next argument or =value
+	listing    map[string]bool // options that switch the verb to list mode
+	shorts     string          // letters allowed in a cluster such as -vv
+	noOperands map[string]bool // options that forbid operands
+}
+
+var gitListingVerbs = map[string]listingFlags{
+	"branch": {
+		boolean: map[string]bool{"-a": true, "--all": true, "-r": true, "--remotes": true, "-v": true, "--verbose": true,
+			"--list": true, "-l": true, "--show-current": true, "--no-color": true, "--ignore-case": true, "-i": true, "--no-column": true},
+		valued:     map[string]bool{"--contains": true, "--no-contains": true, "--merged": true, "--no-merged": true, "--points-at": true, "--sort": true, "--format": true},
+		listing:    map[string]bool{"--list": true, "-l": true, "--contains": true, "--no-contains": true, "--merged": true, "--no-merged": true, "--points-at": true, "--show-current": true},
+		shorts:     "arvli",
+		noOperands: map[string]bool{"--show-current": true},
+	},
+	"tag": {
+		boolean: map[string]bool{"--list": true, "-l": true, "--no-color": true, "--ignore-case": true, "-i": true, "--no-column": true},
+		valued:  map[string]bool{"--contains": true, "--no-contains": true, "--merged": true, "--no-merged": true, "--points-at": true, "--sort": true, "--format": true},
+		listing: map[string]bool{"--list": true, "-l": true, "--contains": true, "--no-contains": true, "--merged": true, "--no-merged": true, "--points-at": true},
+		shorts:  "li",
+	},
+}
+
+// gitListingReadOnly accepts only explicit listing invocations. A bare
+// `git branch` or `git tag` keeps the write verdict.
+func gitListingReadOnly(verb string, args []string) bool {
+	flags, ok := gitListingVerbs[verb]
+	if !ok {
+		return false
+	}
+	seen, listing, forbidden, operands := false, false, false, 0
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		if arg == "--" {
+			operands += len(args) - index - 1
+			break
+		}
+		if !strings.HasPrefix(arg, "-") {
+			operands++
+			continue
+		}
+		name, _, hasValue := strings.Cut(arg, "=")
+		switch {
+		case flags.valued[name]:
+			if !hasValue {
+				index++
+				if index >= len(args) || strings.HasPrefix(args[index], "-") {
+					return false
+				}
+			}
+		case flags.boolean[arg]:
+		case !strings.HasPrefix(arg, "--") && len(arg) > 2 && strings.Trim(arg[1:], flags.shorts) == "":
+			for _, letter := range arg[1:] {
+				listing = listing || flags.listing["-"+string(letter)]
+			}
+			seen = true
+			continue
+		default:
+			return false
+		}
+		seen = true
+		listing = listing || flags.listing[name]
+		forbidden = forbidden || flags.noOperands[name]
+	}
+	if !seen || (operands > 0 && (!listing || forbidden)) {
+		return false
+	}
+	return true
+}
+
+// A go install into a literal scratch GOBIN writes only a binary there.
+// Module-changing flags keep the write verdict.
+func goModuleFlagPresent(args []string) bool {
+	for _, arg := range args {
+		name, _, _ := strings.Cut(strings.TrimLeft(arg, "-"), "=")
+		if name == "mod" || name == "modfile" {
+			return true
+		}
+	}
+	return false
 }
 
 // A flag value named --help is data, not a help request. Achta's boolean
