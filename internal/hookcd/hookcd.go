@@ -33,6 +33,9 @@ type Result struct {
 	Verb      string
 	Reason    string
 	Hint      string
+	// Problem says why the denied write is unanchored. It never contains
+	// command arguments (HOOK-CD-RETRY-1).
+	Problem string
 }
 
 var gitWriteVerbs = map[string]struct{}{
@@ -114,13 +117,14 @@ func Evaluate(payload []byte) Result {
 				directory = literalPath(tokens[1])
 			}
 		}
-		if verb := unanchoredWriter(tokens, directory, anchor); verb != "" {
+		if verb, problem := unanchoredWriter(tokens, directory, anchor); verb != "" {
 			return Result{
 				Verdict:   Deny,
 				Statement: index + 1,
 				Verb:      verb,
 				Reason:    "a write lacks an absolute anchor or escapes the leading cd",
 				Hint:      variableHint(tokens),
+				Problem:   problem,
 			}
 		}
 	}
@@ -643,7 +647,9 @@ func gitListingReadOnly(verb string, args []string) bool {
 		case flags.valued[name]:
 			if !hasValue {
 				index++
-				if index >= len(args) || strings.HasPrefix(args[index], "-") {
+				// A --sort key may be descending (-committerdate); other
+				// values that look like options keep the write verdict.
+				if index >= len(args) || (strings.HasPrefix(args[index], "-") && name != "--sort") {
 					return false
 				}
 			}

@@ -210,12 +210,18 @@ paths without a leading absolute cd do not count. Denial is exit 2 and names the
 statement number and a working retry. If a harness strips a redundant cd, use
 the writer's own absolute selector or target; the hook never infers a missing cd.
 Explicit file targets (redirects, `cp`/`mv`/`rm`/`mkdir`/`touch`/`tee`, `gofmt -w`,
-`sed -i`) may also be literal paths beneath `/tmp`, `/private/tmp`, `/var/tmp` or
-`/private/var/tmp`; selectors such as `git -C` never use these. `git branch` and
-`git tag` are read-only when they carry only listing options (`--contains`,
-`--list`, `--show-current`, ...) and a `go install` is allowed when the statement
-sets a literal scratch `GOBIN`. A denial caused by a shell variable names that
-variable and asks for the literal absolute path; it never echoes other arguments.
+`sed -i`) may also be literal paths beneath `/tmp`, `/private/tmp`, `/var/tmp`,
+`/private/var/tmp` or the macOS per-user temporary tree `/var/folders` (and
+`/private/var/folders`, which holds the default `$TMPDIR`); selectors such as
+`git -C` never use these. `git branch` and `git tag` are read-only when they
+carry only listing options (`--contains`, `--list`, `--show-current`, `--sort`
+including a descending `-key`, ...) and a `go install` is allowed when the
+statement sets a literal scratch `GOBIN`, including a scratch root such as
+`GOBIN=/tmp`. A denial adds a `why:` line that classifies the problem (a
+relative target without a leading cd, a target outside the cd, a variable or
+glob target, a missing or non-absolute `-C`/`--repo` selector), and a denial
+caused by a shell variable names that variable and asks for the literal
+absolute path. Denials never echo command arguments or write targets.
 Path checks are lexical; they do not resolve symlinks or inspect Git repositories.
 Input that cannot be parsed
 warns on stderr and allows with exit 0; unknown verbs are read-only by contract.

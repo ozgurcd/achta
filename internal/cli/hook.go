@@ -31,6 +31,9 @@ func runHook(args []string, stdin io.Reader, stderr io.Writer) int {
 		return 0
 	case hookcd.Deny:
 		fmt.Fprintf(stderr, "achta hook cd: DENY — statement %d (%s) may write without an absolute repository selector\n", result.Statement, result.Verb)
+		if result.Problem != "" {
+			fmt.Fprintf(stderr, "why: %s\n", result.Problem)
+		}
 		if result.Hint != "" {
 			fmt.Fprintf(stderr, "hint: %s\n", result.Hint)
 		}
