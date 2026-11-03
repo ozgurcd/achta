@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.5.22 — 2026-11-03
+
+Word the fixed statements of what `declared-route check`, `count check` and
+`ledger rows` deliberately do not infer as `not inferred (by design)` in human
+output instead of `refused`, so a passing check relayed by Lictor no longer
+looks like a failure. JSON `refused` lists and exit codes are unchanged.
+
 ## v0.5.21 — 2026-11-03
 
 Stop the cd hook denying commands that cannot write into a repository: read-only

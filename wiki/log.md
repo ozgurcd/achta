@@ -1132,3 +1132,10 @@ not infer, printed on every run, and read like failures when relayed. Human
 output of declared-route check, count check and ledger rows now words them as
 `not inferred (by design) — …`; the JSON `refused` lists and exit codes are
 unchanged. A new passing-run test fails on the old wording for all three.
+
+## [2026-11-03] release | ACHTA-V0522-RELEASE-PREP
+
+Prepare v0.5.22 for the ACH-03 wording change. Update the source Version, CLI
+testVersion and the four exact human and machine version and capability
+fixtures; CHANGELOG and RELEASE_NOTES describe the not-inferred wording. The
+owner merges, tags and installs; the tag workflow publishes the Homebrew cask.

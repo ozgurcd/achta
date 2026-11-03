@@ -2,6 +2,14 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.22 — 2026-11-03
+
+`declared-route check`, `count check` and `ledger rows` end their human output
+with what they deliberately do not infer. These lines now read
+`not inferred (by design) — …` instead of `refused — …`, so a passing
+`lictor route` no longer prints lines that look like failures. JSON output keeps
+the same statements in its `refused` list, and exit codes are unchanged.
+
 ## v0.5.21 — 2026-11-03
 
 The cd hook no longer denies commands that cannot write into a repository:
