@@ -2,6 +2,14 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## v0.5.20 — 2026-11-03
+
+Human `claim take`, `claim status`, `claim check` and `claim release` output now
+shows only the latest release event, with its force flag and reason. Add
+`--history` to print the complete human history. All four commands show tracked
+and unpushed paths. The `achta.claim.v1` JSON document and stored history are
+unchanged.
+
 ## v0.5.19 — 2026-10-10
 
 Use an absolute file target, `git -C`, `make -C`, or a writer's `--repo` selector

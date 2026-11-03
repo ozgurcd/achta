@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.5.20 — 2026-11-03
 
 Compact human claim take/status/check/release output to the latest release
 event, preserving its force flag and reason. Add `--history` for complete human

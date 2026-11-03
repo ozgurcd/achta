@@ -1094,3 +1094,12 @@ commit and its final result is recorded in the requested workspace report.
 The cd hook denied a combined help request because rehash lacked an absolute
 anchor; its named retry with an absolute leading cd succeeded. No permission
 refusal, bypass, amendment, fetch, installation, push or tag occurred.
+
+## [2026-11-03] release | ACHTA-V0520-RELEASE-PREP
+
+Prepare v0.5.20 on release/v0.5.20 from origin/main 9f8ef4b with the three
+compact claim output commits cherry-picked (wiki log and repo page conflicts
+resolved by keeping both entries). Update the source Version, CLI testVersion
+and the four exact human/machine version and capability fixtures. CHANGELOG and
+RELEASE_NOTES describe the compact human claim output and --history. The owner
+pushes, tags and installs; no push, tag or installation is done here.

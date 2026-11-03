@@ -25,7 +25,7 @@ commands, whose own effects remain the caller's responsibility.
 - Journal briefs report live claim and repository evidence in seven lines; private
   claim-owned notes retain 200 lines and the resume hook is silent on errors.
 
-- Current release line: v0.5.19.
+- Current release line: v0.5.20.
 - `gate run` captures complete output in private per-checkout Git metadata,
   retains 20 logs, prints a bounded summary and preserves the child's exit code.
 - `claim take/status/check/release` coordinates a local checkout through private
@@ -244,3 +244,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-10-20 | `co-versioned` | TOOL-ACHTA-CLAIM-OUTPUT: compact human claim output, explicit full history, unchanged JSON/storage, checkout evidence on all commands, and red-first golden coverage. |
 | 2026-10-20 | `co-versioned` | TOOL-ACHTA-CLAIM-OUTPUT-FIX: test-only forced-release status goldens and complete JSON comparisons against independently captured origin/main output; production behavior unchanged. |
 | 2026-10-20 | `co-versioned` | TOOL-ACHTA-CLAIM-OUTPUT-FIX: refresh the reviewed compact-output test binding through Rulefloor after native verification detected the changed test body; invariant and proof unchanged. |
+| 2026-11-03 | `co-versioned` | ACHTA-V0520-RELEASE-PREP: advance source and exact fixtures to v0.5.20 with changelog and release notes for compact claim output; owner publishes the annotated tag and installs. |
