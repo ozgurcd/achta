@@ -94,7 +94,7 @@ func runDeclaredRoute(args []string, stdout, stderr io.Writer, opts globalOption
 	}
 	fmt.Fprintf(stdout, "declared-route check: %s; %d workflow(s), %d violation(s)\n", result.Status, len(result.Documents), len(result.Violations))
 	for _, refused := range result.Refused {
-		fmt.Fprintf(stdout, "declared-route check: refused — %s\n", refused)
+		fmt.Fprintf(stdout, "declared-route check: not inferred (by design) — %s\n", refused)
 	}
 	return code
 }

@@ -437,6 +437,12 @@ ban, key, or scope defaults. Missing, malformed, multi-document, unsafe, or
 ambiguous input is `cannot_evaluate`, exit 2. The command reads only
 workspace-confined regular files and invokes neither shell nor Git.
 
+`declared-route check`, `count check` and `ledger rows` end their human output
+with `not inferred (by design) — …` lines. These state what the check
+deliberately does not infer, on every run; they are not failures, and the exit
+status alone reports the result. JSON output keeps the same statements in its
+`refused` list.
+
 `replacement check` makes named-script parity an explicit repository gate.
 The caller supplies the exact statuses that mean replacement or retirement;
 there are no vocabulary defaults and Achta does not infer claims from prose.

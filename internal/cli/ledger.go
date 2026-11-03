@@ -176,7 +176,7 @@ func runLedgerRows(args []string, stdout, stderr io.Writer, opts globalOptions) 
 	}
 	fmt.Fprintf(stdout, "ledger rows: %s; %d row(s), %d open, %d closed, %d violation(s)\n", result.Status, result.Rows, result.OpenRows, result.ClosedRows, len(result.Violations))
 	for _, refused := range result.Refused {
-		fmt.Fprintf(stdout, "ledger rows: refused — %s\n", refused)
+		fmt.Fprintf(stdout, "ledger rows: not inferred (by design) — %s\n", refused)
 	}
 	return code
 }

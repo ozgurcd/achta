@@ -1123,3 +1123,12 @@ machine version and capability fixtures. CHANGELOG and RELEASE_NOTES describe
 the allowed read-only, scratch-target and scratch-GOBIN forms and the new
 denial explanation. The owner merges, tags and installs; the tag workflow
 publishes the Homebrew cask.
+
+## [2026-11-03] fix | TOOL-FAULTS-1103 ACH-03
+
+A passing `lictor route` printed `declared-route check: refused — …` twice per
+install call. Those lines are Achta's fixed statements of what the check does
+not infer, printed on every run, and read like failures when relayed. Human
+output of declared-route check, count check and ledger rows now words them as
+`not inferred (by design) — …`; the JSON `refused` lists and exit codes are
+unchanged. A new passing-run test fails on the old wording for all three.
