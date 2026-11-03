@@ -119,7 +119,7 @@ func runCount(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 		fmt.Fprintf(stdout, "count check: %s; %d file(s), %d breakdown(s), %d claim(s), %d violation(s)\n", result.Status, result.Files, result.Breakdowns, result.Claims, len(result.Violations))
 	}
 	for _, refused := range result.Refused {
-		fmt.Fprintf(stdout, "count check: refused — %s\n", refused)
+		fmt.Fprintf(stdout, "count check: not inferred (by design) — %s\n", refused)
 	}
 	return code
 }
