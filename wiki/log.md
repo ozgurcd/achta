@@ -1114,3 +1114,12 @@ a `why:` line classifying the unanchored write without echoing its text, as
 HOOK-CD-RETRY-1 requires. New false-positive and CLI rows failed on 283bad1
 and pass with the change; writers that must stay denied are covered alongside.
 Rulefloor check passes with 61 armed rows; no binding changed.
+
+## [2026-11-03] release | ACHTA-V0521-RELEASE-PREP
+
+Prepare v0.5.21 on fix/hook-cd-1103 for the ACH-02 cd hook false-positive
+fixes. Update the source Version, CLI testVersion and the four exact human and
+machine version and capability fixtures. CHANGELOG and RELEASE_NOTES describe
+the allowed read-only, scratch-target and scratch-GOBIN forms and the new
+denial explanation. The owner merges, tags and installs; the tag workflow
+publishes the Homebrew cask.

@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.21 — 2026-11-03
+
+Stop the cd hook denying commands that cannot write into a repository: read-only
+`git branch`/`git tag` listings (including `--contains` and a descending
+`--sort` key), literal targets under `/tmp`, `/var/tmp` and the macOS
+`/var/folders` temporary tree, and `go install` into a literal scratch `GOBIN`,
+including `GOBIN=/tmp`. Denials add a `why:` line that classifies the problem
+and name an unexpandable shell variable, without echoing command arguments.
+
 ## v0.5.20 — 2026-11-03
 
 Compact human claim take/status/check/release output to the latest release
