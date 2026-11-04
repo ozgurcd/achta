@@ -2,6 +2,27 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+The cd hook now expands variables and stops refusing its own advice (ACH-05):
+
+- a variable assigned earlier in the same command to a literal absolute path
+  (`D=/abs/repo; git -C $D add .`, `R=/abs/repo; nohup make -C $R verify &`,
+  `export D=...`) is expanded, so redirects, `-C`, `--repo` and file targets
+  through it are judged by their real path. The anchor rule is unchanged: a
+  value outside the leading cd, a relative or unknown value, a single-quoted or
+  escaped reference, a prefix assignment, and any variable touched by `eval`,
+  `source`, `read`, `unset`, `for`, `printf -v` or `NAME+=` still deny;
+- the table is bounded by `ACHTA_HOOK_CD_MAX_VARIABLES` (default 64) and
+  `ACHTA_HOOK_CD_MAX_VALUE_BYTES` (default 4096), so `A=$A$A` cannot grow;
+- a denial's `fix:` line no longer suggests `git -C` or `make -C` for a
+  relative redirect or file target, which a selector cannot fix. It names the
+  accepted form, and separates an absolute selector outside the leading cd and
+  a write after a later `cd` from the missing-anchor case.
+
+Writes that can reach a repository are still denied. A second `cd` outside the
+leading one still loses the anchor.
+
 ## v0.5.22 — 2026-11-03
 
 `declared-route check`, `count check` and `ledger rows` end their human output

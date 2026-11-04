@@ -43,6 +43,58 @@ func TestHookCDVariableAndFalsePositiveContract(t *testing.T) {
 	}
 }
 
+func runHookCommand(t *testing.T, command string) (int, string) {
+	t.Helper()
+	var stdout, stderr bytes.Buffer
+	payload := `{"tool_input":{"command":"` + command + `"}}`
+	code := runWithInput([]string{"hook", "cd"}, strings.NewReader(payload), &stdout, &stderr, testVersion)
+	if stdout.Len() != 0 {
+		t.Fatalf("stdout = %q, want empty", stdout.String())
+	}
+	return code, stderr.String()
+}
+
+// A denial's fix line never names a form the hook refuses for that problem
+// (HOOK-CD-OWN-SUGGESTION-1), and literal-variable commands pass (ACH-05).
+func TestHookCDFixLineAndVariableExpansion(t *testing.T) {
+	t.Parallel()
+
+	if code, stderr := runHookCommand(t, "R=/abs/repo; nohup make -C $R verify > /tmp/log 2>&1 &"); code != 0 || stderr != "" {
+		t.Fatalf("variable nohup: code=%d stderr=%q, want allow", code, stderr)
+	}
+	code, stderr := runHookCommand(t, "make -C /abs/wiki postcheck > out.txt")
+	if code != 2 || !strings.Contains(stderr, "fix: give the redirect or file target an absolute path") || strings.Contains(stderr, "make -C <abs>") {
+		t.Fatalf("relative redirect: code=%d stderr=%q", code, stderr)
+	}
+	code, stderr = runHookCommand(t, "cd /abs/repo && git -C /abs/other commit -m x")
+	if code != 2 || !strings.Contains(stderr, "why: the -C selector is absolute but outside the leading cd") || !strings.Contains(stderr, "its own command") {
+		t.Fatalf("outside selector: code=%d stderr=%q", code, stderr)
+	}
+}
+
+// The variable limits come from the environment; an invalid value warns and
+// falls back to the default. Not parallel: it sets the environment.
+func TestHookCDVariableLimitsFromEnvironment(t *testing.T) {
+	command := "A=/abs/a; B=/abs/b; git -C $A add ."
+	if code, stderr := runHookCommand(t, command); code != 0 || stderr != "" {
+		t.Fatalf("default limits: code=%d stderr=%q, want allow", code, stderr)
+	}
+	t.Setenv(hookMaxVariablesEnv, "1")
+	if code, _ := runHookCommand(t, command); code != 2 {
+		t.Fatalf("one variable allowed: code=%d, want deny", code)
+	}
+	t.Setenv(hookMaxVariablesEnv, "many")
+	code, stderr := runHookCommand(t, command)
+	if code != 0 || !strings.Contains(stderr, hookMaxVariablesEnv+" must be a positive integer") {
+		t.Fatalf("invalid limit: code=%d stderr=%q, want allow with a warning", code, stderr)
+	}
+	t.Setenv(hookMaxVariablesEnv, "64")
+	t.Setenv(hookMaxValueBytesEnv, "4")
+	if code, _ := runHookCommand(t, command); code != 2 {
+		t.Fatalf("value bound 4: code=%d, want deny", code)
+	}
+}
+
 func TestHookCDDenyDoesNotEchoArguments(t *testing.T) {
 	t.Parallel()
 

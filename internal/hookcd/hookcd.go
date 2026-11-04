@@ -36,6 +36,8 @@ type Result struct {
 	// Problem says why the denied write is unanchored. It never contains
 	// command arguments (HOOK-CD-RETRY-1).
 	Problem string
+	// Fix names a corrected form the hook accepts for this problem.
+	Fix string
 }
 
 var gitWriteVerbs = map[string]struct{}{
@@ -68,7 +70,16 @@ var directWriteVerbs = map[string]struct{}{
 	"cp": {}, "make": {}, "mkdir": {}, "mv": {}, "rm": {}, "tee": {}, "touch": {},
 }
 
-func Evaluate(payload []byte) Result {
+// Limits bound the variable table built from literal assignments. A zero or
+// negative field takes its default. The CLI reads them from the environment.
+type Limits struct {
+	MaxVariables  int
+	MaxValueBytes int
+}
+
+func Evaluate(payload []byte) Result { return EvaluateWithLimits(payload, Limits{}) }
+
+func EvaluateWithLimits(payload []byte, limits Limits) Result {
 	if len(payload) == 0 || len(payload) > MaxInput {
 		return warning("PreToolUse input is empty or exceeds the input bound")
 	}
@@ -101,8 +112,9 @@ func Evaluate(payload []byte) Result {
 		return Result{Verdict: Allow}
 	}
 	anchor, directory := "", ""
+	vars := newVariables(limits)
 	for index, statement := range statements {
-		tokens, err := lex(statement)
+		tokens, err := lexWith(statement, vars)
 		if err != nil {
 			return warning(err.Error())
 		}
@@ -124,9 +136,11 @@ func Evaluate(payload []byte) Result {
 				Verb:      verb,
 				Reason:    "a write lacks an absolute anchor or escapes the leading cd",
 				Hint:      variableHint(tokens),
-				Problem:   problem,
+				Problem:   problem.Problem,
+				Fix:       problem.Fix,
 			}
 		}
+		vars.observe(tokens)
 	}
 	return Result{Verdict: Allow}
 }
@@ -361,12 +375,33 @@ func previousRune(value string) rune {
 	return runes[len(runes)-1]
 }
 
-func lex(statement string) ([]string, error) {
+func lex(statement string) ([]string, error) { return lexWith(statement, nil) }
+
+// lexWith splits one statement into words. With a variable table it also
+// replaces an exact $NAME or ${NAME} reference, unquoted or in double quotes,
+// by its literal absolute value; single-quoted and escaped text stays literal.
+func lexWith(statement string, vars *variables) ([]string, error) {
 	var tokens []string
 	var token strings.Builder
 	quote := rune(0)
 	escaped := false
 	runes := []rune(statement)
+	remaining := 0
+	if vars != nil {
+		remaining = vars.budget()
+	}
+	expandAt := func(char rune, allowed bool, index int) (int, bool) {
+		if vars == nil || char != '$' || !allowed {
+			return index, false
+		}
+		value, last, ok := vars.expand(runes, index)
+		if !ok || len(value) > remaining {
+			return index, false
+		}
+		remaining -= len(value)
+		token.WriteString(value)
+		return last, true
+	}
 	flush := func() {
 		if token.Len() > 0 {
 			tokens = append(tokens, token.String())
@@ -387,6 +422,8 @@ func lex(statement string) ([]string, error) {
 		if quote != 0 {
 			if char == quote {
 				quote = 0
+			} else if last, ok := expandAt(char, quote == '"', index); ok {
+				index = last
 			} else {
 				token.WriteRune(char)
 			}
@@ -394,6 +431,10 @@ func lex(statement string) ([]string, error) {
 		}
 		if char == '\'' || char == '"' {
 			quote = char
+			continue
+		}
+		if last, ok := expandAt(char, true, index); ok {
+			index = last
 			continue
 		}
 		if unicode.IsSpace(char) {

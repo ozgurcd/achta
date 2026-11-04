@@ -222,6 +222,25 @@ relative target without a leading cd, a target outside the cd, a variable or
 glob target, a missing or non-absolute `-C`/`--repo` selector), and a denial
 caused by a shell variable names that variable and asks for the literal
 absolute path. Denials never echo command arguments or write targets.
+A shell variable assigned earlier in the same command, as a statement of its
+own (`D=/abs/repo; git -C $D add .`, `R=/abs/repo; nohup make -C $R verify &`,
+or `export D=/abs/x`), expands when its value is a plain absolute path: no
+whitespace, glob, `$` or leading `~`, and never `HOME`. `$NAME` and `${NAME}`
+expand unquoted and in double quotes; single-quoted or escaped text, other
+`${...}` forms, a prefix assignment (`D=/x cmd $D`) and a variable set in
+another call stay unexpanded and deny. A value must still satisfy the same
+anchor rule as a typed path. `eval`, `source`, `read`, `unset`, `declare`,
+`for` and similar words, `printf -v`, and `NAME+=`/`NAME[i]=` clear or drop the
+affected variables. The table holds at most `ACHTA_HOOK_CD_MAX_VARIABLES`
+names (default 64) of at most `ACHTA_HOOK_CD_MAX_VALUE_BYTES` bytes each
+(default 4096); one statement gains at most the product of the two by
+expansion. Past a bound the hook stops expanding and denies. Each denial's
+`fix:` line names only forms the hook accepts for that problem: a relative
+redirect asks for an absolute target (a `-C`/`--repo` selector does not move a
+shell redirect), an absolute selector outside the leading cd asks for its own
+command with that cd first, and a write after a later `cd` outside the leading
+cd names that cd. `nohup` is transparent: its target is checked like the
+command it launches.
 Path checks are lexical; they do not resolve symlinks or inspect Git repositories.
 Input that cannot be parsed
 warns on stderr and allows with exit 0; unknown verbs are read-only by contract.

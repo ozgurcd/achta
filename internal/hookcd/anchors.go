@@ -90,7 +90,7 @@ func gobinScratch(environment []string) bool {
 // program's directory, not the shell's redirect or another pipeline writer.
 // It returns the denied writer and why it is unanchored, without echoing
 // command arguments (HOOK-CD-RETRY-1).
-func unanchoredWriter(tokens []string, directory, anchor string) (string, string) {
+func unanchoredWriter(tokens []string, directory, anchor string) (string, unanchored) {
 	for index, token := range tokens {
 		if (token == redirectOutputToken || token == redirectAppendToken) && index+1 < len(tokens) {
 			target := tokens[index+1]
@@ -102,23 +102,42 @@ func unanchoredWriter(tokens []string, directory, anchor string) (string, string
 	}
 	for _, segment := range pipelineSegments(tokens) {
 		if verb := segmentWritingVerb(segment); verb != "" {
-			if anchored, target := anchoredInvocation(segment, directory, anchor); !anchored {
-				return verb, target
+			if anchored, problem := anchoredInvocation(segment, directory, anchor); !anchored {
+				return verb, problem
 			}
 		}
 	}
-	return "", ""
+	return "", unanchored{}
 }
+
+// unanchored says why a write is unanchored and which corrected form the hook
+// accepts. A fix never names a form the hook refuses for the same problem
+// (HOOK-CD-OWN-SUGGESTION-1).
+type unanchored struct {
+	Problem string
+	Fix     string
+}
+
+const (
+	fixNoAnchor = "put the absolute cd on its own line first; use git -C <abs> or make -C <abs>, --repo <abs> for repository writers, or absolute file targets. Keep every write inside the cd anchor. If the harness strips cd, use the writer's own absolute selector or target."
+	fixTarget   = "give the redirect or file target an absolute path inside the leading cd or under a scratch directory (/tmp, /var/tmp, /var/folders), or put the absolute cd on its own line first. A -C or --repo selector does not move a shell redirect or a file target."
+	fixSelector = "use an absolute -C or --repo selector inside the leading cd. To write another repository, make that repository's absolute cd the first line of its own command."
+	fixLaterCD  = "a later cd left the leading cd, so relative writes after it are unanchored. Use the writer's own absolute selector or an absolute target, or run that directory's work as its own command with its absolute cd first."
+)
 
 // anchoredInvocation reports whether every write of one pipeline segment is
 // anchored. When it is not, it also explains why, without echoing command
 // arguments (HOOK-CD-RETRY-1).
-func anchoredInvocation(tokens []string, directory, anchor string) (bool, string) {
+func anchoredInvocation(tokens []string, directory, anchor string) (bool, unanchored) {
 	command, args := invocation(tokens)
-	selector, selected, valid := invocationSelector(command, args, directory, anchor)
+	selector, selected, fault := invocationSelector(command, args, directory, anchor)
 	if selected {
-		if !valid {
-			return false, "the " + selectorFlag(command) + " selector is not an absolute path inside the leading cd"
+		if fault != selectorOK {
+			why := "the " + selectorFlag(command) + " selector is not an absolute path inside the leading cd"
+			if fault == selectorOutside {
+				why = "the " + selectorFlag(command) + " selector is absolute but outside the leading cd"
+			}
+			return false, unanchored{why, fixSelector}
 		}
 		directory = selector
 	}
@@ -139,7 +158,7 @@ func anchoredInvocation(tokens []string, directory, anchor string) (bool, string
 				} else {
 					index++
 					if index >= len(args) {
-						return false, "the " + command + " target directory is missing"
+						return false, unanchored{"the " + command + " target directory is missing", fixTarget}
 					}
 					target = args[index]
 				}
@@ -178,17 +197,26 @@ func anchoredInvocation(tokens []string, directory, anchor string) (bool, string
 			}
 		}
 		if len(operands) > 0 || target != "" || directory != "" {
-			return true, ""
+			return true, unanchored{}
 		}
-		return false, "it names no target and the command has no leading absolute cd"
+		return false, noDirectory("it names no target and the command has no leading absolute cd", anchor)
 	}
 	if directory != "" {
-		return true, ""
+		return true, unanchored{}
 	}
 	if selectorFlag(command) == "--repo" || command == "git" || command == "go" || command == "make" {
-		return false, "it has no absolute " + selectorFlag(command) + " selector and the command has no leading absolute cd"
+		return false, noDirectory("it has no absolute "+selectorFlag(command)+" selector and the command has no leading absolute cd", anchor)
 	}
-	return false, "the command has no leading absolute cd"
+	return false, noDirectory("the command has no leading absolute cd", anchor)
+}
+
+// noDirectory explains a write that has no working directory. With a leading
+// cd that can only follow a later cd outside it.
+func noDirectory(why, anchor string) unanchored {
+	if anchor != "" {
+		return unanchored{"a later cd moved outside the leading cd, so the write has no anchored directory", fixLaterCD}
+	}
+	return unanchored{why, fixNoAnchor}
 }
 
 // selectorFlag names the absolute-selector flag a repository writer accepts.
@@ -199,7 +227,18 @@ func selectorFlag(command string) string {
 	return "-C"
 }
 
-func invocationSelector(command string, args []string, directory, anchor string) (string, bool, bool) {
+type selectorFault int
+
+const (
+	selectorOK selectorFault = iota
+	selectorBad
+	selectorOutside
+)
+
+// invocationSelector returns the selector of a repository writer. selectorBad
+// is a missing, relative or unresolvable value; selectorOutside is an
+// absolute selector beyond the leading cd.
+func invocationSelector(command string, args []string, directory, anchor string) (string, bool, selectorFault) {
 	flag := ""
 	switch command {
 	case "git", "go", "make":
@@ -207,7 +246,7 @@ func invocationSelector(command string, args []string, directory, anchor string)
 	case "achta", "rulefloor":
 		flag = "--repo"
 	default:
-		return "", false, true
+		return "", false, selectorOK
 	}
 	selector, selected := "", false
 	for index := 0; index < len(args); index++ {
@@ -218,7 +257,7 @@ func invocationSelector(command string, args []string, directory, anchor string)
 		path := ""
 		if arg == flag {
 			if index+1 >= len(args) {
-				return "", true, false
+				return "", true, selectorBad
 			}
 			index++
 			path = args[index]
@@ -236,30 +275,33 @@ func invocationSelector(command string, args []string, directory, anchor string)
 		selected = true
 		if !isAbsoluteSelector(path) {
 			if directory == "" || literalPath(path) == "" {
-				return "", true, false
+				return "", true, selectorBad
 			}
 			path = filepath.Join(directory, literalPath(path))
 		}
+		if literalPath(path) == "" {
+			return "", true, selectorBad
+		}
 		if (flag == "-C" && !hasAbsoluteC([]string{flag, path})) || !anchoredPath(path, "", anchor) {
-			return "", true, false
+			return "", true, selectorOutside
 		}
 		selector = literalPath(path)
 	}
-	return selector, selected, true
+	return selector, selected, selectorOK
 }
 
 // describeTarget explains why a write target is not anchored. It classifies
 // the target and never includes its text (HOOK-CD-RETRY-1).
-func describeTarget(subject, path, anchor string) string {
+func describeTarget(subject, path, anchor string) unanchored {
 	literal := literalPath(path)
 	switch {
 	case literal == "":
-		return subject + " uses a shell variable or glob the hook cannot resolve"
+		return unanchored{subject + " uses a shell variable or glob the hook cannot resolve", fixTarget}
 	case !filepath.IsAbs(literal) && anchor == "":
-		return subject + " is relative and the command has no leading absolute cd"
+		return unanchored{subject + " is relative and the command has no leading absolute cd", fixTarget}
 	case !filepath.IsAbs(literal):
-		return subject + " is relative to a directory outside the leading cd"
+		return unanchored{subject + " is relative to a directory outside the leading cd", fixLaterCD}
 	default:
-		return subject + " is outside the leading cd and is not a scratch directory (/tmp, /var/tmp, /var/folders)"
+		return unanchored{subject + " is outside the leading cd and is not a scratch directory (/tmp, /var/tmp, /var/folders)", fixTarget}
 	}
 }
