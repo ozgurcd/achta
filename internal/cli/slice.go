@@ -18,6 +18,8 @@ func runSlice(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	commits := set.Int("commits", 1, "number of slice commits")
 	entries := set.Int("entries", 1, "expected appended log entries")
 	ahead := set.Int("ahead", -1, "exact total commits ahead of upstream")
+	upstream := set.String("upstream", "", "explicit comparison reference for upstream, ahead and ancestry (default: the branch upstream, else the main repository's)")
+	repoName := set.String("repo-name", "", "wiki page name (default: the main repository's directory name)")
 	jsonMode := set.Bool("json", opts.json, "emit JSON")
 	if err := parseFlags(set, rest); err != nil {
 		opts.json = *jsonMode
@@ -39,7 +41,7 @@ func runSlice(args []string, stdout, stderr io.Writer, opts globalOptions) int {
 	if *ahead >= 0 {
 		exactAhead = ahead
 	}
-	result := slicecheck.Run(slicecheck.Options{Workspace: ws.Root, Repository: repo, Commits: *commits, ExpectedEntries: *entries, ExactAhead: exactAhead, LogDirectory: *logDirectory})
+	result := slicecheck.Run(slicecheck.Options{Workspace: ws.Root, Repository: repo, Commits: *commits, ExpectedEntries: *entries, ExactAhead: exactAhead, LogDirectory: *logDirectory, Upstream: *upstream, RepoName: *repoName})
 	code := 0
 	if result.Status == "cannot_evaluate" {
 		code = 2

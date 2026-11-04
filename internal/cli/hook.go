@@ -3,9 +3,34 @@ package cli
 import (
 	"fmt"
 	"io"
+	"os"
+	"strconv"
 
 	"github.com/ozgurcd/achta/internal/hookcd"
 )
+
+const (
+	hookMaxVariablesEnv  = "ACHTA_HOOK_CD_MAX_VARIABLES"
+	hookMaxValueBytesEnv = "ACHTA_HOOK_CD_MAX_VALUE_BYTES"
+)
+
+// hookLimits reads the variable-table limits from the environment. An unset
+// value takes the hookcd default; an invalid one warns and takes it too.
+func hookLimits(stderr io.Writer) hookcd.Limits {
+	read := func(name string) int {
+		raw, set := os.LookupEnv(name)
+		if !set {
+			return 0
+		}
+		value, err := strconv.Atoi(raw)
+		if err != nil || value <= 0 {
+			fmt.Fprintf(stderr, "achta hook cd: WARNING — %s must be a positive integer; using the default\n", name)
+			return 0
+		}
+		return value
+	}
+	return hookcd.Limits{MaxVariables: read(hookMaxVariablesEnv), MaxValueBytes: read(hookMaxValueBytesEnv)}
+}
 
 func runHook(args []string, stdin io.Reader, stderr io.Writer) int {
 	rest, err := requireSubcommand(args, "cd")
@@ -22,7 +47,7 @@ func runHook(args []string, stdin io.Reader, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "achta hook cd: WARNING — could not read PreToolUse input; allowing")
 		return 0
 	}
-	result := hookcd.Evaluate(payload)
+	result := hookcd.EvaluateWithLimits(payload, hookLimits(stderr))
 	switch result.Verdict {
 	case hookcd.Allow:
 		return 0
@@ -37,7 +62,7 @@ func runHook(args []string, stdin io.Reader, stderr io.Writer) int {
 		if result.Hint != "" {
 			fmt.Fprintf(stderr, "hint: %s\n", result.Hint)
 		}
-		fmt.Fprintln(stderr, "fix: put the absolute cd on its own line first; use git -C <abs> or make -C <abs>, --repo <abs> for repository writers, or absolute file targets. Keep every write inside the cd anchor. If the harness strips cd, use the writer's own absolute selector or target.")
+		fmt.Fprintf(stderr, "fix: %s\n", result.Fix)
 		return 2
 	default:
 		fmt.Fprintln(stderr, "achta hook cd: WARNING — evaluator returned an unknown verdict; allowing")

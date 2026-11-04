@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.22 release specification; authorized future scope in §3.1 is not shipped
+Status: v0.5.23 release specification; authorized future scope in §3.1 is not shipped
 
 Project name: Achta
 
@@ -944,8 +944,15 @@ output; it neither mints a witness nor strengthens a locally writable record.
 
 ```text
 achta slice check --repo PATH [--log-dir RELATIVE_PATH] \
-  [--commits N] [--entries N] [--ahead N] [--json]
+  [--commits N] [--entries N] [--ahead N] [--upstream REF] [--repo-name NAME] \
+  [--json]
 ```
+
+A linked worktree resolves to its main repository for the upstream (when its
+own branch has none) and for the wiki page name; `--upstream` and `--repo-name`
+override both explicitly. `--repo-name` is refused unless it equals the
+repository's own identity, and `--upstream` is refused unless it is a
+remote-tracking ref or a commit id that is not HEAD and not a descendant of it.
 
 The command audits local Git and wiki evidence for an already landed slice. It
 checks a clean tree, upstream availability and ancestry, total commits ahead,

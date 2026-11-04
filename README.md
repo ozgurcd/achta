@@ -222,6 +222,33 @@ relative target without a leading cd, a target outside the cd, a variable or
 glob target, a missing or non-absolute `-C`/`--repo` selector), and a denial
 caused by a shell variable names that variable and asks for the literal
 absolute path. Denials never echo command arguments or write targets.
+A shell variable expands only when all of these hold: it is assigned earlier in
+the same command by an unconditional, top-level statement of its own
+(`D=/abs/repo; git -C "$D" add .`, `R=/abs/repo; nohup make -C "$R" verify &`)
+that is not joined to the previous statement by `&&` or `||`, is not inside
+`if`/`while`/`for`/`case`, a function, a group or a subshell, and is not
+backgrounded; its value is a plain absolute path (no whitespace, glob, `$` or
+leading `~`, never `HOME`); and the use is double-quoted (`"$NAME"`,
+`"${NAME}"`). An unquoted use is word-split, globbed and dropped when empty by
+the shell, so it is never expanded. Single-quoted or escaped text, other
+`${...}` forms, a prefix assignment (`D=/x cmd "$D"`), `export D=...` and a
+variable set in another call stay unexpanded and deny. A value must still
+satisfy the same anchor rule as a typed path. Any `IFS`, arithmetic (`(( ))`,
+`let`), control keyword, function, group, subshell, `eval`, `source`, `.`,
+`read`, `unset`, `declare`, `for` and similar words, `printf -v` or
+`${NAME:=x}` empties the table and stops all expansion for the rest of the
+command; `NAME+=`/`NAME[i]=` drop that name. The shell assigns left to right, so a
+statement that assigns a name it also reads (`D=/x; D="$D"/y`), or assigns two
+or more names (`D= E="$D"`), forgets every name it assigns or reads. The table holds at most `ACHTA_HOOK_CD_MAX_VARIABLES`
+names (default 64) of at most `ACHTA_HOOK_CD_MAX_VALUE_BYTES` bytes each
+(default 4096); one statement gains at most the product of the two by
+expansion. Past a bound the hook stops expanding and denies. Each denial's
+`fix:` line names only forms the hook accepts for that problem: a relative
+redirect asks for an absolute target (a `-C`/`--repo` selector does not move a
+shell redirect), an absolute selector outside the leading cd asks for its own
+command with that cd first, and a write after a later `cd` outside the leading
+cd names that cd. `nohup` is transparent: its target is checked like the
+command it launches.
 Path checks are lexical; they do not resolve symlinks or inspect Git repositories.
 Input that cannot be parsed
 warns on stderr and allows with exit 0; unknown verbs are read-only by contract.
@@ -487,6 +514,20 @@ new headings across both sources. An explicit missing or linked directory is
 the flag skips the check. The directory name stays caller-owned, consistent with
 the flag-only vocabulary decision for `floor census`. The command invokes no
 shell and does not fetch, stage, commit, or otherwise mutate Git.
+
+`slice check` resolves a linked Git worktree to its main repository
+(`git rev-parse --git-common-dir`). When the worktree's branch has no upstream
+of its own, the upstream, ahead and ancestry checks use the main repository's
+upstream, and the check detail names that source. The wiki page is selected by
+the main repository's directory name, not the worktree's, and its pin is judged
+against the HEAD of the repository passed to `--repo`. `--upstream REF` names
+the comparison reference explicitly and `--repo-name NAME` names the wiki page
+explicitly. Both are validated: `--repo-name` must equal the repository's own
+identity (the main repository's directory name; a mismatch names both), and
+`--upstream` must be a remote-tracking ref (`refs/remotes/...`) or a commit id
+that is not HEAD and not a descendant of it, since HEAD, relative revisions and
+local branches would make ahead and ancestry hold trivially. An unresolvable or
+refused value stays `cannot_evaluate`.
 
 `amendments declare` records human intent; it never infers a declaration.
 `amendments rebase` selects the newest reachable commit with the accepted

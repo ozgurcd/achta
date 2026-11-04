@@ -28,6 +28,12 @@ type Options struct {
 	ExpectedEntries int
 	ExactAhead      *int
 	LogDirectory    string
+	// Upstream, when set, is the explicit comparison reference for the
+	// upstream, ahead and ancestry checks.
+	Upstream string
+	// RepoName, when set, names the wiki page instead of the canonical
+	// repository directory name.
+	RepoName string
 }
 
 type Check struct {
@@ -84,13 +90,13 @@ func Run(options Options) Result {
 		add("clean-tree", "fail", "working tree is not clean")
 	}
 
-	upstream, upstreamErr := gitstate.Upstream(options.Repository)
+	upstream, upstreamDetail, upstreamErr := resolveUpstream(options.Repository, options.Upstream)
 	if upstreamErr != nil {
 		add("upstream", "cannot_evaluate", upstreamErr.Error())
 		add("ahead", "skip", "no upstream")
 		add("ancestry", "skip", "no upstream")
 	} else {
-		add("upstream", "pass", "upstream is "+upstream)
+		add("upstream", "pass", upstreamDetail)
 		ahead, behind, compareErr := gitstate.AheadBehind(options.Repository, upstream)
 		if compareErr != nil {
 			add("ahead", "cannot_evaluate", compareErr.Error())
@@ -199,7 +205,7 @@ func Run(options Options) Result {
 		add("log-append", status, detail)
 	}
 
-	freshness, freshnessErr := achtawiki.FreshnessRepository(options.Workspace, options.Repository)
+	freshness, freshnessErr := freshnessFor(options)
 	if freshnessErr != nil {
 		add("wiki-pin", "cannot_evaluate", freshnessErr.Error())
 	} else if freshness.Status == "pass" && freshness.Fresh == 1 {
@@ -208,6 +214,99 @@ func Run(options Options) Result {
 		add("wiki-pin", "fail", "repository wiki page is not pinned to HEAD")
 	}
 	return result
+}
+
+// resolveUpstream picks the comparison reference: an explicit one, else the
+// checked-out branch's own upstream, else, for a linked worktree whose private
+// branch has none, the upstream of the main repository. The returned detail
+// names which one was used.
+func resolveUpstream(repo, explicit string) (string, string, error) {
+	if explicit != "" {
+		return explicitUpstream(repo, explicit)
+	}
+	upstream, err := gitstate.Upstream(repo)
+	if err == nil {
+		return upstream, "upstream is " + upstream, nil
+	}
+	canonical, canonicalErr := gitstate.CanonicalRepository(repo)
+	if canonicalErr != nil || sameDirectory(canonical, repo) {
+		return "", "", fmt.Errorf("%w (pass --upstream REF to name the comparison reference)", err)
+	}
+	mainUpstream, mainErr := gitstate.Upstream(canonical)
+	if mainErr == nil {
+		if _, resolveErr := gitstate.ResolveCommit(repo, mainUpstream); resolveErr == nil {
+			return mainUpstream, fmt.Sprintf("upstream is %s (from main repository %s)", mainUpstream, filepath.Base(canonical)), nil
+		}
+	}
+	return "", "", fmt.Errorf("%w; main repository %s has no usable upstream either (pass --upstream REF to name the comparison reference)", err, filepath.Base(canonical))
+}
+
+// commitIDPattern is an explicit commit id: abbreviated or full, lowercase hex.
+var commitIDPattern = regexp.MustCompile(`^[0-9a-f]{7,64}$`)
+
+// explicitUpstream accepts an explicit comparison only when it can disprove a
+// landed slice: a remote-tracking reference, or a commit id that is neither HEAD
+// nor a descendant of it. HEAD, relative revisions and local branches make the
+// ahead and ancestry checks hold for any unpushed slice, so they are refused.
+func explicitUpstream(repo, explicit string) (string, string, error) {
+	if strings.HasPrefix(explicit, "-") || strings.ContainsAny(explicit, "\r\n\x00") {
+		return "", "", errors.New("--upstream must be a Git reference")
+	}
+	commit, err := gitstate.ResolveCommit(repo, explicit)
+	if err != nil {
+		return "", "", fmt.Errorf("resolve --upstream %s: %w", explicit, err)
+	}
+	remote, err := gitstate.IsRemoteTracking(repo, explicit)
+	if err != nil {
+		return "", "", fmt.Errorf("classify --upstream %s: %w", explicit, err)
+	}
+	if remote {
+		return explicit, fmt.Sprintf("upstream is %s (explicit remote-tracking ref at %s)", explicit, commit), nil
+	}
+	if !commitIDPattern.MatchString(explicit) {
+		return "", "", fmt.Errorf("--upstream %q is neither a remote-tracking ref (such as origin/main) nor an explicit commit id; HEAD, relative revisions and local branches make the ahead and ancestry checks trivial", explicit)
+	}
+	head, err := gitstate.Head(repo)
+	if err != nil {
+		return "", "", fmt.Errorf("resolve HEAD: %w", err)
+	}
+	if commit == head {
+		return "", "", fmt.Errorf("--upstream %s is HEAD; the ahead and ancestry checks would be trivial", explicit)
+	}
+	descendant, err := gitstate.HeadIsAncestorOf(repo, commit)
+	if err != nil {
+		return "", "", fmt.Errorf("compare --upstream %s with HEAD: %w", explicit, err)
+	}
+	if descendant {
+		return "", "", fmt.Errorf("--upstream %s is a descendant of HEAD; the ahead and ancestry checks would be trivial", explicit)
+	}
+	return commit, fmt.Sprintf("upstream is %s (explicit commit)", commit), nil
+}
+
+func sameDirectory(a, b string) bool {
+	left, leftErr := os.Stat(a)
+	right, rightErr := os.Stat(b)
+	return leftErr == nil && rightErr == nil && os.SameFile(left, right)
+}
+
+// freshnessFor selects the wiki page by the explicit name, else by the name of
+// the main repository, so a linked worktree finds its repository's page.
+func freshnessFor(options Options) (achtawiki.FreshnessResult, error) {
+	name := filepath.Base(options.Repository)
+	canonical, canonicalErr := gitstate.CanonicalRepository(options.Repository)
+	if canonicalErr == nil {
+		name = filepath.Base(canonical)
+	}
+	if options.RepoName != "" {
+		// An override only confirms the identity git reports; it cannot name another repository's page.
+		if canonicalErr != nil {
+			return achtawiki.FreshnessResult{}, fmt.Errorf("--repo-name %q cannot be verified against the repository identity: %w", options.RepoName, canonicalErr)
+		}
+		if options.RepoName != name {
+			return achtawiki.FreshnessResult{}, fmt.Errorf("--repo-name %q does not match the repository identity %q (main repository %s)", options.RepoName, name, canonical)
+		}
+	}
+	return achtawiki.FreshnessRepositoryNamed(options.Workspace, options.Repository, name)
 }
 
 func secretPath(paths []string) bool {

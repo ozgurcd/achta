@@ -1139,3 +1139,7 @@ Prepare v0.5.22 for the ACH-03 wording change. Update the source Version, CLI
 testVersion and the four exact human and machine version and capability
 fixtures; CHANGELOG and RELEASE_NOTES describe the not-inferred wording. The
 owner merges, tags and installs; the tag workflow publishes the Homebrew cask.
+
+## [2026-11-04] release | ACHTA-RELEASE-V0523-1104
+
+Prepare v0.5.23 for the ACH-05 cd hook variable expansion and the WIKI-01 slice check worktree identity fixes. Update the source Version, CLI testVersion and the four exact human and machine version and capability fixtures; CHANGELOG and RELEASE_NOTES describe both changes. The owner merges and tags; the tag workflow publishes the Homebrew cask.

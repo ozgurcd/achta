@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.5.23 — 2026-11-04
+
+The cd hook expands variables assigned earlier in the same command to a literal
+absolute path by an unconditional top-level statement, when the use is
+double-quoted, and fails closed on every other form (conditional, function,
+group, subshell, unquoted, `export`, `eval`, `read`, arithmetic, multi-assignment
+statements). The variable table is bounded by `ACHTA_HOOK_CD_MAX_VARIABLES` and
+`ACHTA_HOOK_CD_MAX_VALUE_BYTES`. Denial `fix:` lines name the accepted form
+instead of suggesting a selector that cannot fix a relative target (ACH-05).
+
+`slice check` now resolves a linked Git worktree to its main repository: a
+worktree branch with no upstream of its own is compared with the main
+repository's upstream, and the wiki page is found by the main repository's
+name instead of the worktree directory's. New `--upstream REF` and
+`--repo-name NAME` flags set both explicitly, and both are validated:
+`--repo-name` must equal the repository's own identity (the main repository's
+directory name), and `--upstream` must be a remote-tracking ref or a commit id
+that is neither HEAD nor a descendant of it, so a check never passes trivially.
+Checks that cannot be resolved remain `cannot_evaluate`. The wiki pin is always
+compared with the HEAD of the checkout being checked, taken from its own git
+dir, so a worktree whose directory is named like the repository (also through
+a symlink, or with a detached HEAD) is no longer judged against the main
+checkout's HEAD.
+
 ## v0.5.22 — 2026-11-03
 
 Word the fixed statements of what `declared-route check`, `count check` and
