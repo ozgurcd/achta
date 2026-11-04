@@ -75,12 +75,10 @@ func FreshnessRepository(root, repository string) (FreshnessResult, error) {
 // under a directory name that is not its page name, such as a linked worktree.
 // The page is selected by name; when name differs from the directory name, an
 // unowned page's pin is judged against the HEAD of repository itself rather
-// than of the workspace checkout called name.
+// than of the workspace checkout called name. The HEAD always comes from
+// repository itself (its own git dir), never from its directory name.
 func FreshnessRepositoryNamed(root, repository, name string) (FreshnessResult, error) {
-	headRepository := ""
-	if name != filepath.Base(repository) {
-		headRepository = repository
-	}
+	headRepository := repository
 	selected := ""
 	for _, directory := range []string{"wiki", "llm-wiki"} {
 		_, err := os.Lstat(filepath.Join(repository, directory, "repos", name+".md"))

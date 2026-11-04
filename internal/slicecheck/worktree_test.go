@@ -231,6 +231,79 @@ func TestRepoNameOverrideMustMatchRepositoryIdentity(t *testing.T) {
 	}
 }
 
+// addNamedWorktree adds a linked worktree whose directory is named name, one
+// commit ahead of main, attached to a branch or detached.
+func addNamedWorktree(t *testing.T, repo, name string, detach bool) string {
+	t.Helper()
+	worktree := filepath.Join(t.TempDir(), name)
+	if detach {
+		runLogGit(t, repo, "worktree", "add", "--detach", worktree, "main")
+	} else {
+		runLogGit(t, repo, "worktree", "add", "--no-track", "-b", "job/"+name, worktree, "main")
+	}
+	writeLogTestFile(t, worktree, "file", "changed\n")
+	runLogGit(t, worktree, "commit", "-am", "slice")
+	return worktree
+}
+
+// The pin is judged against the HEAD of the checkout being checked, resolved
+// from its own git dir, even when its directory is named like the repository.
+// Reviewer R4.
+// RULE: SLICE-WORKTREE-HEAD-1
+func TestWikiPinUsesCheckedWorktreeHeadWhenDirectoryNamedLikeRepository(t *testing.T) {
+	for _, detach := range []bool{false, true} {
+		repo := newMainWithOrigin(t)
+		name := filepath.Base(repo)
+		worktree := addNamedWorktree(t, repo, name, detach)
+		mainHead, sliceHead := headOf(t, repo), headOf(t, worktree)
+		if mainHead == sliceHead {
+			t.Fatal("fixture: worktree HEAD equals main HEAD")
+		}
+		// The main checkout sits in the workspace under the page name, as in a real workspace.
+		workspace := filepath.Dir(repo)
+		writeRepoPage(t, workspace, name, mainHead)
+		result := Run(Options{Workspace: workspace, Repository: worktree, Commits: 1})
+		if check := checkOf(t, result, "wiki-pin"); check.Status != "fail" || !strings.Contains(check.Detail, "not pinned") {
+			t.Fatalf("detached=%v: pin to main checkout HEAD accepted for a slice at another HEAD: %+v", detach, check)
+		}
+		writeRepoPage(t, workspace, name, sliceHead)
+		result = Run(Options{Workspace: workspace, Repository: worktree, Commits: 1})
+		if check := checkOf(t, result, "wiki-pin"); check.Status != "pass" {
+			t.Fatalf("detached=%v: pin to the slice HEAD refused: %+v", detach, check)
+		}
+	}
+}
+
+// A symlinked path to the same-named worktree must never be judged against the
+// main checkout's HEAD; refusing it is acceptable.
+func TestWikiPinSymlinkedSameNameWorktreeNotJudgedByMainHead(t *testing.T) {
+	repo := newMainWithOrigin(t)
+	name := filepath.Base(repo)
+	worktree := addNamedWorktree(t, repo, name, false)
+	link := filepath.Join(t.TempDir(), name)
+	if err := os.Symlink(worktree, link); err != nil {
+		t.Fatal(err)
+	}
+	workspace := filepath.Dir(repo)
+	writeRepoPage(t, workspace, name, headOf(t, repo))
+	result := Run(Options{Workspace: workspace, Repository: link, Commits: 1})
+	if check := checkOf(t, result, "wiki-pin"); check.Status == "pass" {
+		t.Fatalf("symlinked worktree passed against the main checkout pin: %+v", check)
+	}
+}
+
+// The plain main checkout keeps its own HEAD as the pin target.
+func TestWikiPinMainCheckoutStillJudgedByOwnHead(t *testing.T) {
+	repo := newMainWithOrigin(t)
+	name := filepath.Base(repo)
+	workspace := filepath.Dir(repo)
+	writeRepoPage(t, workspace, name, headOf(t, repo))
+	result := Run(Options{Workspace: workspace, Repository: repo, Commits: 1})
+	if check := checkOf(t, result, "wiki-pin"); check.Status != "pass" {
+		t.Fatalf("wiki-pin: %+v", check)
+	}
+}
+
 func TestPlainRepositoryKeepsBasenamePage(t *testing.T) {
 	repo := newMainWithOrigin(t)
 	workspace := t.TempDir()

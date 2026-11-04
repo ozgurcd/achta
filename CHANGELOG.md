@@ -10,7 +10,11 @@ name instead of the worktree directory's. New `--upstream REF` and
 `--repo-name` must equal the repository's own identity (the main repository's
 directory name), and `--upstream` must be a remote-tracking ref or a commit id
 that is neither HEAD nor a descendant of it, so a check never passes trivially.
-Checks that cannot be resolved remain `cannot_evaluate`.
+Checks that cannot be resolved remain `cannot_evaluate`. The wiki pin is always
+compared with the HEAD of the checkout being checked, taken from its own git
+dir, so a worktree whose directory is named like the repository (also through
+a symlink, or with a detached HEAD) is no longer judged against the main
+checkout's HEAD.
 
 ## v0.5.22 — 2026-11-03
 
