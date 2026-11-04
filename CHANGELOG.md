@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## v0.5.23 — 2026-11-04
+
+The cd hook expands variables assigned earlier in the same command to a literal
+absolute path by an unconditional top-level statement, when the use is
+double-quoted, and fails closed on every other form (conditional, function,
+group, subshell, unquoted, `export`, `eval`, `read`, arithmetic, multi-assignment
+statements). The variable table is bounded by `ACHTA_HOOK_CD_MAX_VARIABLES` and
+`ACHTA_HOOK_CD_MAX_VALUE_BYTES`. Denial `fix:` lines name the accepted form
+instead of suggesting a selector that cannot fix a relative target (ACH-05).
 
 `slice check` now resolves a linked Git worktree to its main repository: a
 worktree branch with no upstream of its own is compared with the main

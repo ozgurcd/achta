@@ -2,7 +2,7 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.5.23 — 2026-11-04
 
 The cd hook now expands variables and stops refusing its own advice (ACH-05):
 
