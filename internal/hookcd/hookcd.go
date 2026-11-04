@@ -113,8 +113,14 @@ func EvaluateWithLimits(payload []byte, limits Limits) Result {
 	}
 	anchor, directory := "", ""
 	vars := newVariables(limits)
-	for index, statement := range statements {
-		tokens, err := lexWith(statement, vars)
+	for index, segment := range statements {
+		statement := segment.text
+		words, err := lex(statement)
+		if err != nil {
+			return warning(err.Error())
+		}
+		vars.screen(statement, words)
+		tokens, quoteAt, err := lexWith(statement, vars)
 		if err != nil {
 			return warning(err.Error())
 		}
@@ -140,7 +146,7 @@ func EvaluateWithLimits(payload []byte, limits Limits) Result {
 				Fix:       problem.Fix,
 			}
 		}
-		vars.observe(tokens)
+		vars.observe(tokens, quoteAt, segment.simple)
 	}
 	return Result{Verdict: Allow}
 }
@@ -298,25 +304,44 @@ func heredocDelimiters(line string) ([]heredocSpec, error) {
 	return found, nil
 }
 
-func splitStatements(command string) ([]string, error) {
-	var statements []string
+// segment is one statement with how it is joined to its neighbours. simple is
+// true only when the statement is certain to run: it follows the start, a ; or
+// a newline (never && or ||, nor a newline that continues one), and it is
+// followed by the end, a ; , a newline or &&.
+type segment struct {
+	text   string
+	simple bool
+}
+
+func splitStatements(command string) ([]segment, error) {
+	var segments []segment
 	var current strings.Builder
 	quote := rune(0)
 	escaped := false
 	comment := false
 	runes := []rune(command)
-	flush := func() {
-		if statement := strings.TrimSpace(current.String()); statement != "" {
-			statements = append(statements, statement)
-		}
+	before := ";"
+	flush := func(sep string) {
+		statement := strings.TrimSpace(current.String())
 		current.Reset()
+		if statement == "" {
+			// A newline after && or || continues the list and stays conditional.
+			if sep != ";" && sep != "\n" {
+				before = sep
+			}
+			return
+		}
+		leading := before == ";" || before == "\n"
+		trailing := sep == ";" || sep == "\n" || sep == "&&" || sep == "end"
+		segments = append(segments, segment{text: statement, simple: leading && trailing})
+		before = sep
 	}
 	for index := 0; index < len(runes); index++ {
 		char := runes[index]
 		if comment {
 			if char == '\n' {
 				comment = false
-				flush()
+				flush("\n")
 			}
 			continue
 		}
@@ -350,11 +375,11 @@ func splitStatements(command string) ([]string, error) {
 			continue
 		}
 		if char == '\n' || char == ';' {
-			flush()
+			flush(string(char))
 			continue
 		}
 		if index+1 < len(runes) && ((char == '&' && runes[index+1] == '&') || (char == '|' && runes[index+1] == '|')) {
-			flush()
+			flush(string(char) + string(char))
 			index++
 			continue
 		}
@@ -363,8 +388,8 @@ func splitStatements(command string) ([]string, error) {
 	if quote != 0 || escaped {
 		return nil, fmt.Errorf("shell statement has an unterminated quote or escape")
 	}
-	flush()
-	return statements, nil
+	flush("end")
+	return segments, nil
 }
 
 func previousRune(value string) rune {
@@ -375,14 +400,22 @@ func previousRune(value string) rune {
 	return runes[len(runes)-1]
 }
 
-func lex(statement string) ([]string, error) { return lexWith(statement, nil) }
+func lex(statement string) ([]string, error) {
+	tokens, _, err := lexWith(statement, nil)
+	return tokens, err
+}
 
 // lexWith splits one statement into words. With a variable table it also
-// replaces an exact $NAME or ${NAME} reference, unquoted or in double quotes,
-// by its literal absolute value; single-quoted and escaped text stays literal.
-func lexWith(statement string, vars *variables) ([]string, error) {
+// replaces an exact "$NAME" or "${NAME}" reference inside double quotes by its
+// literal absolute value. An unquoted reference is word-split, globbed and
+// dropped when empty by the shell, so it never expands; single-quoted and
+// escaped text stays literal. quoteAt gives, per word, the offset of its first
+// quote or escape, or -1.
+func lexWith(statement string, vars *variables) ([]string, []int, error) {
 	var tokens []string
+	var quoteAt []int
 	var token strings.Builder
+	firstQuote := -1
 	quote := rune(0)
 	escaped := false
 	runes := []rune(statement)
@@ -390,8 +423,13 @@ func lexWith(statement string, vars *variables) ([]string, error) {
 	if vars != nil {
 		remaining = vars.budget()
 	}
-	expandAt := func(char rune, allowed bool, index int) (int, bool) {
-		if vars == nil || char != '$' || !allowed {
+	noteQuote := func() {
+		if firstQuote < 0 {
+			firstQuote = token.Len()
+		}
+	}
+	expandAt := func(index int) (int, bool) {
+		if vars == nil {
 			return index, false
 		}
 		value, last, ok := vars.expand(runes, index)
@@ -405,8 +443,10 @@ func lexWith(statement string, vars *variables) ([]string, error) {
 	flush := func() {
 		if token.Len() > 0 {
 			tokens = append(tokens, token.String())
+			quoteAt = append(quoteAt, firstQuote)
 			token.Reset()
 		}
+		firstQuote = -1
 	}
 	for index := 0; index < len(runes); index++ {
 		char := runes[index]
@@ -416,25 +456,32 @@ func lexWith(statement string, vars *variables) ([]string, error) {
 			continue
 		}
 		if quote == 0 && char == '\\' {
+			noteQuote()
 			escaped = true
 			continue
 		}
 		if quote != 0 {
-			if char == quote {
+			switch {
+			case char == quote:
 				quote = 0
-			} else if last, ok := expandAt(char, quote == '"', index); ok {
-				index = last
-			} else {
+			case quote == '"' && char == '\\' && index+1 < len(runes) && runes[index+1] == '$':
+				token.WriteRune(char)
+				token.WriteRune('$')
+				index++
+			case quote == '"' && char == '$':
+				if last, ok := expandAt(index); ok {
+					index = last
+				} else {
+					token.WriteRune(char)
+				}
+			default:
 				token.WriteRune(char)
 			}
 			continue
 		}
 		if char == '\'' || char == '"' {
+			noteQuote()
 			quote = char
-			continue
-		}
-		if last, ok := expandAt(char, true, index); ok {
-			index = last
 			continue
 		}
 		if unicode.IsSpace(char) {
@@ -444,6 +491,7 @@ func lexWith(statement string, vars *variables) ([]string, error) {
 		if char == '|' {
 			flush()
 			tokens = append(tokens, "|")
+			quoteAt = append(quoteAt, -1)
 			continue
 		}
 		if char == '<' || char == '>' {
@@ -459,15 +507,16 @@ func lexWith(statement string, vars *variables) ([]string, error) {
 				operator = redirectAppendToken
 			}
 			tokens = append(tokens, operator)
+			quoteAt = append(quoteAt, -1)
 			continue
 		}
 		token.WriteRune(char)
 	}
 	if quote != 0 || escaped {
-		return nil, fmt.Errorf("shell statement has an unterminated quote or escape")
+		return nil, nil, fmt.Errorf("shell statement has an unterminated quote or escape")
 	}
 	flush()
-	return tokens, nil
+	return tokens, quoteAt, nil
 }
 
 func firstStatementIsAbsoluteCD(statement string) bool {

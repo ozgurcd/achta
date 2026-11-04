@@ -59,8 +59,11 @@ func runHookCommand(t *testing.T, command string) (int, string) {
 func TestHookCDFixLineAndVariableExpansion(t *testing.T) {
 	t.Parallel()
 
-	if code, stderr := runHookCommand(t, "R=/abs/repo; nohup make -C $R verify > /tmp/log 2>&1 &"); code != 0 || stderr != "" {
+	if code, stderr := runHookCommand(t, `R=/abs/repo; nohup make -C \"$R\" verify > /tmp/log 2>&1 &`); code != 0 || stderr != "" {
 		t.Fatalf("variable nohup: code=%d stderr=%q, want allow", code, stderr)
+	}
+	if code, _ := runHookCommand(t, `true || R=/abs/repo; nohup make -C \"$R\" verify > /tmp/log 2>&1 &`); code != 2 {
+		t.Fatalf("conditional assignment: code=%d, want deny", code)
 	}
 	code, stderr := runHookCommand(t, "make -C /abs/wiki postcheck > out.txt")
 	if code != 2 || !strings.Contains(stderr, "fix: give the redirect or file target an absolute path") || strings.Contains(stderr, "make -C <abs>") {
@@ -75,7 +78,7 @@ func TestHookCDFixLineAndVariableExpansion(t *testing.T) {
 // The variable limits come from the environment; an invalid value warns and
 // falls back to the default. Not parallel: it sets the environment.
 func TestHookCDVariableLimitsFromEnvironment(t *testing.T) {
-	command := "A=/abs/a; B=/abs/b; git -C $A add ."
+	command := `A=/abs/a; B=/abs/b; git -C \"$A\" add .`
 	if code, stderr := runHookCommand(t, command); code != 0 || stderr != "" {
 		t.Fatalf("default limits: code=%d stderr=%q, want allow", code, stderr)
 	}

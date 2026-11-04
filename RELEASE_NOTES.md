@@ -7,14 +7,18 @@ Release changes are recorded under their exact version, newest first.
 The cd hook now expands variables and stops refusing its own advice (ACH-05):
 
 - a variable assigned earlier in the same command to a literal absolute path
-  (`D=/abs/repo; git -C $D add .`, `R=/abs/repo; nohup make -C $R verify &`,
-  `export D=...`) is expanded, so redirects, `-C`, `--repo` and file targets
-  through it are judged by their real path. The anchor rule is unchanged: a
-  value outside the leading cd, a relative or unknown value, a single-quoted or
-  escaped reference, a prefix assignment, and any variable touched by `eval`,
-  `source`, `read`, `unset`, `for`, `printf -v` or `NAME+=` still deny;
+  by an unconditional, top-level statement of its own
+  (`D=/abs/repo; git -C "$D" add .`, `R=/abs/repo; nohup make -C "$R" verify &`)
+  is expanded when the use is double-quoted, so redirects, `-C`, `--repo` and
+  file targets through it are judged by their real path. Expansion is
+  fail-closed: an assignment after `&&`/`||` or inside `if`/`while`/`case`, a
+  function, a group or a subshell, an unquoted use, `IFS`, arithmetic (`(( ))`,
+  `let`), `export`, `eval`, `source`, `read`, `unset`, `for`, `printf -v`,
+  `NAME+=` and similar words deny exactly as before. The anchor rule is
+  unchanged: a value outside the leading cd, a relative or unknown value, a
+  single-quoted or escaped reference and a prefix assignment still deny;
 - the table is bounded by `ACHTA_HOOK_CD_MAX_VARIABLES` (default 64) and
-  `ACHTA_HOOK_CD_MAX_VALUE_BYTES` (default 4096), so `A=$A$A` cannot grow;
+  `ACHTA_HOOK_CD_MAX_VALUE_BYTES` (default 4096), so `A="$A$A"` cannot grow;
 - a denial's `fix:` line no longer suggests `git -C` or `make -C` for a
   relative redirect or file target, which a selector cannot fix. It names the
   accepted form, and separates an absolute selector outside the leading cd and

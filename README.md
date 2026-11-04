@@ -222,16 +222,22 @@ relative target without a leading cd, a target outside the cd, a variable or
 glob target, a missing or non-absolute `-C`/`--repo` selector), and a denial
 caused by a shell variable names that variable and asks for the literal
 absolute path. Denials never echo command arguments or write targets.
-A shell variable assigned earlier in the same command, as a statement of its
-own (`D=/abs/repo; git -C $D add .`, `R=/abs/repo; nohup make -C $R verify &`,
-or `export D=/abs/x`), expands when its value is a plain absolute path: no
-whitespace, glob, `$` or leading `~`, and never `HOME`. `$NAME` and `${NAME}`
-expand unquoted and in double quotes; single-quoted or escaped text, other
-`${...}` forms, a prefix assignment (`D=/x cmd $D`) and a variable set in
-another call stay unexpanded and deny. A value must still satisfy the same
-anchor rule as a typed path. `eval`, `source`, `read`, `unset`, `declare`,
-`for` and similar words, `printf -v`, and `NAME+=`/`NAME[i]=` clear or drop the
-affected variables. The table holds at most `ACHTA_HOOK_CD_MAX_VARIABLES`
+A shell variable expands only when all of these hold: it is assigned earlier in
+the same command by an unconditional, top-level statement of its own
+(`D=/abs/repo; git -C "$D" add .`, `R=/abs/repo; nohup make -C "$R" verify &`)
+that is not joined to the previous statement by `&&` or `||`, is not inside
+`if`/`while`/`for`/`case`, a function, a group or a subshell, and is not
+backgrounded; its value is a plain absolute path (no whitespace, glob, `$` or
+leading `~`, never `HOME`); and the use is double-quoted (`"$NAME"`,
+`"${NAME}"`). An unquoted use is word-split, globbed and dropped when empty by
+the shell, so it is never expanded. Single-quoted or escaped text, other
+`${...}` forms, a prefix assignment (`D=/x cmd "$D"`), `export D=...` and a
+variable set in another call stay unexpanded and deny. A value must still
+satisfy the same anchor rule as a typed path. Any `IFS`, arithmetic (`(( ))`,
+`let`), control keyword, function, group, subshell, `eval`, `source`, `.`,
+`read`, `unset`, `declare`, `for` and similar words, `printf -v` or
+`${NAME:=x}` empties the table and stops all expansion for the rest of the
+command; `NAME+=`/`NAME[i]=` drop that name. The table holds at most `ACHTA_HOOK_CD_MAX_VARIABLES`
 names (default 64) of at most `ACHTA_HOOK_CD_MAX_VALUE_BYTES` bytes each
 (default 4096); one statement gains at most the product of the two by
 expansion. Past a bound the hook stops expanding and denies. Each denial's
