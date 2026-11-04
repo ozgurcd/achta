@@ -62,13 +62,25 @@ func Freshness(root, filter string) (FreshnessResult, error) {
 }
 
 func FreshnessSelected(root, filter string, selection Selection) (FreshnessResult, error) {
-	return freshnessDirectory(root, filter, selection, "wiki")
+	return freshnessDirectory(root, filter, selection, "wiki", "")
 }
 
 // FreshnessRepository prefers a repository's own co-versioned page. An
 // unreadable or ambiguous owned page never falls back to a parent record.
 func FreshnessRepository(root, repository string) (FreshnessResult, error) {
-	name := filepath.Base(repository)
+	return FreshnessRepositoryNamed(root, repository, filepath.Base(repository))
+}
+
+// FreshnessRepositoryNamed is FreshnessRepository for a repository checked out
+// under a directory name that is not its page name, such as a linked worktree.
+// The page is selected by name; when name differs from the directory name, an
+// unowned page's pin is judged against the HEAD of repository itself rather
+// than of the workspace checkout called name.
+func FreshnessRepositoryNamed(root, repository, name string) (FreshnessResult, error) {
+	headRepository := ""
+	if name != filepath.Base(repository) {
+		headRepository = repository
+	}
 	selected := ""
 	for _, directory := range []string{"wiki", "llm-wiki"} {
 		_, err := os.Lstat(filepath.Join(repository, directory, "repos", name+".md"))
@@ -84,12 +96,15 @@ func FreshnessRepository(root, repository string) (FreshnessResult, error) {
 		selected = directory
 	}
 	if selected != "" {
-		return freshnessDirectory(repository, name, nil, selected)
+		return freshnessDirectory(repository, name, nil, selected, "")
 	}
-	return Freshness(root, name)
+	return freshnessDirectory(root, name, nil, "wiki", headRepository)
 }
 
-func freshnessDirectory(root, filter string, selection Selection, wikiDirectory string) (FreshnessResult, error) {
+// freshnessDirectory judges every page matching filter. A non-empty
+// headRepository replaces the workspace checkout as the HEAD an unowned page's
+// pin is compared with.
+func freshnessDirectory(root, filter string, selection Selection, wikiDirectory, headRepository string) (FreshnessResult, error) {
 	result := FreshnessResult{SchemaVersion: FreshnessSchema, Status: "pass", Pages: []FreshnessPage{}}
 	if filter != "" && !repoPattern.MatchString(filter) {
 		return result, errors.New("invalid repository filter")
@@ -194,7 +209,10 @@ func freshnessDirectory(root, filter string, selection Selection, wikiDirectory 
 			continue
 		}
 		page.DeclaredSHA = match[2]
-		repo, confineErr := boundary.Confine(repoName)
+		repo, confineErr := headRepository, error(nil)
+		if repo == "" {
+			repo, confineErr = boundary.Confine(repoName)
+		}
 		if confineErr != nil {
 			page.Status, page.Problem = "no_repo", boundedProblem(confineErr)
 			result.Unreadable++

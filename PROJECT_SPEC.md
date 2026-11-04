@@ -944,8 +944,13 @@ output; it neither mints a witness nor strengthens a locally writable record.
 
 ```text
 achta slice check --repo PATH [--log-dir RELATIVE_PATH] \
-  [--commits N] [--entries N] [--ahead N] [--json]
+  [--commits N] [--entries N] [--ahead N] [--upstream REF] [--repo-name NAME] \
+  [--json]
 ```
+
+A linked worktree resolves to its main repository for the upstream (when its
+own branch has none) and for the wiki page name; `--upstream` and `--repo-name`
+override both explicitly.
 
 The command audits local Git and wiki evidence for an already landed slice. It
 checks a clean tree, upstream availability and ancestry, total commits ahead,

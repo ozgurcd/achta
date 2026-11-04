@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+`slice check` now resolves a linked Git worktree to its main repository: a
+worktree branch with no upstream of its own is compared with the main
+repository's upstream, and the wiki page is found by the main repository's
+name instead of the worktree directory's. New `--upstream REF` and
+`--repo-name NAME` flags set both explicitly. Checks that cannot be resolved
+remain `cannot_evaluate`.
+
 ## v0.5.22 — 2026-11-03
 
 Word the fixed statements of what `declared-route check`, `count check` and

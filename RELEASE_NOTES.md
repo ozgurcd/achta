@@ -29,6 +29,13 @@ The cd hook now expands variables and stops refusing its own advice (ACH-05):
 Writes that can reach a repository are still denied. A second `cd` outside the
 leading one still loses the anchor.
 
+`slice check` now resolves a linked Git worktree to its main repository: a
+worktree branch with no upstream of its own is compared with the main
+repository's upstream, and the wiki page is found by the main repository's
+name instead of the worktree directory's. New `--upstream REF` and
+`--repo-name NAME` flags set both explicitly. Checks that cannot be resolved
+remain `cannot_evaluate`.
+
 ## v0.5.22 — 2026-11-03
 
 `declared-route check`, `count check` and `ledger rows` end their human output

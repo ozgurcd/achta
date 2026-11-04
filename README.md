@@ -515,6 +515,15 @@ the flag skips the check. The directory name stays caller-owned, consistent with
 the flag-only vocabulary decision for `floor census`. The command invokes no
 shell and does not fetch, stage, commit, or otherwise mutate Git.
 
+`slice check` resolves a linked Git worktree to its main repository
+(`git rev-parse --git-common-dir`). When the worktree's branch has no upstream
+of its own, the upstream, ahead and ancestry checks use the main repository's
+upstream, and the check detail names that source. The wiki page is selected by
+the main repository's directory name, not the worktree's, and its pin is judged
+against the HEAD of the repository passed to `--repo`. `--upstream REF` names
+the comparison reference explicitly and `--repo-name NAME` names the wiki page
+explicitly; an unresolvable reference or unknown page stays `cannot_evaluate`.
+
 `amendments declare` records human intent; it never infers a declaration.
 `amendments rebase` selects the newest reachable commit with the accepted
 `Witness: make verify green at ` subject that touched the named witness record.

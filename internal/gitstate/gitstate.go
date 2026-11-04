@@ -113,6 +113,25 @@ func Upstream(repo string) (string, error) {
 	return upstream, nil
 }
 
+// CanonicalRepository returns the working directory of the main repository that
+// owns repo. For a linked worktree that is the directory holding the shared
+// .git; for any other checkout, including one with a bare or relocated git
+// directory, it is repo itself.
+func CanonicalRepository(repo string) (string, error) {
+	out, err := run(repo, nil, "rev-parse", "--path-format=absolute", "--git-common-dir")
+	if err != nil {
+		return "", fmt.Errorf("resolve canonical repository: %w", err)
+	}
+	common := filepath.Clean(strings.TrimSpace(out))
+	if !filepath.IsAbs(common) || strings.ContainsAny(common, "\r\n\x00") {
+		return "", errors.New("git returned malformed common directory")
+	}
+	if filepath.Base(common) != ".git" {
+		return repo, nil
+	}
+	return filepath.Dir(common), nil
+}
+
 // AheadBehind compares HEAD with a local reference. It performs no fetch and
 // therefore describes only the checked-out repository's remote-tracking state.
 func AheadBehind(repo, reference string) (ahead, behind int, err error) {
