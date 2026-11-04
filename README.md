@@ -237,7 +237,9 @@ satisfy the same anchor rule as a typed path. Any `IFS`, arithmetic (`(( ))`,
 `let`), control keyword, function, group, subshell, `eval`, `source`, `.`,
 `read`, `unset`, `declare`, `for` and similar words, `printf -v` or
 `${NAME:=x}` empties the table and stops all expansion for the rest of the
-command; `NAME+=`/`NAME[i]=` drop that name. The table holds at most `ACHTA_HOOK_CD_MAX_VARIABLES`
+command; `NAME+=`/`NAME[i]=` drop that name. The shell assigns left to right, so a
+statement that assigns a name it also reads (`D=/x; D="$D"/y`), or assigns two
+or more names (`D= E="$D"`), forgets every name it assigns or reads. The table holds at most `ACHTA_HOOK_CD_MAX_VARIABLES`
 names (default 64) of at most `ACHTA_HOOK_CD_MAX_VALUE_BYTES` bytes each
 (default 4096); one statement gains at most the product of the two by
 expansion. Past a bound the hook stops expanding and denies. Each denial's

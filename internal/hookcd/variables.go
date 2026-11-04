@@ -110,6 +110,64 @@ func (v *variables) screen(statement string, words []string) {
 			return
 		}
 	}
+	v.forgetOrderDependent(statement, words)
+}
+
+// forgetOrderDependent drops the names whose value the shell reads in an order
+// the hook does not follow. The shell assigns left to right, so in
+// `D= E="$D"` E gets the new D, while the hook expands the whole statement
+// against the table as it stood before it. It fails closed, without modelling
+// the order: a name the statement both assigns and reads is forgotten, and a
+// statement with two or more assignment words forgets every name it assigns or
+// reads.
+func (v *variables) forgetOrderDependent(statement string, words []string) {
+	var targets []string
+	assignments := 0
+	for _, word := range words {
+		if name := compoundTarget(word); name != "" {
+			targets = append(targets, name)
+			assignments++
+		}
+	}
+	if assignments == 0 {
+		return
+	}
+	reads := referencedNames(statement)
+	for _, name := range targets {
+		if assignments > 1 || contains(reads, name) {
+			delete(v.values, name)
+		}
+	}
+	if assignments > 1 {
+		for _, name := range reads {
+			delete(v.values, name)
+		}
+	}
+}
+
+// referencedNames lists every $NAME and ${NAME... in the statement, whether
+// quoted, escaped or not: a reference the hook would not expand is still a
+// reason to doubt the name.
+func referencedNames(statement string) []string {
+	var names []string
+	runes := []rune(statement)
+	for index := range runes {
+		if runes[index] != '$' {
+			continue
+		}
+		start := index + 1
+		if start < len(runes) && runes[start] == '{' {
+			start++
+		}
+		end := start
+		for end < len(runes) && nameRune(runes[end], end == start) {
+			end++
+		}
+		if end > start {
+			names = append(names, string(runes[start:end]))
+		}
+	}
+	return names
 }
 
 // structuralWords start a compound command or declare a function. The hook

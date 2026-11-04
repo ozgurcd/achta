@@ -14,7 +14,9 @@ The cd hook now expands variables and stops refusing its own advice (ACH-05):
   fail-closed: an assignment after `&&`/`||` or inside `if`/`while`/`case`, a
   function, a group or a subshell, an unquoted use, `IFS`, arithmetic (`(( ))`,
   `let`), `export`, `eval`, `source`, `read`, `unset`, `for`, `printf -v`,
-  `NAME+=` and similar words deny exactly as before. The anchor rule is
+  `NAME+=` and similar words deny exactly as before. The shell assigns left
+  to right, so a statement that assigns a name it also reads, or assigns two or
+  more names (`D= E="$D"`), forgets every name it assigns or reads. The anchor rule is
   unchanged: a value outside the leading cd, a relative or unknown value, a
   single-quoted or escaped reference and a prefix assignment still deny;
 - the table is bounded by `ACHTA_HOOK_CD_MAX_VARIABLES` (default 64) and

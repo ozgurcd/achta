@@ -139,6 +139,26 @@ func TestVariableExpansionTable(t *testing.T) {
 		{"review F3 arithmetic quoted use", `D=/abs/repo; ((D=5)); git -C "$D" commit -m x`, Deny},
 		{"review F3 let", `D=/abs/repo; let D=5; git -C "$D" commit -m x`, Deny},
 		{"review F3 let unquoted", `D=/abs/repo; let D=5; git -C $D commit -m x`, Deny},
+
+		// Review round 2 N1: bash assigns left to right, so a later assignment in
+		// one statement reads the NEW value of an earlier one. The hook expands
+		// with the table as it stood before the statement.
+		{"review N1 reset then copy", `D=/Users/x/r; D= E="$D"; git -C "$E" commit -m x`, Deny},
+		{"review N1 reset then copy under cd", "cd /Users/x/r\nD=/abs/ok; D= E=\"$D\"\ncd \"$E\"\ngit commit -m x", Deny},
+		{"review N1 set then copy", `D=x E=$D; git -C "$E" commit -m x`, Deny},
+		{"review N1 set then quoted copy", `D=/abs/a E="$D"; git -C "$E" commit -m x`, Deny},
+		{"review N1 set then quoted copy of old value", `D=/abs/old; D=/abs/new E="$D"; git -C "$E" commit -m x`, Deny},
+		{"review N1 copy then set", `D=/abs/old; E="$D" D=/abs/new; git -C "$E" commit -m x`, Deny},
+		{"review N1 copy then set, target holds the new literal", `D=/abs/old; E="$D" D=/abs/new; git -C "$D" commit -m x`, Allow},
+		{"review N1 unrelated pair keeps the table", `A=/abs/a; B=/abs/b C=/abs/c; git -C "$A" commit -m x`, Allow},
+		{"review N1 pair then use", `A=/abs/a B=/abs/b; git -C "$B" commit -m x`, Allow},
+		{"review N1 export multi-assign", `D=/abs/ok; export D= E="$D"; git -C "$E" commit -m x`, Deny},
+		{"review N1 export multi-assign after set", `export D= E=$D; git -C "$E" commit -m x`, Deny},
+		{"review N1 local multi-assign", `D=/abs/ok; local D= E="$D"; git -C "$E" commit -m x`, Deny},
+		{"review N1 declare multi-assign", `D=/abs/ok; declare D= E="$D"; git -C "$E" commit -m x`, Deny},
+		{"review N1 declare multi-assign use of target", `D=/abs/ok; declare D=/abs/other E="$D"; git -C "$D" commit -m x`, Deny},
+		{"review N1 self reference", `D=/abs/ok; D="$D"/sub; git -C "$D" commit -m x`, Deny},
+		{"review N1 prefix assignment reads target", `D=/abs/ok; D=/abs/new git -C "$D" commit -m x`, Deny},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) { assertHookCommand(t, test.command, test.want) })
