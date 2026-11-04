@@ -522,7 +522,12 @@ upstream, and the check detail names that source. The wiki page is selected by
 the main repository's directory name, not the worktree's, and its pin is judged
 against the HEAD of the repository passed to `--repo`. `--upstream REF` names
 the comparison reference explicitly and `--repo-name NAME` names the wiki page
-explicitly; an unresolvable reference or unknown page stays `cannot_evaluate`.
+explicitly. Both are validated: `--repo-name` must equal the repository's own
+identity (the main repository's directory name; a mismatch names both), and
+`--upstream` must be a remote-tracking ref (`refs/remotes/...`) or a commit id
+that is not HEAD and not a descendant of it, since HEAD, relative revisions and
+local branches would make ahead and ancestry hold trivially. An unresolvable or
+refused value stays `cannot_evaluate`.
 
 `amendments declare` records human intent; it never infers a declaration.
 `amendments rebase` selects the newest reachable commit with the accepted

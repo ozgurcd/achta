@@ -222,13 +222,7 @@ func Run(options Options) Result {
 // names which one was used.
 func resolveUpstream(repo, explicit string) (string, string, error) {
 	if explicit != "" {
-		if strings.HasPrefix(explicit, "-") || strings.ContainsAny(explicit, "\r\n\x00") {
-			return "", "", errors.New("--upstream must be a Git reference")
-		}
-		if _, err := gitstate.ResolveCommit(repo, explicit); err != nil {
-			return "", "", fmt.Errorf("resolve --upstream %s: %w", explicit, err)
-		}
-		return explicit, "upstream is " + explicit + " (explicit)", nil
+		return explicitUpstream(repo, explicit)
 	}
 	upstream, err := gitstate.Upstream(repo)
 	if err == nil {
@@ -247,6 +241,48 @@ func resolveUpstream(repo, explicit string) (string, string, error) {
 	return "", "", fmt.Errorf("%w; main repository %s has no usable upstream either (pass --upstream REF to name the comparison reference)", err, filepath.Base(canonical))
 }
 
+// commitIDPattern is an explicit commit id: abbreviated or full, lowercase hex.
+var commitIDPattern = regexp.MustCompile(`^[0-9a-f]{7,64}$`)
+
+// explicitUpstream accepts an explicit comparison only when it can disprove a
+// landed slice: a remote-tracking reference, or a commit id that is neither HEAD
+// nor a descendant of it. HEAD, relative revisions and local branches make the
+// ahead and ancestry checks hold for any unpushed slice, so they are refused.
+func explicitUpstream(repo, explicit string) (string, string, error) {
+	if strings.HasPrefix(explicit, "-") || strings.ContainsAny(explicit, "\r\n\x00") {
+		return "", "", errors.New("--upstream must be a Git reference")
+	}
+	commit, err := gitstate.ResolveCommit(repo, explicit)
+	if err != nil {
+		return "", "", fmt.Errorf("resolve --upstream %s: %w", explicit, err)
+	}
+	remote, err := gitstate.IsRemoteTracking(repo, explicit)
+	if err != nil {
+		return "", "", fmt.Errorf("classify --upstream %s: %w", explicit, err)
+	}
+	if remote {
+		return explicit, fmt.Sprintf("upstream is %s (explicit remote-tracking ref at %s)", explicit, commit), nil
+	}
+	if !commitIDPattern.MatchString(explicit) {
+		return "", "", fmt.Errorf("--upstream %q is neither a remote-tracking ref (such as origin/main) nor an explicit commit id; HEAD, relative revisions and local branches make the ahead and ancestry checks trivial", explicit)
+	}
+	head, err := gitstate.Head(repo)
+	if err != nil {
+		return "", "", fmt.Errorf("resolve HEAD: %w", err)
+	}
+	if commit == head {
+		return "", "", fmt.Errorf("--upstream %s is HEAD; the ahead and ancestry checks would be trivial", explicit)
+	}
+	descendant, err := gitstate.HeadIsAncestorOf(repo, commit)
+	if err != nil {
+		return "", "", fmt.Errorf("compare --upstream %s with HEAD: %w", explicit, err)
+	}
+	if descendant {
+		return "", "", fmt.Errorf("--upstream %s is a descendant of HEAD; the ahead and ancestry checks would be trivial", explicit)
+	}
+	return commit, fmt.Sprintf("upstream is %s (explicit commit)", commit), nil
+}
+
 func sameDirectory(a, b string) bool {
 	left, leftErr := os.Stat(a)
 	right, rightErr := os.Stat(b)
@@ -256,11 +292,18 @@ func sameDirectory(a, b string) bool {
 // freshnessFor selects the wiki page by the explicit name, else by the name of
 // the main repository, so a linked worktree finds its repository's page.
 func freshnessFor(options Options) (achtawiki.FreshnessResult, error) {
-	name := options.RepoName
-	if name == "" {
-		name = filepath.Base(options.Repository)
-		if canonical, err := gitstate.CanonicalRepository(options.Repository); err == nil {
-			name = filepath.Base(canonical)
+	name := filepath.Base(options.Repository)
+	canonical, canonicalErr := gitstate.CanonicalRepository(options.Repository)
+	if canonicalErr == nil {
+		name = filepath.Base(canonical)
+	}
+	if options.RepoName != "" {
+		// An override only confirms the identity git reports; it cannot name another repository's page.
+		if canonicalErr != nil {
+			return achtawiki.FreshnessResult{}, fmt.Errorf("--repo-name %q cannot be verified against the repository identity: %w", options.RepoName, canonicalErr)
+		}
+		if options.RepoName != name {
+			return achtawiki.FreshnessResult{}, fmt.Errorf("--repo-name %q does not match the repository identity %q (main repository %s)", options.RepoName, name, canonical)
 		}
 	}
 	return achtawiki.FreshnessRepositoryNamed(options.Workspace, options.Repository, name)

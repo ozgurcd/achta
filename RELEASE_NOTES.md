@@ -33,8 +33,11 @@ leading one still loses the anchor.
 worktree branch with no upstream of its own is compared with the main
 repository's upstream, and the wiki page is found by the main repository's
 name instead of the worktree directory's. New `--upstream REF` and
-`--repo-name NAME` flags set both explicitly. Checks that cannot be resolved
-remain `cannot_evaluate`.
+`--repo-name NAME` flags set both explicitly, and both are validated:
+`--repo-name` must equal the repository's own identity (the main repository's
+directory name), and `--upstream` must be a remote-tracking ref or a commit id
+that is neither HEAD nor a descendant of it, so a check never passes trivially.
+Checks that cannot be resolved remain `cannot_evaluate`.
 
 ## v0.5.22 — 2026-11-03
 

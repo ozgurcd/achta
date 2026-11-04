@@ -132,6 +132,41 @@ func CanonicalRepository(repo string) (string, error) {
 	return filepath.Dir(common), nil
 }
 
+// IsRemoteTracking reports whether revision names a remote-tracking reference
+// (refs/remotes/...). A commit id, HEAD and a local branch are not.
+func IsRemoteTracking(repo, revision string) (bool, error) {
+	if strings.TrimSpace(revision) == "" || strings.HasPrefix(revision, "-") || strings.ContainsAny(revision, "\r\n\x00") {
+		return false, errors.New("invalid revision")
+	}
+	out, err := run(repo, nil, "rev-parse", "--symbolic-full-name", revision)
+	if err != nil {
+		return false, err
+	}
+	for _, line := range strings.Split(out, "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "refs/remotes/") {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// HeadIsAncestorOf reports whether HEAD is the given commit or an ancestor of
+// it, that is, whether the commit is HEAD or a descendant of HEAD.
+func HeadIsAncestorOf(repo, commit string) (bool, error) {
+	if !validSHA(commit) {
+		return false, errors.New("commit must be a full lowercase Git SHA")
+	}
+	_, err := run(repo, nil, "merge-base", "--is-ancestor", "HEAD", commit)
+	if err == nil {
+		return true, nil
+	}
+	var commandErr *CommandError
+	if errors.As(err, &commandErr) && commandErr.ExitCode == 1 {
+		return false, nil
+	}
+	return false, err
+}
+
 // AheadBehind compares HEAD with a local reference. It performs no fetch and
 // therefore describes only the checked-out repository's remote-tracking state.
 func AheadBehind(repo, reference string) (ahead, behind int, err error) {
