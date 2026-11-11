@@ -2,7 +2,7 @@
 
 Release changes are recorded under their exact version, newest first.
 
-## Unreleased
+## v0.5.24 — 2026-11-11
 
 `witness summarize` now says which targets failed and which did not run, not
 only how many:

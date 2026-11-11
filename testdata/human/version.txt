@@ -1,1 +1,1 @@
-achta v0.5.23 (module v0.5.23, agreement pass)
+achta v0.5.24 (module v0.5.24, agreement pass)

@@ -1,6 +1,6 @@
 # Achta Project Specification
 
-Status: v0.5.23 release specification; authorized future scope in §3.1 is not shipped
+Status: v0.5.24 release specification; authorized future scope in §3.1 is not shipped
 
 Project name: Achta
 

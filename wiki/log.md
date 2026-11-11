@@ -1170,3 +1170,12 @@ byte-identical when none are missing. New rule WITNESS-MISSING-NAMES-1 is armed
 with a mutation proof; the floor is 67. CHANGELOG and RELEASE_NOTES gain an
 Unreleased section for both arrays and state that an absent key means "not
 reported".
+
+## [2026-11-11] release | ACHTA-WITNESS-FAILED-NAMES v0.5.24 prep
+
+Prepare v0.5.24 for the witness summary `failed_target_names` and
+`missing_target_names` arrays. Update the source Version, CLI testVersion and
+the four exact human and machine version and capability fixtures; CHANGELOG and
+RELEASE_NOTES record both arrays under v0.5.24. The newest tag on origin was
+v0.5.23. The owner merges and tags; the tag workflow publishes the Homebrew
+cask.

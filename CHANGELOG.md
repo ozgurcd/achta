@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.5.24 — 2026-11-11
 
 `witness summarize` names the targets behind its counts. The
 `achta.witness-summary.v1` document gains two optional arrays:
