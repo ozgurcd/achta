@@ -1143,3 +1143,39 @@ owner merges, tags and installs; the tag workflow publishes the Homebrew cask.
 ## [2026-11-04] release | ACHTA-RELEASE-V0523-1104
 
 Prepare v0.5.23 for the ACH-05 cd hook variable expansion and the WIKI-01 slice check worktree identity fixes. Update the source Version, CLI testVersion and the four exact human and machine version and capability fixtures; CHANGELOG and RELEASE_NOTES describe both changes. The owner merges and tags; the tag workflow publishes the Homebrew cask.
+
+## [2026-11-11] feature | ACHTA-WITNESS-FAILED-NAMES
+
+`witness summarize` reported failed targets as a count only, so a consumer had
+to parse the gate-run.v1 record again to learn which target failed.
+`achta.witness-summary.v1` gains the optional array `failed_target_names`:
+each planned target with a non-zero recorded exit code, once, in plan order,
+empty when nothing failed. Missing targets are not listed. The embedded summary
+of `achta.witness-check.v1` carries the same field. Human output names the
+failed targets after the failed count and is byte-identical when nothing
+failed. Status, completeness, freshness, counts and exit codes are unchanged;
+the schema stays v1. The parser already refuses a repeated target, an unplanned
+target and a repeated plan name, so each name appears once. New rule
+WITNESS-FAILED-NAMES-1 is armed with a mutation proof; the floor is 66. Source
+version stays v0.5.23; the changelog entry belongs to the next release.
+
+## [2026-11-11] feature | ACHTA-WITNESS-FAILED-NAMES missing names
+
+Owner answer to Q1: name the missing targets too, on the same branch.
+`achta.witness-summary.v1` gains the optional array `missing_target_names`
+after `failed_target_names`: each planned target with no recorded result, once,
+in plan order, empty when nothing is missing; `missing_targets` equals its
+length. Human output names them after the missing count and stays
+byte-identical when none are missing. New rule WITNESS-MISSING-NAMES-1 is armed
+with a mutation proof; the floor is 67. CHANGELOG and RELEASE_NOTES gain an
+Unreleased section for both arrays and state that an absent key means "not
+reported".
+
+## [2026-11-11] release | ACHTA-WITNESS-FAILED-NAMES v0.5.24 prep
+
+Prepare v0.5.24 for the witness summary `failed_target_names` and
+`missing_target_names` arrays. Update the source Version, CLI testVersion and
+the four exact human and machine version and capability fixtures; CHANGELOG and
+RELEASE_NOTES record both arrays under v0.5.24. The newest tag on origin was
+v0.5.23. The owner merges and tags; the tag workflow publishes the Homebrew
+cask.

@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/ozgurcd/achta/internal/safefile"
 	"github.com/ozgurcd/achta/internal/witness"
@@ -84,7 +85,15 @@ func runWitnessSummarize(rest []string, stdout, stderr io.Writer, opts globalOpt
 }
 
 func renderWitnessSummaryHuman(output io.Writer, recordName string, summary witness.Summary) {
-	fmt.Fprintf(output, "witness %s: %s, %s, %s; targets %d planned/%d passed/%d failed/%d missing\n", recordName, summary.Status, summary.Completeness, summary.Freshness, summary.PlannedTargets, summary.PassedTargets, summary.FailedTargets, summary.MissingTargets)
+	failedNames := ""
+	if len(summary.FailedTargetNames) > 0 {
+		failedNames = " (" + strings.Join(summary.FailedTargetNames, ", ") + ")"
+	}
+	missingNames := ""
+	if len(summary.MissingTargetNames) > 0 {
+		missingNames = " (" + strings.Join(summary.MissingTargetNames, ", ") + ")"
+	}
+	fmt.Fprintf(output, "witness %s: %s, %s, %s; targets %d planned/%d passed/%d failed%s/%d missing%s\n", recordName, summary.Status, summary.Completeness, summary.Freshness, summary.PlannedTargets, summary.PassedTargets, summary.FailedTargets, failedNames, summary.MissingTargets, missingNames)
 	for _, target := range summary.SlowTargets {
 		fmt.Fprintf(output, "  %s: %dms\n", target.Name, target.ElapsedMS)
 	}

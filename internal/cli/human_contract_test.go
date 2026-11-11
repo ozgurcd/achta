@@ -62,6 +62,42 @@ func TestPhaseOneHumanContracts(t *testing.T) {
 		})
 		assertHumanGolden(t, "witness-summary.txt", output.String())
 	})
+	t.Run("witness summary names failed targets", func(t *testing.T) {
+		var output bytes.Buffer
+		renderWitnessSummaryHuman(&output, "GATE-RUN.txt", witness.Summary{
+			Status:            "red",
+			Completeness:      "complete",
+			Freshness:         "current",
+			PlannedTargets:    3,
+			PassedTargets:     1,
+			FailedTargets:     2,
+			FailedTargetNames: []string{"vet", "build"},
+			SlowTargets:       []witness.SlowTarget{},
+		})
+		want := "witness GATE-RUN.txt: red, complete, current; targets 3 planned/1 passed/2 failed (vet, build)/0 missing\n"
+		if output.String() != want {
+			t.Fatalf("human summary = %q, want %q", output.String(), want)
+		}
+	})
+	t.Run("witness summary names missing targets", func(t *testing.T) {
+		var output bytes.Buffer
+		renderWitnessSummaryHuman(&output, "GATE-RUN.txt", witness.Summary{
+			Status:             "red",
+			Completeness:       "incomplete",
+			Freshness:          "current",
+			PlannedTargets:     4,
+			PassedTargets:      1,
+			FailedTargets:      1,
+			MissingTargets:     2,
+			FailedTargetNames:  []string{"vet"},
+			MissingTargetNames: []string{"test", "lint"},
+			SlowTargets:        []witness.SlowTarget{},
+		})
+		want := "witness GATE-RUN.txt: red, incomplete, current; targets 4 planned/1 passed/1 failed (vet)/2 missing (test, lint)\n"
+		if output.String() != want {
+			t.Fatalf("human summary = %q, want %q", output.String(), want)
+		}
+	})
 }
 
 func assertHumanGolden(t *testing.T, name, got string) {
