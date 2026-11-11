@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+`witness summarize` names the targets behind its counts. The
+`achta.witness-summary.v1` document gains two optional arrays:
+`failed_target_names` lists each planned target with a non-zero recorded exit
+code, and `missing_target_names` lists each planned target with no recorded
+result. Both are in plan order, are always present, and are empty when they
+have nothing to name; `failed_targets` and `missing_targets` equal their
+lengths. The summary embedded in `achta.witness-check.v1` carries both. Human
+output names the targets after each count and is byte-identical when nothing
+failed and nothing is missing. Status, completeness, freshness, counts and exit
+codes are unchanged and the schema stays v1. An older Achta omits both keys: a
+consumer must treat an absent key as "not reported".
+
 ## v0.5.23 — 2026-11-04
 
 The cd hook expands variables assigned earlier in the same command to a literal

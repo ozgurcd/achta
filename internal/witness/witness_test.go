@@ -170,6 +170,72 @@ func TestSummarizeFailedTargetNames(t *testing.T) {
 	}
 }
 
+// RULE: WITNESS-MISSING-NAMES-1
+func TestSummarizeMissingTargetNames(t *testing.T) {
+	repo := t.TempDir()
+	runWitnessGit(t, repo, "init", "-b", "main")
+	runWitnessGit(t, repo, "config", "user.name", "Achta Test")
+	runWitnessGit(t, repo, "config", "user.email", "achta@example.invalid")
+	if err := os.WriteFile(filepath.Join(repo, "tracked.txt"), []byte("tracked\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	runWitnessGit(t, repo, "add", "tracked.txt")
+	runWitnessGit(t, repo, "commit", "-m", "base")
+	recordPath := filepath.Join(repo, "GATE-RUN.txt")
+	for _, tc := range []struct {
+		name   string
+		record string
+		want   []string
+		raw    string
+	}{
+		{
+			name:   "plan order, failed not listed",
+			record: "schema: gate-run.v1\nplan: delta gamma alpha beta\ntarget: gamma exit=1\ntarget: alpha exit=0\n",
+			want:   []string{"delta", "beta"},
+			raw:    `"failed_targets":1,"missing_targets":2,"slow_targets":[],"failed_target_names":["gamma"],"missing_target_names":["delta","beta"]}`,
+		},
+		{
+			name:   "nothing missing",
+			record: "schema: gate-run.v1\nplan: gamma alpha\ntarget: alpha exit=0\ntarget: gamma exit=3\n",
+			want:   []string{},
+			raw:    `"failed_targets":1,"missing_targets":0,"slow_targets":[],"failed_target_names":["gamma"],"missing_target_names":[]}`,
+		},
+		{
+			name:   "nothing recorded",
+			record: "schema: gate-run.v1\nplan: gamma alpha\n",
+			want:   []string{"gamma", "alpha"},
+			raw:    `"failed_targets":0,"missing_targets":2,"slow_targets":[],"failed_target_names":[],"missing_target_names":["gamma","alpha"]}`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			record, err := Parse([]byte(tc.record))
+			if err != nil {
+				t.Fatal(err)
+			}
+			summary, err := Summarize(record, repo, recordPath, "", 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if summary.MissingTargetNames == nil || !slices.Equal(summary.MissingTargetNames, tc.want) {
+				t.Fatalf("missing target names = %#v, want %#v", summary.MissingTargetNames, tc.want)
+			}
+			if summary.MissingTargets != len(summary.MissingTargetNames) {
+				t.Fatalf("missing_targets = %d, names = %d", summary.MissingTargets, len(summary.MissingTargetNames))
+			}
+			if summary.PassedTargets+summary.FailedTargets+summary.MissingTargets != summary.PlannedTargets {
+				t.Fatalf("counts do not sum to the plan: %+v", summary)
+			}
+			encoded, err := json.Marshal(summary)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.HasSuffix(string(encoded), tc.raw) {
+				t.Fatalf("document = %s, want it to end with %s", encoded, tc.raw)
+			}
+		})
+	}
+}
+
 func TestParseRefusesRepeatedAndUnplannedTargets(t *testing.T) {
 	for name, record := range map[string]string{
 		"target recorded twice":     "schema: gate-run.v1\nplan: one two\ntarget: one exit=1\ntarget: one exit=1\n",

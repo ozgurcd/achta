@@ -89,7 +89,11 @@ func renderWitnessSummaryHuman(output io.Writer, recordName string, summary witn
 	if len(summary.FailedTargetNames) > 0 {
 		failedNames = " (" + strings.Join(summary.FailedTargetNames, ", ") + ")"
 	}
-	fmt.Fprintf(output, "witness %s: %s, %s, %s; targets %d planned/%d passed/%d failed%s/%d missing\n", recordName, summary.Status, summary.Completeness, summary.Freshness, summary.PlannedTargets, summary.PassedTargets, summary.FailedTargets, failedNames, summary.MissingTargets)
+	missingNames := ""
+	if len(summary.MissingTargetNames) > 0 {
+		missingNames = " (" + strings.Join(summary.MissingTargetNames, ", ") + ")"
+	}
+	fmt.Fprintf(output, "witness %s: %s, %s, %s; targets %d planned/%d passed/%d failed%s/%d missing%s\n", recordName, summary.Status, summary.Completeness, summary.Freshness, summary.PlannedTargets, summary.PassedTargets, summary.FailedTargets, failedNames, summary.MissingTargets, missingNames)
 	for _, target := range summary.SlowTargets {
 		fmt.Fprintf(output, "  %s: %dms\n", target.Name, target.ElapsedMS)
 	}

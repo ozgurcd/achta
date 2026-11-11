@@ -1158,3 +1158,15 @@ the schema stays v1. The parser already refuses a repeated target, an unplanned
 target and a repeated plan name, so each name appears once. New rule
 WITNESS-FAILED-NAMES-1 is armed with a mutation proof; the floor is 66. Source
 version stays v0.5.23; the changelog entry belongs to the next release.
+
+## [2026-11-11] feature | ACHTA-WITNESS-FAILED-NAMES missing names
+
+Owner answer to Q1: name the missing targets too, on the same branch.
+`achta.witness-summary.v1` gains the optional array `missing_target_names`
+after `failed_target_names`: each planned target with no recorded result, once,
+in plan order, empty when nothing is missing; `missing_targets` equals its
+length. Human output names them after the missing count and stays
+byte-identical when none are missing. New rule WITNESS-MISSING-NAMES-1 is armed
+with a mutation proof; the floor is 67. CHANGELOG and RELEASE_NOTES gain an
+Unreleased section for both arrays and state that an absent key means "not
+reported".

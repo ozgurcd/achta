@@ -686,6 +686,12 @@ Behavior:
   A planned target with no recorded result is missing, not failed, and is not
   named. Human output names the failed targets after the failed count, as
   `N failed (name, name)`, and is unchanged when nothing failed.
+- Name every missing target in `missing_target_names`: each planned target
+  with no recorded result, once, in plan order. The array is always present
+  and is empty when nothing is missing. `missing_targets` equals its length.
+  A failed target is not named there. Human output names the missing targets
+  after the missing count, as `N missing (name, name)`, and is unchanged when
+  nothing is missing.
 - Report record start, finish, and wall elapsed when both valid timestamps are
   present.
 - Report the sum of recorded target durations separately from wall elapsed.
@@ -715,12 +721,14 @@ The JSON schema is `achta.witness-summary.v1` and contains at minimum:
   "wall_elapsed_ms": 1000,
   "recorded_target_elapsed_ms": 900,
   "slow_targets": [],
-  "failed_target_names": []
+  "failed_target_names": [],
+  "missing_target_names": []
 }
 ```
 
-`failed_target_names` is an optional addition to v1. A consumer that needs it
-must treat its absence as "not reported", not as "nothing failed".
+`failed_target_names` and `missing_target_names` are optional additions to v1.
+A consumer that reads an older Achta must treat an absent key as "not
+reported", not as "nothing failed" or "nothing missing".
 
 Unknown time values must be omitted or explicitly null according to the final
 schema fixture. They must never be written as zero if zero was not measured.

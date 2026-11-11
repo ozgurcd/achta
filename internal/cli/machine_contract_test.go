@@ -66,6 +66,7 @@ func assertStableMachineContracts(t *testing.T) {
 				RecordedTargetElapsedMS: &fixtureMS,
 				SlowTargets:             []witness.SlowTarget{{Name: "verify", ElapsedMS: 1000}},
 				FailedTargetNames:       []string{},
+				MissingTargetNames:      []string{},
 			},
 		},
 		{
@@ -179,6 +180,7 @@ func assertStableMachineContracts(t *testing.T) {
 					RecordedTargetElapsedMS: &targetMS,
 					SlowTargets:             []witness.SlowTarget{{Name: "test", ElapsedMS: 12}},
 					FailedTargetNames:       []string{},
+					MissingTargetNames:      []string{},
 				},
 			},
 		},

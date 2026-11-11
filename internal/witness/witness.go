@@ -83,6 +83,7 @@ type Summary struct {
 	RecordedTargetElapsedMS *int64       `json:"recorded_target_elapsed_ms,omitempty"`
 	SlowTargets             []SlowTarget `json:"slow_targets"`
 	FailedTargetNames       []string     `json:"failed_target_names"`
+	MissingTargetNames      []string     `json:"missing_target_names"`
 }
 
 func Parse(data []byte) (Record, error) {
@@ -260,7 +261,7 @@ func Summarize(record Record, repo, recordPath, requireHead string, slowest int)
 	if requireHead != "" && (!shaPattern.MatchString(requireHead) || requireHead != head) {
 		return Summary{}, errors.New("required HEAD does not match repository HEAD")
 	}
-	summary := Summary{SchemaVersion: "achta.witness-summary.v1", RecordSchemaVersion: Schema, RepositoryHead: head, SlowTargets: []SlowTarget{}, FailedTargetNames: []string{}, PlannedTargets: len(record.Plan), RecordedTargets: len(record.Targets)}
+	summary := Summary{SchemaVersion: "achta.witness-summary.v1", RecordSchemaVersion: Schema, RepositoryHead: head, SlowTargets: []SlowTarget{}, FailedTargetNames: []string{}, MissingTargetNames: []string{}, PlannedTargets: len(record.Plan), RecordedTargets: len(record.Targets)}
 	recordedHeadMatches := false
 	if record.RepoHead != "" {
 		if resolved, resolveErr := gitstate.ResolveCommit(repo, record.RepoHead); resolveErr == nil {
@@ -272,6 +273,7 @@ func Summarize(record Record, repo, recordPath, requireHead string, slowest int)
 		exitCode, ok := record.Targets[name]
 		if !ok {
 			summary.MissingTargets++
+			summary.MissingTargetNames = append(summary.MissingTargetNames, name)
 			continue
 		}
 		if exitCode == 0 {

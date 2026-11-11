@@ -2,6 +2,25 @@
 
 Release changes are recorded under their exact version, newest first.
 
+## Unreleased
+
+`witness summarize` now says which targets failed and which did not run, not
+only how many:
+
+- `achta.witness-summary.v1` gains `failed_target_names` (each planned target
+  with a non-zero recorded exit code) and `missing_target_names` (each planned
+  target with no recorded result). Both arrays are in plan order, are always
+  present, and are empty when they have nothing to name. `failed_targets` and
+  `missing_targets` always equal their lengths. The summary inside
+  `achta.witness-check.v1` carries the same two arrays;
+- human output names the targets after each count, for example
+  `1 failed (vet)/2 missing (test, lint)`, and is byte-identical when nothing
+  failed and nothing is missing;
+- status, completeness, freshness, the counts and the exit codes do not change,
+  and the schema stays v1. Both keys are optional additions: an older Achta
+  omits them, so a consumer must treat an absent key as "not reported", never
+  as "nothing failed" or "nothing missing".
+
 ## v0.5.23 — 2026-11-04
 
 The cd hook now expands variables and stops refusing its own advice (ACH-05):

@@ -488,8 +488,11 @@ replacement. Achta still executes neither implementation.
 `witness summarize` treats wall elapsed time and summed target elapsed time as
 different measurements. Missing timing remains absent. Green, red,
 incomplete, malformed, unsupported, and stale records remain distinguishable.
-The summary names each failed target in `failed_target_names`, in plan order;
-the array is empty when nothing failed and never lists a missing target.
+The summary names each failed target in `failed_target_names` and each planned
+target with no recorded result in `missing_target_names`, both in plan order.
+Each array is always present, is empty when it has nothing to name, and never
+lists a target of the other kind. An older Achta omits both keys; treat an
+absent key as "not reported".
 
 `witness init`, `step`, `finalize`, and `check` maintain the same canonical
 record format. Optional sibling pins are parsed and singleton-guarded. A changed
