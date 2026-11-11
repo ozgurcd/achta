@@ -680,6 +680,12 @@ Behavior:
 - Parse and validate the witness schema before summarizing.
 - Compare its repository/tree tie with the selected current repository.
 - Report planned, recorded, passed, failed, and missing target counts.
+- Name every failed target in `failed_target_names`: each planned target whose
+  recorded exit code is non-zero, once, in plan order. The array is always
+  present and is empty when nothing failed. `failed_targets` equals its length.
+  A planned target with no recorded result is missing, not failed, and is not
+  named. Human output names the failed targets after the failed count, as
+  `N failed (name, name)`, and is unchanged when nothing failed.
 - Report record start, finish, and wall elapsed when both valid timestamps are
   present.
 - Report the sum of recorded target durations separately from wall elapsed.
@@ -708,9 +714,13 @@ The JSON schema is `achta.witness-summary.v1` and contains at minimum:
   "finished_at": "RFC3339",
   "wall_elapsed_ms": 1000,
   "recorded_target_elapsed_ms": 900,
-  "slow_targets": []
+  "slow_targets": [],
+  "failed_target_names": []
 }
 ```
+
+`failed_target_names` is an optional addition to v1. A consumer that needs it
+must treat its absence as "not reported", not as "nothing failed".
 
 Unknown time values must be omitted or explicitly null according to the final
 schema fixture. They must never be written as zero if zero was not measured.

@@ -1,9 +1,11 @@
 package witness
 
 import (
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -94,6 +96,89 @@ func TestSummarizeMissingTimeOrderingAndBounds(t *testing.T) {
 	for _, limit := range []int{-1, 101} {
 		if _, err := Summarize(record, repo, filepath.Join(repo, "GATE-RUN.txt"), "", limit); err == nil {
 			t.Fatalf("slowest limit %d accepted", limit)
+		}
+	}
+}
+
+// RULE: WITNESS-FAILED-NAMES-1
+func TestSummarizeFailedTargetNames(t *testing.T) {
+	repo := t.TempDir()
+	runWitnessGit(t, repo, "init", "-b", "main")
+	runWitnessGit(t, repo, "config", "user.name", "Achta Test")
+	runWitnessGit(t, repo, "config", "user.email", "achta@example.invalid")
+	if err := os.WriteFile(filepath.Join(repo, "tracked.txt"), []byte("tracked\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	runWitnessGit(t, repo, "add", "tracked.txt")
+	runWitnessGit(t, repo, "commit", "-m", "base")
+	recordPath := filepath.Join(repo, "GATE-RUN.txt")
+	for _, tc := range []struct {
+		name   string
+		record string
+		want   []string
+		status string
+		raw    string
+	}{
+		{
+			name:   "plan order, negative exit, missing not listed",
+			record: "schema: gate-run.v1\nplan: gamma alpha beta delta\ntarget: beta exit=-2\ntarget: alpha exit=0\ntarget: gamma exit=1\n",
+			want:   []string{"gamma", "beta"},
+			status: "red",
+			raw:    `"failed_targets":2,"missing_targets":1,"slow_targets":[],"failed_target_names":["gamma","beta"]`,
+		},
+		{
+			name:   "nothing failed",
+			record: "schema: gate-run.v1\nplan: gamma alpha\ntarget: alpha exit=0\ntarget: gamma exit=0\n",
+			want:   []string{},
+			status: "incomplete",
+			raw:    `"failed_targets":0,"missing_targets":0,"slow_targets":[],"failed_target_names":[]`,
+		},
+		{
+			name:   "nothing recorded",
+			record: "schema: gate-run.v1\nplan: gamma alpha\n",
+			want:   []string{},
+			status: "incomplete",
+			raw:    `"failed_targets":0,"missing_targets":2,"slow_targets":[],"failed_target_names":[]`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			record, err := Parse([]byte(tc.record))
+			if err != nil {
+				t.Fatal(err)
+			}
+			summary, err := Summarize(record, repo, recordPath, "", 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if summary.FailedTargetNames == nil || !slices.Equal(summary.FailedTargetNames, tc.want) {
+				t.Fatalf("failed target names = %#v, want %#v", summary.FailedTargetNames, tc.want)
+			}
+			if summary.FailedTargets != len(summary.FailedTargetNames) {
+				t.Fatalf("failed_targets = %d, names = %d", summary.FailedTargets, len(summary.FailedTargetNames))
+			}
+			if summary.Status != tc.status {
+				t.Fatalf("status = %q, want %q", summary.Status, tc.status)
+			}
+			encoded, err := json.Marshal(summary)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(string(encoded), tc.raw) {
+				t.Fatalf("document = %s, want it to contain %s", encoded, tc.raw)
+			}
+		})
+	}
+}
+
+func TestParseRefusesRepeatedAndUnplannedTargets(t *testing.T) {
+	for name, record := range map[string]string{
+		"target recorded twice":     "schema: gate-run.v1\nplan: one two\ntarget: one exit=1\ntarget: one exit=1\n",
+		"target not in the plan":    "schema: gate-run.v1\nplan: one\ntarget: two exit=1\n",
+		"target planned twice":      "schema: gate-run.v1\nplan: one one\ntarget: one exit=1\n",
+		"target name outside limit": "schema: gate-run.v1\nplan: one\ntarget: o,ne exit=1\n",
+	} {
+		if _, err := Parse([]byte(record)); err == nil {
+			t.Fatalf("%s: record accepted", name)
 		}
 	}
 }

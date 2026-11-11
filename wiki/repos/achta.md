@@ -3,7 +3,7 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-11-03
+updated: 2026-11-11
 verified: 2026-11-03
 co_versioned: true
 ---
@@ -257,3 +257,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-11-03 | `co-versioned` | TOOL-FAULTS-1103 ACH-03: word the fixed design-limit statements of declared-route check, count check and ledger rows as `not inferred (by design)` in human output; JSON `refused` lists unchanged; a passing-run test fails on the old wording. |
 | 2026-11-03 | `co-versioned` | TOOL-FAULTS-1103 ACH-03: advance source and exact fixtures to v0.5.22 with changelog and release notes for the not-inferred wording; the owner publishes the annotated tag, which releases the Homebrew cask. |
 | 2026-11-04 | `co-versioned` | ACHTA-RELEASE-V0523-1104: advance source and exact fixtures to v0.5.23 with changelog and release notes for the ACH-05 cd hook variable expansion and the WIKI-01 slice check worktree identity; the annotated tag releases the Homebrew cask. |
+| 2026-11-11 | `co-versioned` | ACHTA-WITNESS-FAILED-NAMES: `achta.witness-summary.v1` gains the optional array `failed_target_names` (planned targets with a non-zero recorded exit code, plan order, empty when none); human output names them after the failed count; rule WITNESS-FAILED-NAMES-1 armed with a mutation proof; schema stays v1. |
