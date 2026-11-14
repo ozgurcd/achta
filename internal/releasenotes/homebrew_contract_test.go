@@ -105,21 +105,29 @@ func TestReleaseNotesGateMatchesWorkflowAndRejectsEmptyUnreleased(t *testing.T) 
 		t.Fatal(err)
 	}
 	makeText := string(makefile)
-	for _, required := range []string{
-		"release-notes-check:\n\tgo run ./cmd/release-notes RELEASE_NOTES.md > \"$(RELEASE_NOTES_OUTPUT)\"",
-		"verify: fmt-check release-notes-check",
-	} {
-		if !strings.Contains(makeText, required) {
-			t.Fatalf("Makefile release-note gate is missing %q", required)
-		}
+	if !strings.Contains(makeText, "release-notes-check:\n\tgo run ./cmd/release-notes RELEASE_NOTES.md > \"$(RELEASE_NOTES_OUTPUT)\"") {
+		t.Fatal("Makefile is missing the shared release-note extractor target")
+	}
+	// The release workflow extracts the notes once; make verify does not repeat it.
+	if !strings.Contains(makeText, "\nverify: fmt-check\n") {
+		t.Fatal("make verify must depend on fmt-check only, not on the release-note gate")
 	}
 	workflow, err := os.ReadFile(filepath.Join(repositoryRoot, ".github/workflows/release.yml"))
 	if err != nil {
 		t.Fatal(err)
 	}
+	workflowText := string(workflow)
 	workflowInvocation := "make release-notes-check RELEASE_NOTES_OUTPUT=\"$RUNNER_TEMP/release-notes.md\""
-	if count := strings.Count(string(workflow), workflowInvocation); count != 2 {
-		t.Fatalf("release workflow invokes the shared release-note gate %d times, want 2", count)
+	if count := strings.Count(workflowText, workflowInvocation); count != 1 {
+		t.Fatalf("release workflow invokes the shared release-note gate %d times, want 1", count)
+	}
+	notes := strings.Index(workflowText, workflowInvocation)
+	publish := strings.Index(workflowText, "- name: Publish public GitHub release")
+	if publish < 0 || notes >= publish {
+		t.Fatal("release workflow must extract release notes before publishing the GitHub release")
+	}
+	if strings.Contains(workflowText, "--snapshot") || strings.Contains(workflowText, "make verify") {
+		t.Fatal("release workflow must not repeat verification or build a snapshot before the real release")
 	}
 	if _, err := Extract([]byte("# Notes\n\n## Unreleased\n\n## v0.5.6 — 2026-09-06\n\nBody.\n"), "v0.5.6"); err == nil || err.Error() != "release notes Unreleased section is empty" {
 		t.Fatalf("empty Unreleased error = %v", err)

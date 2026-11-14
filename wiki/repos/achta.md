@@ -3,7 +3,7 @@ title: achta
 category: repo
 status: authoritative
 sources: PROJECT_SPEC.md, README.md, Makefile, RULE-FLOOR.md, RELEASE_NOTES.md
-updated: 2026-11-11
+updated: 2026-11-14
 verified: 2026-11-03
 co_versioned: true
 ---
@@ -138,18 +138,21 @@ commands, whose own effects remain the caller's responsibility.
 
 ## Verification surface
 
-- `make verify` is canonical: release-note extraction, format, build, unit
-  tests, vet, Staticcheck, govulncheck, module tidiness, precise Gograph,
-  Rulefloor execute mode, and the repository-owned wiki check. Both release
-  workflow stages invoke the same `release-notes-check` target; an optional
-  `## Unreleased` section is rejected when empty.
+- `make verify` is canonical: format, unit tests, vet, Staticcheck,
+  govulncheck, module tidiness, precise Gograph, Rulefloor execute mode, the
+  repository-owned wiki check and replacement check; test and vet compile every
+  package, so there is no separate build. CI runs it once per change, on the
+  pull request; pushes to main and release tags do not repeat it (P-081).
+- The single release job invokes `release-notes-check` once, before
+  publishing; an optional `## Unreleased` section is rejected when empty.
 - `make test-fuzz` covers the five bounded parser families named by the project
   specification.
 - `slice check` can combine its discovered log file with an explicit,
   caller-named directory in deterministic filename order while preserving
   per-file append-only heading history.
 - `make release-check` invokes GoReleaser v2.17.0 through `go run`, matching
-  the release workflow pin; the workflow uses that same configuration check.
+  the release workflow pin; the workflow does not repeat it, since its
+  GoReleaser release validates the same configuration.
 - `RULE-FLOOR.md` carries 61 armed invariants with recorded red proofs on the current
   source line, including digest-pinned closed-set replay evidence, annotated
   release tags, and the closed working-directory hook writer table.
@@ -260,3 +263,4 @@ Verification and both release stages use `ozgurcd/lictor/.github/actions/go-tool
 | 2026-11-11 | `co-versioned` | ACHTA-WITNESS-FAILED-NAMES: `achta.witness-summary.v1` gains the optional array `failed_target_names` (planned targets with a non-zero recorded exit code, plan order, empty when none); human output names them after the failed count; rule WITNESS-FAILED-NAMES-1 armed with a mutation proof; schema stays v1. |
 | 2026-11-11 | `co-versioned` | ACHTA-WITNESS-FAILED-NAMES: `achta.witness-summary.v1` gains the optional array `missing_target_names` (planned targets with no recorded result, plan order, empty when none); human output names them after the missing count; rule WITNESS-MISSING-NAMES-1 armed with a mutation proof; changelog and release notes gain an Unreleased section for both arrays. |
 | 2026-11-11 | `co-versioned` | ACHTA-WITNESS-FAILED-NAMES: advance source and exact fixtures to v0.5.24 with changelog and release notes for the witness summary `failed_target_names` and `missing_target_names` arrays; the owner merges and publishes the annotated tag, which releases the Homebrew cask. |
+| 2026-11-14 | `co-versioned` | ACHTA-CI-ONCE: owner instruction, CI runs each check once per change. `verify.yml` runs on pull requests and `workflow_dispatch`, not also on push to main; release.yml is one job without the re-run `make verify`, `make release-check` and snapshot build; `make verify` drops `go build ./...` and its `release-notes-check` prerequisite. RELEASE-NOTES-LOCAL-PARITY-1 and RELEASE-PINNED-CHECK-1 amended, rehashed and re-proved by mutation; floor stays 67; P-081 supersedes P-078. |

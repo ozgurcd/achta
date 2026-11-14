@@ -1179,3 +1179,17 @@ the four exact human and machine version and capability fixtures; CHANGELOG and
 RELEASE_NOTES record both arrays under v0.5.24. The newest tag on origin was
 v0.5.23. The owner merges and tags; the tag workflow publishes the Homebrew
 cask.
+
+## [2026-11-14] ci | ACHTA-CI-ONCE
+
+Owner instruction: CI runs each check once per change (P-081, superseding
+P-078). `verify.yml` drops the push-to-main trigger, which repeated the pull
+request run on the same tree (every main change since PR #1 is a merge), and
+gains `workflow_dispatch`. release.yml becomes one `release` job: tag and
+source-version validation, tap credential check, one `release-notes-check`,
+the GoReleaser release and the unchanged cask publish and verification; the
+re-run `make verify`, `make release-check` and snapshot build are gone.
+`make verify` drops `go build ./...` and its `release-notes-check`
+prerequisite. RELEASE-NOTES-LOCAL-PARITY-1 and RELEASE-PINNED-CHECK-1 are
+amended, rehashed and re-proved by mutation through Rulefloor; the floor and
+red-proof count stay 67. README and PROJECT_SPEC describe the new shape.

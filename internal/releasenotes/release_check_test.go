@@ -33,7 +33,8 @@ func TestPinnedReleaseCheck(t *testing.T) {
 	if strings.TrimSpace(string(out)) != want {
 		t.Fatalf("release-check recipe=%q want=%q", out, want)
 	}
-	if !strings.Contains(string(workflow), "run: make release-check") {
-		t.Fatal("release workflow must run the same release-check recipe")
+	// The real GoReleaser release validates the same configuration as it builds.
+	if strings.Contains(string(workflow), "make release-check") {
+		t.Fatal("release workflow must not repeat the configuration check its GoReleaser release performs")
 	}
 }
