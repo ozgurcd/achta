@@ -1990,26 +1990,30 @@ make install-tools
 
 ```text
 go version
-go build ./...
 go test ./... -count=1 -timeout=120s
 go vet ./...
 staticcheck ./...
 govulncheck ./...
 go mod tidy -diff
 gograph build . --precise
-make release-notes-check
-make release-check
+make wiki-check
 make replacement-check
 rulefloor check --repo . --run-profile unit --timings
 ```
 
-It must also fail on unformatted Go files. `RULE-FLOOR.md` is the canonical
+It must also fail on unformatted Go files. Each check runs once: `go test` and
+`go vet` compile every package, so there is no separate `go build`. The
+release-time checks `make release-notes-check` and `make release-check` are
+separate targets; the release workflow extracts the notes once and its
+GoReleaser release validates the configuration, so neither is part of
+`make verify` (P-081). `RULE-FLOOR.md` is the canonical
 repository-local invariant ledger. The default gate uses Rulefloor execute mode
 so ledger syntax, bindings, tests, fingerprints, and red-proof requirements are
 enforced together; a static-only check is diagnostic and is not a substitute
 for `make verify`. New release-critical behavior must add or deliberately amend
 an armed rule with a measured red proof. CI uses the Go version from `go.mod`
-and runs the complete repository-local verification gate.
+and runs the complete repository-local verification gate once per change, on
+its pull request; the tag-triggered release workflow does not repeat it.
 
 For every Go implementation slice:
 
@@ -2075,11 +2079,11 @@ implementation detail but must not disagree with the release notes.
 The checked-in `cmd/release-notes` helper validates an exact semantic version,
 requires exactly one matching heading, validates the optional Unreleased
 section, and extracts only the requested version. With no explicit version it
-uses the source version. `make release-notes-check` is a prerequisite of
-`make verify`, and both release workflow stages invoke that same target before
-passing its output to GoReleaser. A missing, duplicate, malformed, or empty
-required section therefore fails locally and in release CI through one code
-path.
+uses the source version. The release workflow invokes `make
+release-notes-check` once, before passing its output to GoReleaser, and the
+same target runs locally before tagging. A missing, duplicate, malformed, or
+empty required section therefore fails locally and in release CI through one
+code path.
 
 ## 19. Delivery phases
 

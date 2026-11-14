@@ -11,10 +11,12 @@ env:
   GORELEASER_VERSION: 'v2.17.0'
 
 jobs:
-  verify:
+  # One job, no test re-run: the tagged commit already passed verify.yml on its
+  # pull request. GoReleaser validates its configuration as it builds.
+  release:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -30,32 +32,6 @@ jobs:
           test "$(git cat-file -t "$tag")" = tag
           test "$(git rev-parse "${tag}^{}")" = "$(git rev-parse HEAD)"
           test "$(go run ./cmd/achta version --json | jq -r .version)" = "$tag"
-      - name: Install pinned verification tools
-        run: make install-tools
-      - name: Verify
-        run: make verify
-      - name: Check pinned release configuration
-        run: make release-check
-      - name: Select version release notes
-        run: make release-notes-check RELEASE_NOTES_OUTPUT="$RUNNER_TEMP/release-notes.md"
-      - name: Validate release artifacts
-        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
-        with:
-          distribution: goreleaser
-          version: ${{ env.GORELEASER_VERSION }}
-          args: release --snapshot --clean --skip=publish --release-notes=${{ runner.temp }}/release-notes.md
-
-  release:
-    needs: verify
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ozgurcd/lictor/.github/actions/go-toolchain@d35a8ad07dc59bd76153f0ed7d3b1ade22c6cf04 # v0.4.6-6-gd35a8ad (untagged action snapshot)
       - name: Verify Homebrew tap credential
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}

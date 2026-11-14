@@ -1,10 +1,10 @@
 name: Verify
 
+# Runs once per change, on its pull request. Merges to main and release tags
+# carry the same tree and do not repeat it; workflow_dispatch runs it by hand.
 on:
   pull_request:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read

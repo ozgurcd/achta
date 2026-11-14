@@ -2,7 +2,7 @@
 title: Achta Decisions
 category: platform
 status: authoritative
-updated: 2026-10-14
+updated: 2026-11-14
 ---
 
 # Achta Decisions
@@ -439,6 +439,9 @@ removes operator ambiguity without altering existing history.
 
 ### P-078 — Release notes have one local-and-CI grammar
 
+Superseded by P-081 (2026-11-14): `make verify` no longer runs
+`release-notes-check`, and the single release job calls it once.
+
 An optional leading `## Unreleased` section is accepted only while it contains
 nonblank content. Once those entries are folded into an exact version section,
 the empty heading is removed. This preserves the working convention without
@@ -527,3 +530,29 @@ trust. Missing policy is off, with no registration assertion or created state.
 An injected epoch minimum is only a comparison; protected-history rollback,
 custody, activation, leases and runtime enforcement remain later authorized
 work. No Rulefloor ledger, native gate or legacy claim behavior changes.
+
+### P-081 — CI runs each check once per change
+
+2026-11-14. Source: owner instruction: CI runs each check once per change.
+Supersedes P-078.
+
+`verify.yml` runs `make verify` once per change, on its pull request, and by
+hand through `workflow_dispatch`. It no longer also runs on push to main: since
+PR #1 (2026-11-03) every change reaches main through a pull request merge, so
+the push run repeated the pull request run on the same tree. A change pushed
+to main directly must be verified by a manual dispatch.
+
+The release workflow is one `release` job. It validates the annotated tag and
+source version, verifies the Homebrew tap credential, runs
+`make release-notes-check` once, publishes through GoReleaser and then
+publishes and verifies the cask. It does not re-run `make verify`,
+`make release-check` or a snapshot build: the tagged commit already passed
+verification on its pull request, and the real GoReleaser release validates
+its configuration and fails before publishing on a bad build.
+
+`make verify` no longer depends on `release-notes-check` and no longer runs
+`go build ./...`; `go test` and `go vet` compile every package. The P-078
+grammar is unchanged: an optional leading `## Unreleased` section is accepted
+only while it holds nonblank content, and the release extracts notes only
+through the checked-in `cmd/release-notes` entry point behind the one Make
+target, which also runs locally before tagging.

@@ -738,14 +738,18 @@ Detailed release bodies live in `RELEASE_NOTES.md`, newest version first.
 `CHANGELOG.md` is the concise historical summary. Release automation requires
 one exact `## vMAJOR.MINOR.PATCH — YYYY-MM-DD` heading and publishes only the
 section matching the release tag. One optional leading `## Unreleased` section
-must contain content; remove the heading after folding its entries. Local
-`make verify` and both release stages run the same `release-notes-check` target.
+must contain content; remove the heading after folding its entries. The
+release workflow runs the `release-notes-check` target once, before publishing;
+run the same target locally to check a release section before tagging.
 
-Before releasing, run `make release-check` and `make verify`. The release-check
-recipe runs `go run github.com/goreleaser/goreleaser/v2@v2.17.0 check`, at the
-exact version pinned by the release workflow. It needs Go, not a globally
-installed `goreleaser`. The workflow runs the same target before building
-release artifacts, and a regression test refuses a mismatched tool version.
+CI runs each check once per change: `verify.yml` runs `make verify` on the pull
+request, and the tag-triggered release workflow does not repeat it. Before
+releasing, run `make release-notes-check` and `make release-check`. The
+release-check recipe runs `go run github.com/goreleaser/goreleaser/v2@v2.17.0
+check`, at the exact version pinned by the release workflow. It needs Go, not a
+globally installed `goreleaser`. The release workflow does not repeat it, since
+its GoReleaser release validates the same configuration, and a regression test
+refuses a mismatched tool version.
 
 ## Short status after compaction
 

@@ -18,10 +18,8 @@ func TestGo1272ToolchainPins(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		// Each workflow has one job, so each sets up the toolchain once.
 		want := 1
-		if strings.HasSuffix(path, "release.yml") {
-			want = 2
-		}
 		const action = "uses: ozgurcd/lictor/.github/actions/go-toolchain@d35a8ad07dc59bd76153f0ed7d3b1ade22c6cf04"
 		if got := strings.Count(string(data), action); got != want {
 			t.Errorf("%s has %d shared toolchain steps, want %d", path, got, want)
